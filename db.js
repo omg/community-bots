@@ -1,7 +1,8 @@
-import { MongoClient } from 'mongodb';
+const { MongoClient } = require('mongodb');
 
 // Connection URL
 const url = process.env.MONGO_URL;
+console.log(url);
 const client = new MongoClient(url);
 
 // Database Name
@@ -12,7 +13,7 @@ async function main() {
   await client.connect();
   console.log('Connected successfully to server');
   const db = client.db(dbName);
-  const collection = db.collection('documents');
+  const collection = db.collection('rounds');
 
   // the following code examples can be pasted here...
 
