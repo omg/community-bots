@@ -1,8 +1,8 @@
 const TOKEN = process.env.TOKEN;
 
 // Require the necessary discord.js classes
-import { Client, GatewayIntentBits } from 'discord.js';
-import { token } from './config.json';
+const { Client, GatewayIntentBits } = require('discord.js');
+// import { token } from './config.json';
 
 // Create a new client instance
 const client = new Client({
@@ -31,4 +31,4 @@ client.on('messageCreate', (message) => {
 });
 
 // Login to Discord with your client's token
-client.login(token);
+client.login(process.env.TOKEN);
