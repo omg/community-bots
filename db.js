@@ -2,33 +2,54 @@ const { MongoClient } = require('mongodb');
 
 // Connection URL
 const url = process.env.MONGO_URL;
-console.log(url);
 const client = new MongoClient(url);
+
+let db;
 
 // Database Name
 const dbName = 'lame';
 
-async function main() {
-  // Use connect method to connect to the server
+async function getDatabase() {
+  if (db) return db;
   await client.connect();
   console.log('Connected successfully to server');
-  const db = client.db(dbName);
-  const collection = db.collection('rounds');
+  db = client.db(dbName);
+  return db;
+}
 
-  const games = db.collection("games");
-  let defaultGame = await games.findOne({});
-  console.log(defaultGame.channel);
-
-  // TODO
-
-  return 'done.';
+let defaultGameID;
+async function getDefaultGameID() {
+  if (defaultGameID) return defaultGameID;
+  defaultGameID = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0]._id;
+  return defaultGameID;
 }
 
 async function getCurrentRoundInfo() {
+  let defaultID = await getDefaultGameID();
 
+  let lastWinnerArray = await client.db(dbName).collection('rounds').find({ gameID: defaultGameID }).sort({ timestamp: -1 }).limit(1).toArray();
+  if (lastWinnerArray.length == 0) return { lastWinner: undefined, streak: 0 };
+
+  let lastWinner = lastWinnerArray[0].winner;
+
+  let lastRoundWinnerHasntWon = (await client.db(dbName).collection('rounds').find({ gameID: defaultGameID, winner: { $ne: lastWinner } }).limit(1).toArray());
+  let streak;
+  if (lastRoundWinnerHasntWon.length == 0) {
+    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID: defaultID });
+  } else {
+    let lastTimeWinnerHasntWon = lastRoundWinnerHasntWon[0].timestamp;
+    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID: defaultID, winner: lastWinner, timestamp: { $gt: lastTimeWinnerHasntWon } });
+  }
+
+  return { lastWinner, streak };
 }
 
-main()
-  .then(console.log)
-  .catch(console.error)
-  .finally(() => client.close());
+// main()
+//   .then(console.log)
+//   .catch(console.error)
+//   .finally(() => client.close());
+
+module.exports = {
+  getDatabase,
+  getCurrentRoundInfo,
+}
