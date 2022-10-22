@@ -15,9 +15,17 @@ async function main() {
   const db = client.db(dbName);
   const collection = db.collection('rounds');
 
-  // the following code examples can be pasted here...
+  const games = db.collection("games");
+  let defaultGame = await games.findOne({});
+  console.log(defaultGame.channel);
+
+  // TODO
 
   return 'done.';
+}
+
+async function getCurrentRoundInfo() {
+
 }
 
 main()
