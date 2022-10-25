@@ -12,17 +12,45 @@ let solves = {
   "209023094092902490": "DANCER"
 }
 
-// on-solve calculations:
-// submit solve to leaderboard
-// calc ranking movement remarks
-// calc solve remarks
-// calc prompt stats
-// calc solve streak
-// calc if player used the solver
-// submit these remarks to the database in case the bot goes down as: (rankings, solveStats, promptStats, roundDetails)
+// Late solvers can't be stored in the round until the round ends
+// This isn't preferred because ideally I'd just like to push to the database once per round
+// I could make it so that the round is only pushed after late solving completes - but the bot could go down during this time
+// (Does that even matter?)
+// I think this time is so negligible we should just just wait until late solving completes to finish the round
+// If the bot goes down at any point during a round - Lame will proceed with a new round
 
-// after-round calculations (if the bot didn't go down):
-// jinxes goes below late solves
+// Round
+// gameID
+// winner
+// solvers (user + word) (includes winner)
+// startedAt
+// completedAt
+// prompt
+// promptWord
+// solutionCount
+// solution
+// usedVivi
+// exact
+
+// Player stats
+// Wins
+// Solves
+// Late solves
+// Exact solves
+// Vivi uses
+// Jinxes
+
+// On a solve:
+// Calculate ranking movement remarks (rankRemarks)
+// Calculate solve remarks (solveRemarks)
+// Calculate prompt statistic remarks (promptStatRemarks)
+// Create streak remarks (streakRemarks)
+// Add remark if player used the solver (extraRemarks)
+// Wait for the end of the round for late solvers
+// Add remarks for late solvers (topRemarks)
+// Add remarks for jinxes (topRemarks)
+// Submit round to the database
+// Add statistics to all players
 
 // jinxes
 // ranking movements
