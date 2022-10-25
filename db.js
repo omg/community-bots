@@ -9,13 +9,13 @@ let db;
 // Database Name
 const dbName = 'lame';
 
-async function getDatabase() {
-  if (db) return db;
-  await client.connect();
-  console.log('Connected successfully to server');
-  db = client.db(dbName);
-  return db;
-}
+// async function getDatabase() {
+//   if (db) return db;
+//   await client.connect();
+//   console.log('Connected successfully to server');
+//   db = client.db(dbName);
+//   return db;
+// }
 
 let defaultGameID;
 async function getDefaultGameID() {
@@ -50,6 +50,6 @@ async function getCurrentRoundInfo() {
 //   .finally(() => client.close());
 
 module.exports = {
-  getDatabase,
+  // getDatabase,
   getCurrentRoundInfo,
 }
