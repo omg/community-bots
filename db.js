@@ -24,6 +24,10 @@ async function getDefaultGameID() {
   return defaultGameID;
 }
 
+async function getSolveInfo() {
+  
+}
+
 async function getCurrentRoundInfo() {
   let defaultID = await getDefaultGameID();
 
@@ -42,6 +46,11 @@ async function getCurrentRoundInfo() {
   }
 
   return { lastWinner, streak };
+}
+
+async function solvePrompt(user, prompt, solution) {
+  let gameID = await getDefaultGameID();
+  //client.db(dbName)
 }
 
 // main()
