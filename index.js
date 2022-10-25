@@ -43,29 +43,23 @@ let solves = {
 // On a solve:
 // Calculate ranking movement remarks (rankRemarks)
 // Calculate solve remarks (solveRemarks)
+//   first solve - first solve being related to firstness - exact solve
+//   10,000th solve - related to 10,000thness
+//   1,000th solve - related to thousandness
+//   100th solve - related to hundredness
+//   69th and such solves
+//   666..6 and such solves - relatedness to devilish activities
+//   exact solves
 // Calculate prompt statistic remarks (promptStatRemarks)
-// Create streak remarks (streakRemarks)
-// Add remark if player used the solver (extraRemarks)
-// Wait for the end of the round for late solvers
+//   first time the solve has ever been used - once this happens less than 2 times in the past 150 solves
+//   promptiversary - using the same solve as your first time (only appears once) - probably add more to this remark
+// Add remarks for the player's streak (roundRemarks)
+// Add remark if player used the solver (roundRemarks)
+//   Wait for the end of the round for late solvers
 // Add remarks for late solvers (topRemarks)
 // Add remarks for jinxes (topRemarks)
 // Submit round to the database
 // Add statistics to all players
-
-// jinxes
-// ranking movements
-// solve stats:
-// first solve - first solve being related to firstness - exact solve
-// 10,000th solve - related to 10,000thness
-// 1,000th solve - related to thousandness
-// 100th solve - related to hundredness
-// 69th and such solves
-// 666..6 and such solves - relatedness to devilish activities
-// exact solves
-// first time the solve has ever been used - once this happens less than 2 times in the past 150 solves
-// promptiversary - using the same solve as your first time (only appears once) - probably add more to this remark
-// solve streak - solve streak ended
-// player used the solver during the round
 
 async function main() {
   ({ streak, lastWinner } = await getCurrentRoundInfo());
