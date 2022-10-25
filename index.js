@@ -60,6 +60,7 @@ let solves = {
 // Add remarks for jinxes (topRemarks)
 // Submit round to the database
 // Add statistics to all players
+// Update all-time leaderboard
 
 async function main() {
   ({ streak, lastWinner } = await getCurrentRoundInfo());
