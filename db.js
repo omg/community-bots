@@ -24,8 +24,16 @@ async function getDefaultGameID() {
   return defaultGameID;
 }
 
-async function getSolveInfo() {
-  
+let allTimeLeaderboardID;
+async function getAllTimeLeaderboardID() {
+  if (allTimeLeaderboardID) return allTimeLeaderboardID;
+  allTimeLeaderboardID = (await client.db(dbName).collection('leaderboards').find({}).limit(1).toArray())[0]._id;
+  return allTimeLeaderboardID;
+}
+
+async function getPlayerRanking(userID) {
+  // leaderboards contains all the leaderboards and ids for the leaderboards
+  // rankings contains scores for players + leaderboard id
 }
 
 async function getCurrentRoundInfo() {
@@ -61,4 +69,5 @@ async function solvePrompt(user, prompt, solution) {
 module.exports = {
   // getDatabase,
   getCurrentRoundInfo,
+  getAllTimeLeaderboardID,
 }

@@ -1,8 +1,8 @@
 require('dotenv').config();
 
-//require('./discord.js');
-const { getCurrentRoundInfo } = require('./db.js');
-const { setPresence, sendImportantMessageThatNeedsToBeReceived } = require('./discord.js');
+// require('./discord.js');
+const { getCurrentRoundInfo, getAllTimeLeaderboardID } = require('./db.js');
+// const { setPresence, sendImportantMessageThatNeedsToBeReceived } = require('./discord.js');
 
 let streak;
 let lastWinner;
@@ -32,7 +32,10 @@ let solves = {
 // usedVivi
 // exact
 
-// Player stats
+// Rankings
+// User
+// Leaderboard ID
+// Score
 // Wins
 // Solves
 // Late solves
@@ -70,9 +73,10 @@ async function main() {
   // console.log("test 2");
   console.log(streak);
   console.log(lastWinner);
+  console.log(await getAllTimeLeaderboardID());
 }
 
-setPresence("doodoo", true);
+// setPresence("doodoo", true);
 
 // getCurrentRoundInfo().then((info) => {
 //   console.log(info);
