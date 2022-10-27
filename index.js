@@ -8,9 +8,13 @@ let streak;
 let lastWinner;
 
 // for jinxes
-let solves = {
-  "209023094092902490": "DANCER"
-}
+let solves = [
+  {
+    user: "209023094092902490",
+    solution: "DANCER",
+    usedVivi: false
+  }
+];
 
 // Late solvers can't be stored in the round until the round ends
 // This isn't preferred because ideally I'd just like to push to the database once per round
@@ -19,7 +23,7 @@ let solves = {
 // I think this time is so negligible we should just just wait until late solving completes to finish the round
 // If the bot goes down at any point during a round - Lame will proceed with a new round
 
-// Round
+// Round collection document:
 // gameID
 // winner
 // solvers (user + word) (includes winner)
@@ -31,8 +35,9 @@ let solves = {
 // solution
 // usedVivi
 // exact
+// timestamp
 
-// Rankings
+// Rankings collection document:
 // User
 // Leaderboard ID
 // Score
