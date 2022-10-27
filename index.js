@@ -9,11 +9,11 @@ let lastWinner;
 
 // for jinxes
 let solves = [
-  {
-    user: "209023094092902490",
-    solution: "DANCER",
-    usedVivi: false
-  }
+  // {
+  //   user: "209023094092902490",
+  //   solution: "DANCER",
+  //   usedVivi: false
+  // }
 ];
 
 // If the bot goes down at any point during a round - Lame will proceed with a new round
