@@ -9,13 +9,30 @@ let db;
 // Database Name
 const dbName = 'lame';
 
-// async function getDatabase() {
-//   if (db) return db;
-//   await client.connect();
-//   console.log('Connected successfully to server');
-//   db = client.db(dbName);
-//   return db;
-// }
+// Round collection document:
+// gameID
+// winner
+// solvers (user + word) (includes winner)
+// startedAt
+// completedAt
+// prompt
+// promptWord
+// solutionCount
+// solution
+// usedVivi
+// exact
+// timestamp
+
+// Rankings collection document:
+// User
+// Leaderboard ID
+// Score
+// Wins
+// Solves
+// Late solves
+// Exact solves
+// Vivi uses
+// Jinxes
 
 async function getSolutionCount(solution) {
   // get number of times solution appears in the rounds collection

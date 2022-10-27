@@ -16,37 +16,7 @@ let solves = [
   }
 ];
 
-// Late solvers can't be stored in the round until the round ends
-// This isn't preferred because ideally I'd just like to push to the database once per round
-// I could make it so that the round is only pushed after late solving completes - but the bot could go down during this time
-// (Does that even matter?)
-// I think this time is so negligible we should just just wait until late solving completes to finish the round
 // If the bot goes down at any point during a round - Lame will proceed with a new round
-
-// Round collection document:
-// gameID
-// winner
-// solvers (user + word) (includes winner)
-// startedAt
-// completedAt
-// prompt
-// promptWord
-// solutionCount
-// solution
-// usedVivi
-// exact
-// timestamp
-
-// Rankings collection document:
-// User
-// Leaderboard ID
-// Score
-// Wins
-// Solves
-// Late solves
-// Exact solves
-// Vivi uses
-// Jinxes
 
 // On a solve:
 // Calculate ranking movement remarks (rankRemarks)
@@ -82,14 +52,6 @@ async function main() {
 }
 
 // setPresence("doodoo", true);
-
-// getCurrentRoundInfo().then((info) => {
-//   console.log(info);
-// });
-
-// getDatabase().then((db) => {
-  
-// });
 
 main().then(() => {
   console.log("Done!");
