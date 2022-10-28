@@ -36,7 +36,7 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-function isMessageASolution(word) {
+function isWord(word) {
   let cleanWord = cleanWord(escapeRegExp(word));
   return new RegExp("^.*" + cleanWord + ".*$", "m").test(dictionaryString);
 }
