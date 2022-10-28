@@ -58,3 +58,9 @@ function getSolveLetters(solution, prompt) {
   // combine the matches together with the correct emojiMaps
   return getNormalLetters(beforeMatch) + getPromptLetters(matchString) + getNormalLetters(afterMatch);
 }
+
+module.exports = {
+  getRemarkEmoji,
+  getSolveLetters,
+  getStreakNumbers
+}
