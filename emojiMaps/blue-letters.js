@@ -1,4 +1,4 @@
-const letterMap = {
+const emojiMap = {
   "A": "",
   "B": "",
   "C": "",
@@ -42,4 +42,4 @@ const letterMap = {
   "unknown": "",
 }
 
-export default letterMap;
+module.exports = emojiMap;
