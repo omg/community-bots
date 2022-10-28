@@ -41,6 +41,13 @@ async function getSolutionCount(solution) {
   return count;
 }
 
+async function getUserSolveCount(user) {
+  let allTimeLeaderboardID = await getAllTimeLeaderboardID();
+  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID: allTimeLeaderboardID }).limit(1).toArray();
+  if (userStats.length === 0) return 0;
+  return userStats[0].solves;
+}
+
 // get amount of times a user has solved a prompt
 async function getUserSolveCountForPrompt(user, prompt) {
   let gameID = await getDefaultGameID();
@@ -93,11 +100,8 @@ async function finishRound(solvers, startedAt, prompt, promptWord, solutionCount
       lateSolves: !isWinner ? 1 : 0,
       viviUses: usedVivi ? 1 : 0,
       jinxes: isJinx ? 1 : 0
-    }});
+    }}, { upsert: true });
   }
-
-  // add a late solve to every solver after the first one
-  
 }
 
 let defaultGameID;
@@ -105,6 +109,13 @@ async function getDefaultGameID() {
   if (defaultGameID) return defaultGameID;
   defaultGameID = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0]._id;
   return defaultGameID;
+}
+
+let defaultGameChannel;
+async function getDefaultGameChannel() {
+  if (defaultGameChannel) return defaultGameChannel;
+  defaultGameChannel = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0].channel;
+  return defaultGameChannel;
 }
 
 let allTimeLeaderboardID;
@@ -151,7 +162,14 @@ async function getCurrentRoundInfo() {
 }
 
 module.exports = {
-  // getDatabase,
-  getCurrentRoundInfo,
+  getSolutionCount,
+  getUserSolveCount,
+  getUserSolveCountForPrompt,
+  getFirstSolutionToPrompt,
+  finishRound,
+  getDefaultGameID,
+  getDefaultGameChannel,
   getAllTimeLeaderboardID,
+  getUserRanking,
+  getCurrentRoundInfo
 }
