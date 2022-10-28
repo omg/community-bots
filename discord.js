@@ -51,14 +51,11 @@ async function sendMessage(channelID, message) {
   });
 }
 
-client.on('messageCreate', (message) => {
-  // TODO
-});
-
 // Login to Discord with your client's token
 client.login(process.env.TOKEN);
 
 module.exports = {
+  client,
   setPresence,
   sendImportantMessageThatNeedsToBeReceived,
   sendMessage
