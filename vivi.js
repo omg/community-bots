@@ -34,9 +34,40 @@ const commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  commands.set(command.data.name, command);
+  const command = require(`./commands/vivi/${file}`);
+  // check if data and execute are defined in command
+  if (command.data && command.execute) {
+    commands.set(command.data.name, command);
+  }
 }
+
+const commandCooldown = new Set();
+const cooldownTime = 2000;
+
+commandName = interaction.options.getSubcommand();
+function replyToInteraction(interaction, header, response, broadcastThis) {
+  interaction.reply({
+    content: "**" + header + " *｡✲ﾟ ——**"
+    + (broadcastThis ? '\n\n<@' + interaction.user.id + '>' : '')
+    + '\n' + response,
+    ephemeral: !broadcastThis
+  });
+}
+
+// Handle interactions for slash commands
+vivi.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const command = commands.get(interaction.commandName);
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'An error occurred while executing this command.', ephemeral: true });
+  }
+});
 
 function getBroadcastJSON(command) {
   return { type: 1, ...command };
@@ -105,100 +136,6 @@ const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
 //Functionality
 
 const Dictionary = require('./dictionary.js');
-//const Vivi = require('./vivi.js');
-
-const presentEmotes = {
-  'A': '<:AWhite:971179538350477412>',
-  'B': '<:BWhite:971191770958409778>',
-  'C': '<:CWhite:971191771008761897>',
-  'D': '<:DWhite:971179806161002496>',
-  'E': '<:EWhite:971179806072905748>',
-  'F': '<:FWhite:971179806202921061>',
-  'G': '<:GWhite:971179848695435344>',
-  'H': '<:HWhite:971191771226857472>',
-  'I': '<:IWhite:971179848670265415>',
-  'J': '<:JWhite:971179848871604254>',
-  'K': '<:KWhite:971179848678645790>',
-  'L': '<:LWhite:971179848833830973>',
-  'M': '<:MWhite:971179900637704352>',
-  'N': '<:NWhite:971191771155542046>',
-  'O': '<:OWhite:971179900616728647>',
-  'P': '<:PWhite:971179900583165952>',
-  'Q': '<:QWhite:971179900599951370>',
-  'R': '<:RWhite:971191771105210419>',
-  'S': '<:SWhite:971179965930414122>',
-  'T': '<:TWhite:971179966446305360>',
-  'U': '<:UWhite:971179966496669727>',
-  'V': '<:VWhite:971179966404378674>',
-  'W': '<:WWhite:971180026106085386>',
-  'X': '<:XWhite:971180094179647499>',
-  'Y': '<:YWhite:971191771025526874>',
-  'Z': '<:ZWhite:971191771067478086>',
-  '\'': '<:ApostropheWhite:971179966454714428>',
-  '-': '<:HyphenWhite:971179966379196496>',
-  '.': '<:BlankWhite:971179538350477342>',
-  '0': '<:0White:971179538329522186>',
-  '1': '<:1White:971179538354688081>',
-  '2': '<:2White:971179538321121330>',
-  '3': '<:3White:971179538308534352>',
-  '4': '<:4White:971179538279194685>',
-  '5': '<:5White:971179538308534272>',
-  '6': '<:6White:971179538321137734>',
-  '7': '<:7White:971179538123980891>',
-  '8': '<:8White:971179806173565068>',
-  '9': '<:9White:971179538396635176>',
-  '@': '<:AtWhite:971179538493112400>'
-};
-const promptBlueEmotes = {
-  'A': '<:AGold:971184700167188510>',
-  'B': '<:BGold:971193840348332043>',
-  'C': '<:CGold:971193840369283132>',
-  'D': '<:DGold:971184700150411444>',
-  'E': '<:EGold:971184700171374654>',
-  'F': '<:FGold:971184740549951558>',
-  'G': '<:GGold:971184740541538394>',
-  'H': '<:HGold:971193840457367633>',
-  'I': '<:IGold:971184790231478292>',
-  'J': '<:JGold:971184790269202492>',
-  'K': '<:KGold:971184820573061171>',
-  'L': '<:LGold:971184820694695936>',
-  'M': '<:MGold:971184820245909635>',
-  'N': '<:NGold:971193840352501770>',
-  'O': '<:OGold:971184820627603516>',
-  'P': '<:PGold:971184820606623795>',
-  'Q': '<:QGold:971184862167969833>',
-  'R': '<:RGold:971193840151199823>',
-  'S': '<:SGold:971184862432202842>',
-  'T': '<:TGold:971184862499323914>',
-  'U': '<:UGold:971184862444785724>',
-  'V': '<:VGold:971184862423834654>',
-  'W': '<:WGold:971184898725519380>',
-  'X': '<:XGold:971184898729725952>',
-  'Y': '<:YGold:971193840402858014>',
-  'Z': '<:ZGold:971193913379549215>',
-  '\'': '<:ApostropheGold:971184500149194862>',
-  '-': '<:HyphenGold:971184500145004544>',
-  '.': '<:BlankGold:971184654549921812>',
-  '0': '<:0Gold:971184536811614281>',
-  '1': '<:1Gold:971184537151373342>',
-  '2': '<:2Gold:971184537159737404>',
-  '3': '<:3Gold:971184537151352862>',
-  '4': '<:4Gold:971184537117790268>',
-  '5': '<:5Gold:971184537193295952>',
-  '6': '<:6Gold:971184537130381382>',
-  '7': '<:7Gold:971184537189089290>',
-  '8': '<:8Gold:971184536870350890>',
-  '9': '<:9Gold:971184537147162654>',
-  '@': '<:AtGold:971184500157583431>'
-};
-
-function getEmoteText(emotes, text) {
-  let emoteText = '';
-  for (let i = 0; i < text.length; i++) {
-    emoteText += emotes[text.charAt(i)];
-  }
-  return emoteText;
-}
 
 function formatNumber(x) {
   return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
@@ -221,18 +158,6 @@ function shuffle(array) {
   }
 
   return array;
-}
-
-const commandCooldown = new Set();
-const cooldownTime = 2000;
-
-function replyToInteraction(interaction, header, response, broadcastThis) {
-  interaction.reply({
-    content: "**" + header + " *｡✲ﾟ ——**"
-    + (broadcastThis ? '\n\n<@' + interaction.user.id + '>' : '')
-    + '\n' + response,
-    ephemeral: !broadcastThis
-  });
 }
 
 function solveCountCommand(interaction, broadcastThis) {
