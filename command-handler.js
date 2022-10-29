@@ -44,7 +44,7 @@ function registerClientAsCommandHandler(client, commandFolder) {
       await command.execute(interaction, preferBroadcast);
     } catch (error) {
       console.error(error);
-      await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
+      replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
     }
   });
 }
