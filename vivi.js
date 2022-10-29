@@ -97,43 +97,23 @@ const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
 
 const Dictionary = require('./dictionary.js');
 
-function solveCountCommand(interaction, broadcastThis) {
-  let prompt = Dictionary.clean(interaction.options.get("prompt").value.toUpperCase());
-  if (Dictionary.isSearchGarbage(prompt)) {
-    replyToInteraction(interaction, "Solve Count", "\n• Sorry, that's not a valid prompt!", broadcastThis);
-    return;
-  }
-
-  let solves = Dictionary.solve(prompt);
-
-  if (solves.length === 0) {
-    replyToInteraction(interaction, "Solve Count", "\n• That prompt is impossible.", broadcastThis);
-  } else {
-    replyToInteraction(interaction, "Solve Count",
-      '\n• There '
-      + (solves.length === 1 ? 'is **1** solve' : 'are **' + formatNumber(solves.length) + '** solves')
-      + ' for ' + getEmoteText(presentEmotes, prompt) + '.'
-    , broadcastThis);
-  }
-}
-
 // function getPromptObject(promptString) {
 //   // ES 5-9
 //   // ES <5
 //   // ES >5
 // }
 
-function solveCommand(interaction, broadcastThis) {
+function solveCommand(interaction, preferBroadcast) {
   let prompt = Dictionary.clean(interaction.options.get("prompt").value.toUpperCase());
   if (Dictionary.isSearchGarbage(prompt)) {
-    replyToInteraction(interaction, "Solver", "\n• Sorry, that's not a valid prompt!", broadcastThis);
+    replyToInteraction(interaction, "Solver", "\n• Sorry, that's not a valid prompt!", preferBroadcast);
     return;
   }
 
   let solves = Dictionary.solve(prompt);
 
   if (solves.length === 0) {
-    replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", broadcastThis);
+    replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
   } else {
     let solverString = 'I found '
       + (solves.length === 1 ? '**1** solution!' : '**' + formatNumber(solves.length) + '** solutions!')
@@ -162,14 +142,14 @@ function solveCommand(interaction, broadcastThis) {
       solverString += shownSolves[i];
     }
 
-    replyToInteraction(interaction, "Solver", solverString, broadcastThis);
+    replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
   }
 }
 
-function checkWordCommand(interaction, broadcastThis) {
+function checkWordCommand(interaction, preferBroadcast) {
   let word = Dictionary.clean(interaction.options.get("word").value.toUpperCase());
   if (Dictionary.isSolveGarbage(word)) {
-    replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", broadcastThis);
+    replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
     return;
   }
 
@@ -177,17 +157,17 @@ function checkWordCommand(interaction, broadcastThis) {
     replyToInteraction(interaction, "Word Status",
       '\n• **' + word.substring(0, 20) + '..'
       + '\n<:Bad:775275262740791336> Too long** to be a valid English word.'
-    , broadcastThis);
+    , preferBroadcast);
   } else if (Dictionary.isWord(word)) {
     replyToInteraction(interaction, "Word Status",
       '\n• **' + word
       + '\n<:Good:775275262731878410> Available** on live servers.'
-    , broadcastThis);
+    , preferBroadcast);
   } else {
     replyToInteraction(interaction, "Word Status",
       '\n• **' + word
       + '\n<:Bad:775275262740791336> Not found** in the English dictionary.'
-    , broadcastThis);
+    , preferBroadcast);
   }
 }
 
