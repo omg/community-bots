@@ -201,43 +201,6 @@ function checkWordCommand(interaction, broadcastThis) {
 
 */
 
-// Start the bot up
-
-vivi.on('interactionCreate', interaction => { //I removed async before interaction, what's the diffference
-  if (!interaction.isCommand()) return;
-
-  //
-
-  if (commandCooldown.has(interaction.user.id)) {
-    interaction.reply({
-      content: "**Cooldown *｡✲ﾟ ——**"
-      + "\n\n• Hold on! You're sending commands too quickly!",
-      ephemeral: true
-    });
-    return;
-  }
-  commandCooldown.add(interaction.user.id);
-  setTimeout(() => {
-    commandCooldown.delete(interaction.user.id);
-  }, cooldownTime);
-
-  //
-
-  
-
-  //
-
-  if (commandName === 'solve') {
-    solveCommand(interaction, broadcastThis);
-  } else if (commandName === 'count') {
-    solveCountCommand(interaction, broadcastThis);
-  } else if (commandName === 'check') {
-    checkWordCommand(interaction, broadcastThis);
-  }/* else if (commandName === 'version') {
-    versionCommand(interaction, broadcastThis);
-  }*/
-});
-
 //
 
 vivi.login(process.env.VIVI_TOKEN);
