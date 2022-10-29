@@ -1,4 +1,4 @@
-const TOKEN = process.env.TOKEN;
+const LAME_TOKEN = process.env.LAME_TOKEN;
 
 // Require the necessary discord.js classes
 const { Client, GatewayIntentBits } = require('discord.js');
@@ -52,7 +52,7 @@ async function sendMessage(channelID, message) {
 }
 
 // Login to Discord with your client's token
-client.login(process.env.TOKEN);
+client.login(LAME_TOKEN);
 
 module.exports = {
   client,
