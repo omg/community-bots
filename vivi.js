@@ -97,29 +97,6 @@ const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
 
 const Dictionary = require('./dictionary.js');
 
-function formatNumber(x) {
-  return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function shuffle(array) {
-  let currentIndex = array.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-}
-
 function solveCountCommand(interaction, broadcastThis) {
   let prompt = Dictionary.clean(interaction.options.get("prompt").value.toUpperCase());
   if (Dictionary.isSearchGarbage(prompt)) {
@@ -140,11 +117,11 @@ function solveCountCommand(interaction, broadcastThis) {
   }
 }
 
-function getPromptObject(promptString) {
-  // ES 5-9
-  // ES <5
-  // ES >5
-}
+// function getPromptObject(promptString) {
+//   // ES 5-9
+//   // ES <5
+//   // ES >5
+// }
 
 function solveCommand(interaction, broadcastThis) {
   let prompt = Dictionary.clean(interaction.options.get("prompt").value.toUpperCase());
@@ -173,7 +150,6 @@ function solveCommand(interaction, broadcastThis) {
 
       let solveDisplay = '\n• ' + getEmoteText(presentEmotes, solve.substring(0, promptIndex)) + getEmoteText(promptBlueEmotes, solve.substring(promptIndex, promptIndex + prompt.length)) + getEmoteText(presentEmotes, solve.substring(promptIndex + prompt.length));
       if (solverString.length + solvesLength + solveDisplay.length > 1910) break;
-
       shownSolves.push(solveDisplay);
       solvesLength += solveDisplay.length;
     }
@@ -215,9 +191,9 @@ function checkWordCommand(interaction, broadcastThis) {
   }
 }
 
-function versionCommand(interaction, broadcastThis) {
-  replyToInteraction(interaction, "Version", "\n• v" + version, broadcastThis);
-}
+// function versionCommand(interaction, broadcastThis) {
+//   replyToInteraction(interaction, "Version", "\n• v" + version, broadcastThis);
+// }
 
 /*
 
@@ -225,11 +201,7 @@ function versionCommand(interaction, broadcastThis) {
 
 */
 
-//Start the bot up
-
-function canBroadcast(member) {
-  return member.roles.cache.some(role => role.name == "regular");
-}
+// Start the bot up
 
 vivi.on('interactionCreate', interaction => { //I removed async before interaction, what's the diffference
   if (!interaction.isCommand()) return;
