@@ -12,7 +12,7 @@ const data = new SlashCommandBuilder()
       .addChoice('English', 'English'));
 
 // create function to handle the command
-async function execute(interaction) {
+async function execute(interaction, preferBroadcast) {
   
 };
 

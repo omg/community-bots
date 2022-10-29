@@ -2,8 +2,8 @@ const { Collection } = require("discord.js");
 
 const COOLDOWN_TIME = 2000;
 
-const clientCommands = new Collection();
-const commandCooldown = new Collection();
+// const clientCommands = new Collection();
+const commandCooldown = new Set();
 
 function registerClientAsCommandHandler(client, commandFolder) {
   const commands = new Collection();
@@ -17,25 +17,34 @@ function registerClientAsCommandHandler(client, commandFolder) {
     }
   }
 
-  clientCommands.set(client, commands);
+  // clientCommands.set(client, commands);
 
   client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
 
+    if (commandCooldown.has(interaction.user.id)) {
+      // TODO Could personalize this message depending on the bot's personality
+      replyToInteraction(interaction, "Cooldown", "\n• Hold on! You're sending commands too quickly!", false);
+      return;
+    }
+    commandCooldown.add(interaction.user.id);
+    setTimeout(() => commandCooldown.delete(interaction.user.id), COOLDOWN_TIME);
+
     let commandName = interaction.commandName;
-    let broadcastThis = isBroadcastChannel(interaction.channel);
+    let preferBroadcast = isBroadcastChannel(interaction.channel);
     if (commandName === "broadcast") {
       commandName = interaction.options.getSubcommand();
+      preferBroadcast = true;
     }
 
     const command = commands.get(commandName);
     if (!command) return;
 
     try {
-      await command.execute(interaction);
+      await command.execute(interaction, preferBroadcast);
     } catch (error) {
       console.error(error);
-      await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", broadcastThis);
+      await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
     }
   });
 }
@@ -44,11 +53,11 @@ function isBroadcastChannel(channel) {
   return channel.name == "lame-bots";
 }
 
-function replyToInteraction(interaction, header, response, broadcastThis) {
+function replyToInteraction(interaction, header, response, broadcast) {
   interaction.reply({
     content: "**" + header + " *｡✲ﾟ ——**"
-    + (broadcastThis ? '\n\n<@' + interaction.user.id + '>' : '')
+    + (broadcast ? '\n\n<@' + interaction.user.id + '>' : '')
     + '\n' + response,
-    ephemeral: !broadcastThis
+    ephemeral: !broadcast
   });
 }
