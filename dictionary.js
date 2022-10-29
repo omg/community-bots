@@ -7,28 +7,46 @@ try {
 }
 
 function cleanWord(word) {
-  return word.replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...');
+  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...');
 }
 
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 
+function PromptException(message) {
+   this.message = message;
+   this.name = "PromptException";
+}
+
 function getPromptRegexFromPromptSearch(promptQuery) {
   let cleanQuery = cleanWord(promptQuery);
-  let regexResult = regexTest.exec(promptQuery);
+  let regexResult = regexTest.exec(cleanQuery);
   
   // TODO find args in the query
   
   if (regexResult) {
     // This has regex
-    if (regexResult[1] === "") {
+
+    let regexInput = regexResult[1];
+
+    if (regexInput === "") {
       // This regex is empty
-      throw "The regex you've entered is empty.";
+      throw new PromptException("The regex you've entered is empty.");
     }
 
-    return regexResult[1]; // TODO
+    // check if the regex is valid
+    let regex;
+    try {
+      regex = new RegExp("^" + regexInput + "$", "gm");
+    } catch (e) {
+      throw new PromptException("The regex you've entered is invalid.");
+    }
+
+    return regex;
   } else {
     // This isn't regex
-    return cleanQuery.replace(/\?/g, '.');
+
+    // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
+    return new RegExp("^" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + "$", "gm");
   }
 }
 
@@ -39,4 +57,20 @@ function escapeRegExp(string) {
 function isWord(word) {
   let cleanWord = cleanWord(escapeRegExp(word));
   return new RegExp("^.*" + cleanWord + ".*$", "m").test(dictionaryString);
+}
+
+function solveRegex(regex) {
+  // TODO
+}
+
+function solvePrompt(prompt) {
+  // TODO
+}
+
+module.exports = {
+  cleanWord,
+  getPromptRegexFromPromptSearch,
+  isWord,
+  solvePrompt,
+  solveRegex
 }
