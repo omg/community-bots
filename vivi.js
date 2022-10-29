@@ -29,46 +29,6 @@ vivi.on('ready', () => {
   setTimeout(updatePresence, 86400000);
 })();
 
-// Create a commands collection loaded from the commands folder
-const commands = new Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-  const command = require(`./commands/vivi/${file}`);
-  // check if data and execute are defined in command
-  if (command.data && command.execute) {
-    commands.set(command.data.name, command);
-  }
-}
-
-const commandCooldown = new Set();
-const cooldownTime = 2000;
-
-commandName = interaction.options.getSubcommand();
-function replyToInteraction(interaction, header, response, broadcastThis) {
-  interaction.reply({
-    content: "**" + header + " *｡✲ﾟ ——**"
-    + (broadcastThis ? '\n\n<@' + interaction.user.id + '>' : '')
-    + '\n' + response,
-    ephemeral: !broadcastThis
-  });
-}
-
-// Handle interactions for slash commands
-vivi.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
-
-  const command = commands.get(interaction.commandName);
-  if (!command) return;
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({ content: 'An error occurred while executing this command.', ephemeral: true });
-  }
-});
-
 function getBroadcastJSON(command) {
   return { type: 1, ...command };
 }
@@ -291,32 +251,7 @@ vivi.on('interactionCreate', interaction => { //I removed async before interacti
 
   //
 
-  let broadcastThis = interaction.channel.name === 'lame-bot';
-  let commandName = interaction.commandName;
-
-  if (commandName === 'broadcast') {
-
-    if (!canBroadcast(interaction.member)) {
-      interaction.reply({
-        content: "**Broadcast *｡✲ﾟ ——**"
-        + "\n\n• You need to be a regular to use the broadcast command.",
-        ephemeral: true
-      });
-      return;
-    }
-
-    if (interaction.channel.name === 'suggest-new-words') {
-      interaction.reply({
-        content: "**Broadcast *｡✲ﾟ ——**"
-        + "\n\n• You cannot broadcast here.",
-        ephemeral: true
-      });
-      return;
-    }
-
-    broadcastThis = true;
-    commandName = interaction.options.getSubcommand();
-  }
+  
 
   //
 
