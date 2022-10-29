@@ -37,7 +37,7 @@ function registerClientAsCommandHandler(client, commandFolder) {
       console.error(error);
       await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", broadcastThis);
     }
-  }
+  });
 }
 
 function isBroadcastChannel(channel) {
