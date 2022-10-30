@@ -45,23 +45,19 @@ function getNormalLetters(string) {
   return replaceTextWithLetterMap(string, whiteLettersMap);
 }
 
-function getSolveLetters(solution, prompt) {
-  // get match for the prompt in the solution with regex
-  let match = solution.match(prompt);
-  // get the index of the match
-  let matchIndex = match.index;
-  // get the end of the match
-  let matchEnd = matchIndex + match[0].length;
-  
-  // get the string before the match
-  let beforeMatch = solution.slice(0, matchIndex);
-  // get the string after the match
-  let afterMatch = solution.slice(matchEnd);
-  // get the string of the match
-  let matchString = solution.slice(matchIndex, matchEnd);
+function getSolveLetters(solution, promptRegex) {
+  let match = solution.match(promptRegex);
+  if (!match) return "";
+
+  let promptStartIndex = solution.search(promptRegex);
+  let promptEndIndex = promptStartIndex + match[0].length;
+
+  let beforePrompt = solution.slice(0, promptStartIndex);
+  let promptLetters = solution.slice(promptStartIndex, promptEndIndex);
+  let afterPrompt = solution.slice(promptEndIndex);
 
   // combine the matches together with the correct emojiMaps
-  return getNormalLetters(beforeMatch) + getPromptLetters(matchString) + getNormalLetters(afterMatch);
+  return getNormalLetters(beforePrompt) + getPromptLetters(promptLetters) + getNormalLetters(afterPrompt);
 }
 
 function getPromptRegexDisplayText(regex) {
