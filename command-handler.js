@@ -61,3 +61,8 @@ function replyToInteraction(interaction, header, response, broadcast) {
     ephemeral: !broadcast
   });
 }
+
+module.exports = {
+  registerClientAsCommandHandler,
+  replyToInteraction
+}
