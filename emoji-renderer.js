@@ -6,7 +6,7 @@ const goldLettersMap = require("./emojiMaps/gold-letters.js");
 const whiteLettersMap = require("./emojiMaps/white-letters.js");
 const streakNumbersMap = require("./emojiMaps/streak-numbers.js");
 
-const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/g;
+const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 
 function replaceTextWithLetterMap(string, letterMap) {
   // replace every letter in the string with an emoji from the letterMap

@@ -21,12 +21,13 @@ const data = new SlashCommandBuilder()
       }));
 
 // TODO - this should really be moved
-const invalidWordRegex = /[^A-Z0-9'\-@ ]/g;
+const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
 
 // create function to handle the command
 async function execute(interaction, preferBroadcast) {
   let word = Dictionary.cleanWord(interaction.options.get("word").value);
   
+  // check if the word only has valid characters
   if (invalidWordRegex.test(word)) {
     replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
     return;

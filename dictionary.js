@@ -9,7 +9,7 @@ try {
 }
 
 function cleanWord(word) {
-  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...');
+  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim();
 }
 
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
