@@ -33,10 +33,13 @@ function getPromptRegexFromPromptSearch(promptQuery) {
       throw new PromptException("The regex you've entered is empty.");
     }
 
+    if (!regexInput.startsWith("^")) regexInput = ".*" + regexInput;
+    if (!regexInput.endsWith("$")) regexInput = regexInput + ".*";
+
     // check if the regex is valid
     let regex;
     try {
-      regex = new RegExp("^.*" + regexInput + ".*$", "gm");
+      regex = new RegExp("^" + regexInput + "$", "gm");
     } catch (e) {
       throw new PromptException("The regex you've entered is invalid.");
     }
