@@ -46,16 +46,16 @@ function getNormalLetters(string) {
 }
 
 function getSolveLetters(solution, promptRegex) {
-  // remake the regex without the global flag
-  if (promptRegex.flags.includes("g")) {
-    promptRegex = new RegExp(promptRegex.source, promptRegex.flags.replace("g", ""));
-  }
-  
-  let match = solution.match(promptRegex);
-  if (!match) return "";
+  // slice the regex to only include the capturing group by finding the first and last parentheses
+  let regexString = promptRegex.toString();
+  let capturingGroupString = regexString.slice(regexString.indexOf("(") + 1, regexString.lastIndexOf(")"));
+  let capturingRegex = new RegExp(capturingGroupString);
 
-  let promptStartIndex = solution.search(promptRegex);
-  let promptEndIndex = promptStartIndex + match[1].length;
+  let match = capturingRegex.exec(solution);
+  if (!match) return getNormalLetters(solution);
+
+  let promptStartIndex = solution.search(capturingRegex);
+  let promptEndIndex = promptStartIndex + match[0].length;
 
   console.log(promptStartIndex, promptEndIndex);
 

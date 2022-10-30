@@ -28,7 +28,7 @@ async function execute(interaction, preferBroadcast) {
   try {
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = Dictionary.solveRegex(regex);
+    let solutions = await Dictionary.solvePromptWithTimeout(regex, 180);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
@@ -41,8 +41,8 @@ async function execute(interaction, preferBroadcast) {
       , preferBroadcast);
     }
   } catch (error) {
-    if (error.name === 'PromptException') {
-      replyToInteraction(interaction, "Solve Count", "\n• " + error, preferBroadcast);
+    if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
+      replyToInteraction(interaction, "Solve Count", "\n• " + error.message, preferBroadcast);
     } else {
       throw error;
     }
