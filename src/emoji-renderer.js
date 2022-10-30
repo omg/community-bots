@@ -57,8 +57,6 @@ function getSolveLetters(solution, promptRegex) {
   let promptStartIndex = solution.search(capturingRegex);
   let promptEndIndex = promptStartIndex + match[0].length;
 
-  console.log(promptStartIndex, promptEndIndex);
-
   let beforePrompt = solution.slice(0, promptStartIndex);
   let promptLetters = solution.slice(promptStartIndex, promptEndIndex);
   let afterPrompt = solution.slice(promptEndIndex);
