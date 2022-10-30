@@ -68,8 +68,8 @@ function escapeRegExp(string) {
 }
 
 function isWord(word) {
-  let cleanWord = cleanWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanWord + ".*$", "m").test(dictionaryString);
+  let cleanInput = cleanWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(dictionaryString);
 }
 
 function solveRegex(regex) {
