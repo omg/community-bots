@@ -47,7 +47,7 @@ function getNormalLetters(string) {
 
 function getSolveLetters(solution, promptRegex) {
   // slice the regex to only include the capturing group by finding the first and last parentheses
-  let regexString = promptRegex.toString();
+  let regexString = promptRegex.source;
   let capturingGroupString = regexString.slice(regexString.indexOf("(") + 1, regexString.lastIndexOf(")"));
   let capturingRegex = new RegExp(capturingGroupString);
 
@@ -69,18 +69,33 @@ function getSolveLetters(solution, promptRegex) {
 
 function getPromptRegexDisplayText(regex) {
   // get the string of the regex
-  let regexString = regex.toString();
-  // remove the slashes from the start and end of the regex
+  let regexString = regex.source;
+  console.log(regexString);
+  // remove the anchors from the start and end of the regex
   regexString = regexString.slice(1, regexString.length - 1);
+
+  // remove the first opening parenthesis from a string
+  regexString = regexString.replace(/\(/, "");
+  let lastParenthesisIndex = regexString.lastIndexOf(")");
+  // remove the last closing parenthesis from a string
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+
+  let startsWithWildcard = regexString.startsWith(".*");
+  let endsWithWildcard = regexString.endsWith(".*");
   
-  if (regexString.startsWith("/.*") && regexString.endsWith(".*/")) {
-    let displayString = regexString.slice(3, regexString.length - 3);
+  if (startsWithWildcard && endsWithWildcard) {
+    let displayString = regexString.slice(2, regexString.length - 2);
     if (!invalidPromptDisplayRegex.test(displayString)) {
       return getNormalLetters(displayString);
     }
   }
 
-  return "`" + escapeDiscordMarkdown(regexString) + "`";
+  if (startsWithWildcard) regexString = regexString.slice(2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (!startsWithWildcard) regexString = "^" + regexString;
+  if (!endsWithWildcard) regexString = regexString + "$";
+
+  return "`/" + regexString + "/`";
 }
 
 module.exports = {

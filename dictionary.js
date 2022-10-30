@@ -40,11 +40,16 @@ function getPromptRegexFromPromptSearch(promptQuery) {
       throw new PromptException("The regex you've entered is empty.");
     }
 
-    // add capturing group to the regex
-    regexInput = "(" + regexInput + ")";
-
-    if (!regexInput.startsWith("^")) regexInput = ".*" + regexInput;
-    if (!regexInput.endsWith("$")) regexInput = regexInput + ".*";
+    if (regexInput.startsWith("^")) {
+      regexInput = "(" + regexInput.slice(1);
+    } else {
+      regexInput = ".*(" + regexInput;
+    }
+    if (regexInput.endsWith("$")) {
+      regexInput = regexInput.slice(0, -1) + ")";
+    } else {
+      regexInput = regexInput + ").*";
+    }
 
     // check if the regex is valid
     let regex;
