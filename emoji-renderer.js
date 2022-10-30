@@ -1,7 +1,7 @@
 const { escapeDiscordMarkdown } = require("./utils.js");
 
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
-const remarkEmojiMap = require("./emojiMaps/remark-emoji.js");
+const remarkEmojiMap = require("./emojiMaps/remark-emojis.js");
 const goldLettersMap = require("./emojiMaps/gold-letters.js");
 const whiteLettersMap = require("./emojiMaps/white-letters.js");
 const streakNumbersMap = require("./emojiMaps/streak-numbers.js");
