@@ -7,7 +7,7 @@ const { registerClientAsCommandHandler } = require('./command-handler');
 // const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const vivi = new Client({
   intents: [
-    // GatewayIntentBits.Guilds,
+    GatewayIntentBits.Guilds,
     // GatewayIntentBits.GuildMembers,
     // GatewayIntentBits.GuildMessages,
     // GatewayIntentBits.MessageContent
