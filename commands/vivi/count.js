@@ -44,7 +44,7 @@ async function execute(interaction, preferBroadcast) {
 };
 
 // export the command
-export default {
+module.exports = {
   data,
   execute,
   broadcastable: true
