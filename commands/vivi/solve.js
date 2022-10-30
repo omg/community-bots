@@ -1,7 +1,7 @@
 const { replyToInteraction } = require('../../command-handler.js');
 const { getSolveLetters } = require('../../emoji-renderer.js');
 const { SlashCommandBuilder } = require('discord.js');
-const { formatNumber } = require('../../utils.js');
+const { formatNumber, shuffle } = require('../../utils.js');
 
 const Dictionary = require('../../dictionary.js');
 
