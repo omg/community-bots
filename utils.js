@@ -20,3 +20,8 @@ function shuffle(array) {
 
   return array;
 }
+
+module.exports = {
+  formatNumber,
+  shuffle
+}
