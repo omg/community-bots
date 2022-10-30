@@ -14,12 +14,7 @@ const vivi = new Client({
   ]
 });
 
-vivi.on('ready', () => {
-  console.log(`Logged in as ${vivi.user.tag}!`);
-});
-
-// Set Vivi's Discord presence every 24 hours (if Vivi runs too long, the status might be reset)
-(function updatePresence() {
+function updatePresence() {
   vivi.user.setPresence({
     activities: [{
       name: '286.6K words',
@@ -28,7 +23,12 @@ vivi.on('ready', () => {
     status: 'online'
   });
   setTimeout(updatePresence, 86400000);
-})();
+}
+
+vivi.on('ready', () => {
+  console.log(`Logged in as ${vivi.user.tag}!`);
+  updatePresence();
+});
 
 /*const charactersCommandJSON = {
   name: "characters",
