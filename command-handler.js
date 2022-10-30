@@ -7,16 +7,6 @@ const commandCooldown = new Set();
 const { Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 
-// const commands = [
-// 	new SlashCommandBuilder()
-// ].map(command => command.toJSON());
-
-
-
-rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-	.then((data) => console.log(`Successfully registered ${data.length} application commands.`))
-	.catch(console.error);
-
 function commandToBroadcastOption(command) {
   return { type: 1, ...command };
 }
