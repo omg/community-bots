@@ -1,6 +1,8 @@
+const fs = require('node:fs');
+
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync('./Dictionaries/English/Dictionary.txt', 'utf8');
+  var dictionaryString = fs.readFileSync('./dictionaries/english.txt', 'utf8');
   console.log("Retrieved the English dictionary from file.");
 } catch (e) {
   console.log("Couldn't read the English dictionary!");
