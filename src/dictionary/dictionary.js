@@ -105,7 +105,7 @@ function SolveWorkerException(message) {
 
 function solvePromptWithTimeout(promptRegex, timeout) {
   return new Promise((resolve, reject) => {
-    const worker = fork('./solve-worker.js');
+    const worker = fork(path.join(__dirname, 'solve-worker.js'));
 
     let timeoutId = setTimeout(() => {
       worker.kill();
