@@ -1,10 +1,10 @@
-const { escapeDiscordMarkdown } = require("./utils.js");
+const { escapeDiscordMarkdown } = require("../utils.js");
 
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
-const remarkEmojiMap = require("./emojiMaps/remark-emojis.js");
-const goldLettersMap = require("./emojiMaps/gold-letters.js");
-const whiteLettersMap = require("./emojiMaps/white-letters.js");
-const streakNumbersMap = require("./emojiMaps/streak-numbers.js");
+const remarkEmojiMap = require("../assets/emoji-maps/remark-emojis.js");
+const goldLettersMap = require("../assets/emoji-maps/gold-letters.js");
+const whiteLettersMap = require("../assets/emoji-maps/white-letters.js");
+const streakNumbersMap = require("../assets/emoji-maps/streak-numbers.js");
 
 const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 

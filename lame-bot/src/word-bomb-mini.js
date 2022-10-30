@@ -1,7 +1,6 @@
-// require('./discord.js');
-const { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount } = require('./db.js');
-const { client } = require('./discord.js');
-const { isWord } = require('./dictionary.js');
+const { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount } = require('../../src/database/db.js');
+const { client } = require('../old/discord.js');
+const { isWord } = require('../../src/dictionary/dictionary.js');
 
 let streak;
 let lastWinner;
