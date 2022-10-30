@@ -22,7 +22,9 @@ const emojiMap = {
   streakEnded: ['<:e:816078069495627796>', '<:e:853371460365189120>'],
   solveStreak: ['🔥'],
   solveStreakDubious: ['<a:e:815838130304319498>'],
-  usedVivi: ['<:e:816078069302427679>']
+  usedVivi: ['<:e:816078069302427679>'],
+  bad: ['<:e:775275262740791336>'],
+  good: ['<:e:775275262731878410>']
 };
 
 module.exports = emojiMap;

@@ -2,6 +2,7 @@
 
 const { Client, Intents, Routes, GatewayIntentBits, SlashCommandBuilder } = require('discord.js');
 const { REST } = require('@discordjs/rest');
+const { registerClientAsCommandHandler } = require('./command-handler');
 
 // const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const vivi = new Client({
@@ -93,41 +94,6 @@ const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
   }
 })();
 
-//Functionality
-
-const Dictionary = require('./dictionary.js');
-
-// function getPromptObject(promptString) {
-//   // ES 5-9
-//   // ES <5
-//   // ES >5
-// }
-
-function checkWordCommand(interaction, preferBroadcast) {
-  let word = Dictionary.clean(interaction.options.get("word").value.toUpperCase());
-  if (Dictionary.isSolveGarbage(word)) {
-    replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
-    return;
-  }
-
-  if (word.length > 34) {
-    replyToInteraction(interaction, "Word Status",
-      '\n• **' + word.substring(0, 20) + '..'
-      + '\n<:Bad:775275262740791336> Too long** to be a valid English word.'
-    , preferBroadcast);
-  } else if (Dictionary.isWord(word)) {
-    replyToInteraction(interaction, "Word Status",
-      '\n• **' + word
-      + '\n<:Good:775275262731878410> Available** on live servers.'
-    , preferBroadcast);
-  } else {
-    replyToInteraction(interaction, "Word Status",
-      '\n• **' + word
-      + '\n<:Bad:775275262740791336> Not found** in the English dictionary.'
-    , preferBroadcast);
-  }
-}
-
 // function versionCommand(interaction, broadcastThis) {
 //   replyToInteraction(interaction, "Version", "\n• v" + version, broadcastThis);
 // }
@@ -141,7 +107,8 @@ function checkWordCommand(interaction, preferBroadcast) {
 //
 
 vivi.login(process.env.VIVI_TOKEN);
+registerClientAsCommandHandler(vivi, "vivi");
 
 //
 
-const Lame = require('./lame.js');
+// const Lame = require('./lame.js');
