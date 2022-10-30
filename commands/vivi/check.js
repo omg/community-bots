@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getRemarkEmoji } = require('../../emoji-renderer.js');
+const { replyToInteraction } = require('../../command-handler.js');
 
 const Dictionary = require('../../dictionary.js');
 
