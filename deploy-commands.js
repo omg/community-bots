@@ -6,9 +6,9 @@
 // lame also does badges - that's a problem if this is going to override it!
 // lame also does badges - that's a problem if this is going to override it!
 
-import { SlashCommandBuilder, Routes } from 'discord.js';
-import { REST } from '@discordjs/rest';
-import { clientId, guildId, token } from './config.json';
+const { SlashCommandBuilder, Routes } = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { clientId, guildId, token } = require('./config.json');
 
 const commands = [
 	new SlashCommandBuilder()

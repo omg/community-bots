@@ -1,6 +1,6 @@
 const Dictionary = require('./dictionary.js');
-import { replyToInteraction } from '../../command-handler.js';
-import { getSolveLetters } from '../../emoji-renderer.js';
+const { replyToInteraction } = require('../../command-handler.js');
+const { getSolveLetters } = require('../../emoji-renderer.js');
 
 const data = new SlashCommandBuilder()
   .setName('solve')

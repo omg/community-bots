@@ -2,7 +2,7 @@ const LAME_TOKEN = process.env.LAME_TOKEN;
 
 // Require the necessary discord.js classes
 const { Client, GatewayIntentBits } = require('discord.js');
-// import { token } from './config.json';
+// const { token } = require('./config.json');
 
 // Create a new client instance
 const client = new Client({
