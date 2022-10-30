@@ -29,7 +29,7 @@ async function execute(interaction, preferBroadcast) {
     } else {
       replyToInteraction(interaction, "Solve Count",
         '\n• There '
-        + (solutions.length === 1 ? 'is **1** solve' : 'are **' + formatNumber(solutions.length) + '** solves')
+        + (solutions.length === 1 ? 'is **1** solution' : 'are **' + formatNumber(solutions.length) + '** solutions')
         + ' for ' + getEmoteText(presentEmotes, prompt) + '.'
       , preferBroadcast);
     }
