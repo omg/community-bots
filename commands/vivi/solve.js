@@ -1,4 +1,4 @@
-const Dictionary = require('./dictionary.js');
+const Dictionary = require('../../dictionary.js');
 const { replyToInteraction } = require('../../command-handler.js');
 const { getSolveLetters } = require('../../emoji-renderer.js');
 
