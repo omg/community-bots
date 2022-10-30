@@ -1,3 +1,13 @@
+const { escapeDiscordMarkdown } = require("./utils.js");
+
+// const blueLettersMap = require("./emojiMaps/blue-letters.js");
+const remarkEmojiMap = require("./emojiMaps/remark-emoji.js");
+const goldLettersMap = require("./emojiMaps/gold-letters.js");
+const whiteLettersMap = require("./emojiMaps/white-letters.js");
+const streakNumbersMap = require("./emojiMaps/streak-numbers.js");
+
+const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/g;
+
 function replaceTextWithLetterMap(string, letterMap) {
   // replace every letter in the string with an emoji from the letterMap
   return string.split("").map((letter) => {
@@ -19,23 +29,18 @@ function getEmojiFromMap(emoji, emojiMap) {
   }
 }
 
-const remarkEmojiMap = require("./emojiMaps/remark-emoji.js");
 function getRemarkEmoji(emoji) {
   return getEmojiFromMap(emoji, remarkEmojiMap);
 }
 
-// const blueLettersMap = require("./emojiMaps/blue-letters.js");
-const goldLettersMap = require("./emojiMaps/gold-letters.js");
 function getPromptLetters(prompt) {
   return replaceTextWithLetterMap(prompt, goldLettersMap);
 }
 
-const streakNumbersMap = require("./emojiMaps/streak-numbers.js");
 function getStreakNumbers(number) {
   return replaceTextWithLetterMap(number.toString(), streakNumbersMap);
 }
 
-const whiteLettersMap = require("./emojiMaps/white-letters.js");
 function getNormalLetters(string) {
   return replaceTextWithLetterMap(string, whiteLettersMap);
 }
@@ -59,8 +64,25 @@ function getSolveLetters(solution, prompt) {
   return getNormalLetters(beforeMatch) + getPromptLetters(matchString) + getNormalLetters(afterMatch);
 }
 
+function getPromptRegexDisplayText(regex) {
+  // get the string of the regex
+  let regexString = regex.toString();
+  // remove the slashes from the start and end of the regex
+  regexString = regexString.slice(1, regexString.length - 1);
+  
+  if (regexString.startsWith("/.*") && regexString.endsWith(".*/")) {
+    let displayString = regexString.slice(3, regexString.length - 3);
+    if (!invalidPromptDisplayRegex.test(displayString)) {
+      return getNormalLetters(displayString);
+    }
+  }
+
+  return "`" + escapeDiscordMarkdown(regexString) + "`";
+}
+
 module.exports = {
   getRemarkEmoji,
   getSolveLetters,
-  getStreakNumbers
+  getStreakNumbers,
+  getPromptRegexDisplayText
 }

@@ -1,5 +1,6 @@
 const Dictionary = require('./dictionary.js');
 import { replyToInteraction } from '../../command-handler.js';
+import { getPromptRegexDisplayText } from '../../emoji-renderer.js';
 
 const data = new SlashCommandBuilder()
   .setName('count')
@@ -30,7 +31,7 @@ async function execute(interaction, preferBroadcast) {
       replyToInteraction(interaction, "Solve Count",
         '\n• There '
         + (solutions.length === 1 ? 'is **1** solution' : 'are **' + formatNumber(solutions.length) + '** solutions')
-        + ' for ' + getEmoteText(presentEmotes, prompt) + '.'
+        + ' for ' + getPromptRegexDisplayText(regex) + '.'
       , preferBroadcast);
     }
   } catch (error) {
