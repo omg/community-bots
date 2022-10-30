@@ -26,6 +26,10 @@ function getPromptRegexFromPromptSearch(promptQuery) {
   if (regexResult) {
     // This has regex
 
+    if (cleanQuery.includes("`")) {
+      throw new PromptException("The regex you've entered is invalid.");
+    }
+
     let regexInput = regexResult[1];
 
     if (regexInput === "") {
@@ -47,6 +51,10 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     return regex;
   } else {
     // This isn't regex
+
+    if (cleanQuery.includes("`")) {
+      throw new PromptException("The prompt you've entered is invalid.");
+    }
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
     return new RegExp("^.*" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ".*$", "gm");
