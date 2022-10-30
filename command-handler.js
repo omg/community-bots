@@ -79,9 +79,9 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
       console.error(error);
       replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
     }
-
-    client.login(token);
   });
+
+  client.login(token);
 }
 
 function isBroadcastChannel(channel) {
