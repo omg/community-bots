@@ -34,10 +34,16 @@ function getPromptRegexFromPromptSearch(promptQuery) {
 
     let regexInput = regexResult[1];
 
+    // escape parentheses from the regex input
+    regexInput = regexInput.replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+
     if (regexInput === "") {
       // This regex is empty
       throw new PromptException("The regex you've entered is empty.");
     }
+
+    // add capturing group to the regex
+    regexInput = "(" + regexInput + ")";
 
     if (!regexInput.startsWith("^")) regexInput = ".*" + regexInput;
     if (!regexInput.endsWith("$")) regexInput = regexInput + ".*";
@@ -59,7 +65,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     }
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp("^.*" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ".*$", "gm");
+    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ").*$", "gm");
   }
 }
 
@@ -73,18 +79,18 @@ function isWord(word) {
 }
 
 function solveRegex(regex) {
-  let solves = [];
+  let solutions = [];
 
   let match;
   while (match = regex.exec(dictionaryString)) {
-    solves.push(match[1]);
+    solutions.push(match[0]);
   }
   
-  return solves;
+  return solutions;
 }
 
 function solvePrompt(prompt) {
-  return solveRegex(new RegExp("^.*" + escapeRegExp(prompt) + ".*$", "gm"));
+  return solveRegex(new RegExp("^.*(" + escapeRegExp(prompt) + ").*$", "gm"));
 }
 
 module.exports = {
