@@ -21,7 +21,12 @@ function shuffle(array) {
   return array;
 }
 
+function escapeDiscordMarkdown(string) {
+  return string.replace(/[\\`_~\*\|]/g, '\\$&');
+}
+
 module.exports = {
   formatNumber,
-  shuffle
+  shuffle,
+  escapeDiscordMarkdown
 }
