@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { registerClientAsCommandHandler } = require('../../src/command-handler');
+const path = require('node:path');
 
 const viviClient = new Client({
   intents: [
@@ -25,11 +26,9 @@ viviClient.on('ready', () => {
 
 //
 
-registerClientAsCommandHandler(viviClient, "vivi", process.env.VIVI_CLIENT_ID, process.env.VIVI_TOKEN);
+registerClientAsCommandHandler(viviClient, path.join(__dirname, '../commands'), process.env.VIVI_CLIENT_ID, process.env.VIVI_TOKEN);
 
 //
-
-// const Lame = require('./lame.js');
 
 module.exports = {
   viviClient

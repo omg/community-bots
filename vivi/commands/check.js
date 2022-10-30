@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getRemarkEmoji } = require('../../emoji-renderer.js');
-const { replyToInteraction } = require('../../command-handler.js');
+const { getRemarkEmoji } = require('../../src/emoji-renderer.js');
+const { replyToInteraction } = require('../../src/command-handler.js');
 
-const Dictionary = require('../../dictionary.js');
+const Dictionary = require('../../src/dictionary/dictionary.js');
 
 const data = new SlashCommandBuilder()
   .setName('check')

@@ -1,4 +1,4 @@
-const { escapeDiscordMarkdown } = require("../utils.js");
+const { escapeDiscordMarkdown } = require("./utils.js");
 
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
 const remarkEmojiMap = require("../assets/emoji-maps/remark-emojis.js");

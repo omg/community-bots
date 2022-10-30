@@ -4,7 +4,7 @@ const { MongoClient } = require('mongodb');
 const url = process.env.MONGO_URL;
 const client = new MongoClient(url);
 
-let db;
+// let db;
 
 // Database Name
 const dbName = 'lame';

@@ -1,12 +1,10 @@
 const { Collection, Events } = require("discord.js");
+const { Routes } = require('discord.js');
+const { REST } = require('@discordjs/rest');
 const fs = require('node:fs');
 
 const COOLDOWN_TIME = 2000;
-
 const commandCooldown = new Set();
-
-const { Routes } = require('discord.js');
-const { REST } = require('@discordjs/rest');
 
 function commandToBroadcastOption(command) {
   return { type: 1, ...command };
@@ -14,7 +12,7 @@ function commandToBroadcastOption(command) {
 
 function registerClientAsCommandHandler(client, commandFolder, clientID, token) {
   const commands = new Collection();
-  const commandFiles = fs.readdirSync(`./commands/${commandFolder}`).filter(file => file.endsWith('.js'));
+  const commandFiles = fs.readdirSync(commandFolder).filter(file => file.endsWith('.js'));
 
   const JSONcommands = [];
   let broadcastCommand = {
@@ -24,7 +22,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
   };
   
   for (const file of commandFiles) {
-    const command = require(`./commands/${commandFolder}/${file}`);
+    const command = require(`${commandFolder}/${file}`);
     // check if data and execute are defined in command
     if (command.data && command.execute) {
       const commandJSON = command.data.toJSON();

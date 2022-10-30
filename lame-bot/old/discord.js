@@ -1,8 +1,7 @@
-const LAME_TOKEN = process.env.LAME_TOKEN;
-
-// Require the necessary discord.js classes
 const { Client, GatewayIntentBits } = require('discord.js');
-// const { token } = require('./config.json');
+const { once } = require("events");
+
+const LAME_TOKEN = process.env.LAME_TOKEN;
 
 // Create a new client instance
 const client = new Client({
@@ -13,8 +12,6 @@ const client = new Client({
     //GatewayIntentBits.MessageContent
   ]
 });
-
-const { once } = require("events");
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {

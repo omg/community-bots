@@ -1,9 +1,10 @@
 const { fork } = require('child_process');
 const fs = require('node:fs');
+const path = require('path');
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync('./dictionaries/english.txt', 'utf8');
+  var dictionaryString = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/dictionaries/english.txt'), 'utf8');
   console.log("Retrieved the English dictionary from file.");
 } catch (e) {
   console.log("Couldn't read the English dictionary!");
