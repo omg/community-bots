@@ -36,7 +36,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     // check if the regex is valid
     let regex;
     try {
-      regex = new RegExp("^" + regexInput + "$", "gm");
+      regex = new RegExp("^.*" + regexInput + ".*$", "gm");
     } catch (e) {
       throw new PromptException("The regex you've entered is invalid.");
     }
@@ -46,7 +46,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     // This isn't regex
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp("^" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + "$", "gm");
+    return new RegExp("^.*" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ".*$", "gm");
   }
 }
 
@@ -60,11 +60,18 @@ function isWord(word) {
 }
 
 function solveRegex(regex) {
-  // TODO
+  let solves = [];
+
+  let match;
+  while (match = regex.exec(dictionaryString)) {
+    solves.push(match[1]);
+  }
+  
+  return solves;
 }
 
 function solvePrompt(prompt) {
-  // TODO
+  return solveRegex(new RegExp("^.*" + escapeRegExp(prompt) + ".*$", "gm"));
 }
 
 module.exports = {
