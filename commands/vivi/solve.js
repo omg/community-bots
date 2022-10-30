@@ -1,6 +1,8 @@
-const Dictionary = require('../../dictionary.js');
 const { replyToInteraction } = require('../../command-handler.js');
 const { getSolveLetters } = require('../../emoji-renderer.js');
+const { SlashCommandBuilder } = require('discord.js');
+
+const Dictionary = require('../../dictionary.js');
 
 const data = new SlashCommandBuilder()
   .setName('solve')
@@ -13,7 +15,10 @@ const data = new SlashCommandBuilder()
     option.setName('dictionary')
       .setDescription('The dictionary to solve in')
       .setRequired(false)
-      .addChoice('English', 'English'));
+      .addChoices({
+        name: 'English',
+        value: 'English'
+      }));
 
 // create function to handle the command
 async function execute(interaction, preferBroadcast) {

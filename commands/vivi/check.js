@@ -1,5 +1,7 @@
-const Dictionary = require('../../dictionary.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { getRemarkEmoji } = require('../../emoji-renderer.js');
+
+const Dictionary = require('../../dictionary.js');
 
 const data = new SlashCommandBuilder()
   .setName('check')
@@ -12,7 +14,10 @@ const data = new SlashCommandBuilder()
     option.setName('dictionary')
       .setDescription('The dictionary to check in')
       .setRequired(false)
-      .addChoice('English', 'English'));
+      .addChoices({
+        name: 'English',
+        value: 'English'
+      }));
 
 // TODO - this should really be moved
 const invalidWordRegex = /[^A-Z0-9'\-@ ]/g;
