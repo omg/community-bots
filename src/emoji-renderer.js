@@ -68,7 +68,6 @@ function getSolveLetters(solution, promptRegex) {
 function getPromptRegexDisplayText(regex) {
   // get the string of the regex
   let regexString = regex.source;
-  console.log(regexString);
   // remove the anchors from the start and end of the regex
   regexString = regexString.slice(1, regexString.length - 1);
 
