@@ -18,10 +18,6 @@ const data = new SlashCommandBuilder()
 // create function to handle the command
 async function execute(interaction, preferBroadcast) {
   let prompt = Dictionary.cleanWord(interaction.options.get("prompt").value);
-  // if (Dictionary.isSearchGarbage(prompt)) {
-  //   replyToInteraction(interaction, "Solver", "\n• Sorry, that's not a valid prompt!", preferBroadcast);
-  //   return;
-  // }
 
   try {
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
@@ -68,5 +64,6 @@ async function execute(interaction, preferBroadcast) {
 // export the command
 export default {
   data,
-  execute
+  execute,
+  broadcastable: true
 };

@@ -30,10 +30,6 @@ vivi.on('ready', () => {
   setTimeout(updatePresence, 86400000);
 })();
 
-function getBroadcastJSON(command) {
-  return { type: 1, ...command };
-}
-
 /*const charactersCommandJSON = {
   name: "characters",
   description: "Get the amount of characters for a word!",
@@ -77,23 +73,6 @@ function getBroadcastJSON(command) {
 //   }
 // ];
 
-const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
-
-(async () => {
-  try {
-    console.log('Started refreshing application (/) commands.');
-
-    await rest.put(
-      Routes.applicationGuildCommands(process.env.VIVI_CLIENT_ID, process.env.GUILD_ID),
-      { body: commands },
-    );
-
-    console.log('Successfully reloaded application (/) commands.');
-  } catch (error) {
-    console.error(error);
-  }
-})();
-
 // function versionCommand(interaction, broadcastThis) {
 //   replyToInteraction(interaction, "Version", "\n• v" + version, broadcastThis);
 // }
@@ -106,8 +85,7 @@ const rest = new REST({ version: '9' }).setToken(process.env.VIVI_TOKEN);
 
 //
 
-vivi.login(process.env.VIVI_TOKEN);
-registerClientAsCommandHandler(vivi, "vivi");
+registerClientAsCommandHandler(vivi, "vivi", process.env.VIVI_CLIENT_ID, process.env.VIVI_TOKEN);
 
 //
 
