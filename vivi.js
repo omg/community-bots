@@ -103,49 +103,6 @@ const Dictionary = require('./dictionary.js');
 //   // ES >5
 // }
 
-function solveCommand(interaction, preferBroadcast) {
-  let prompt = Dictionary.clean(interaction.options.get("prompt").value.toUpperCase());
-  if (Dictionary.isSearchGarbage(prompt)) {
-    replyToInteraction(interaction, "Solver", "\n• Sorry, that's not a valid prompt!", preferBroadcast);
-    return;
-  }
-
-  let solves = Dictionary.solve(prompt);
-
-  if (solves.length === 0) {
-    replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
-  } else {
-    let solverString = 'I found '
-      + (solves.length === 1 ? '**1** solution!' : '**' + formatNumber(solves.length) + '** solutions!')
-      + '\n'
-
-    shuffle(solves);
-
-    let shownSolves = [];
-    let solvesLength = 0;
-
-    for (let i = 0; i < Math.min(solves.length, 4); i++) {
-      let solve = solves[i];
-      let promptIndex = solve.search(prompt);
-
-      let solveDisplay = '\n• ' + getEmoteText(presentEmotes, solve.substring(0, promptIndex)) + getEmoteText(promptBlueEmotes, solve.substring(promptIndex, promptIndex + prompt.length)) + getEmoteText(presentEmotes, solve.substring(promptIndex + prompt.length));
-      if (solverString.length + solvesLength + solveDisplay.length > 1910) break;
-      shownSolves.push(solveDisplay);
-      solvesLength += solveDisplay.length;
-    }
-
-    shownSolves.sort(function(a, b) {
-      return b.length - a.length || a.localeCompare(b);
-    });
-
-    for (let i = 0; i < shownSolves.length; i++) {
-      solverString += shownSolves[i];
-    }
-
-    replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
-  }
-}
-
 function checkWordCommand(interaction, preferBroadcast) {
   let word = Dictionary.clean(interaction.options.get("word").value.toUpperCase());
   if (Dictionary.isSolveGarbage(word)) {
