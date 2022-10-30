@@ -28,6 +28,8 @@ async function execute(interaction, preferBroadcast) {
   try {
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
+    console.log(regex);
+
     let solutions = Dictionary.solveRegex(regex);
     let solveCount = solutions.length;
 
@@ -45,6 +47,7 @@ async function execute(interaction, preferBroadcast) {
 
       for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
+        console.log(solution);
         let solutionString = '\n• ' + getSolveLetters(solution, regex);
         if (solutionsLength + solutionString.length > 1910) break;
         solutionStrings.push(solutionString);

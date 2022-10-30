@@ -51,7 +51,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     // check if the regex is valid
     let regex;
     try {
-      regex = new RegExp("^" + regexInput + "$", "gm");
+      regex = new RegExp("^" + regexInput + "$", "m");
     } catch (e) {
       throw new PromptException("The regex you've entered is invalid.");
     }
@@ -65,7 +65,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     }
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ").*$", "gm");
+    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ").*$", "m");
   }
 }
 
@@ -79,6 +79,11 @@ function isWord(word) {
 }
 
 function solveRegex(regex) {
+  // recreate the regex with the global flag
+  if (!regex.flags.includes("g")) {
+    regex = new RegExp(regex.source, regex.flags + "g");
+  }
+
   let solutions = [];
 
   let match;

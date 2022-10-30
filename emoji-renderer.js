@@ -46,11 +46,18 @@ function getNormalLetters(string) {
 }
 
 function getSolveLetters(solution, promptRegex) {
+  // remake the regex without the global flag
+  if (promptRegex.flags.includes("g")) {
+    promptRegex = new RegExp(promptRegex.source, promptRegex.flags.replace("g", ""));
+  }
+  
   let match = solution.match(promptRegex);
   if (!match) return "";
 
   let promptStartIndex = solution.search(promptRegex);
-  let promptEndIndex = promptStartIndex + match[0].length;
+  let promptEndIndex = promptStartIndex + match[1].length;
+
+  console.log(promptStartIndex, promptEndIndex);
 
   let beforePrompt = solution.slice(0, promptStartIndex);
   let promptLetters = solution.slice(promptStartIndex, promptEndIndex);
