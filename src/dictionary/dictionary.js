@@ -103,7 +103,11 @@ function SolveWorkerException(message) {
   this.name = "SolveWorkerException";
 }
 
-function solvePromptWithTimeout(promptRegex, timeout) {
+let solverCache = new Set();
+
+function solvePromptWithTimeout(promptRegex, timeout, user) {
+  if (user) solverCache.add(user);
+
   return new Promise((resolve, reject) => {
     const worker = fork(path.join(__dirname, 'solve-worker.js'));
 
@@ -135,10 +139,58 @@ function solvePromptWithTimeout(promptRegex, timeout) {
   });
 }
 
+// TODO: remake this because it's inefficient
+function generatePrompt() {
+  let promptLength = randInt(3, 5);
+  let requiredCharacters = promptLength + 2;
+
+  let solutions = [];
+  let repeatedRegex = '';
+  for (let i = 0; i < requiredCharacters; i++) repeatedRegex += '[^\n\'\-]';
+  let regex = new RegExp('(' + repeatedRegex + '[^\n\'\-]*)$', 'gm');
+
+  let match;
+  while (match = regex.exec(dictionaryString)) {
+    solutions.push(match[1]);
+  }
+
+  while (true) {
+    let randIndex = Math.floor(Math.random() * solutions.length);
+    let actualPromptWord = solutions[randIndex];
+    let promptWord = actualPromptWord;
+    let promptSubStart = randInt(0, promptWord.length - promptLength);
+
+    let blanks = Math.min(promptLength - 2, 2);
+    for (i = 0; i < blanks; i++) {
+      let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
+      promptWord = promptWord.substring(0, rand) + '.' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
+    }
+
+    let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
+    let solutions = solve(promptWord.substring(promptSubStart, promptSubStart + promptLength));
+    if (lengthRequired) {
+      solutions = solutions.filter((word) => {
+        return word.length == promptWord.length;
+      });
+    }
+    if (solutions.length < 23) continue; // || solutions.length > 1200
+    if (lengthRequired && solutions.length < 46) continue;
+
+    return {
+      promptWord: actualPromptWord,
+      solutions: solutions.length,
+      lengthRequired: lengthRequired,
+      prompt: new RegExp("^.*(" + escapeRegExp(promptWord.slice(promptSubStart, promptSubStart + promptLength)) + ").*$", "m")
+    }
+  }
+}
+
 module.exports = {
   cleanWord,
   getPromptRegexFromPromptSearch,
   isWord,
   solvePrompt,
-  solvePromptWithTimeout
+  solvePromptWithTimeout,
+  generatePrompt,
+  solverCache
 }
