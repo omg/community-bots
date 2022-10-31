@@ -1,7 +1,8 @@
 const { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount, getDefaultGameChannel } = require('../../src/database/db.js');
-const { isWord, generatePrompt, solverCache } = require('../../src/dictionary/dictionary.js');
+const { isWord, generatePrompt, solverCache, cleanWord, escapeRegExp, getPromptRepeatableText } = require('../../src/dictionary/dictionary.js');
 const { getRemarkEmoji, getPromptRegexDisplayText, getPromptRegexText } = require('../../src/emoji-renderer.js');
-const { lameBotClient, getChannel } = require('./client.js');
+const { formatNumber } = require('../../src/utils.js');
+const { lameBotClient, getChannel, sendMessage } = require('./client.js');
 
 let wordBombMiniChannel;
 
@@ -72,8 +73,12 @@ async function startRound() {
   // make prompt
   ({ prompt, promptWord, solutions, lengthRequired } = generatePrompt());
 
+  lengthRequired = true; // TODO remove
+
   // send prompt to the channel
-  wordBombMiniChannel.send(getRemarkEmoji("bomb") + ' **Quick!** Type a word containing:' + '\n\n' + getPromptRegexDisplayText(prompt) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") + (state.lengthRequired ? '\n\n• Must be **' + promptWord.length + '** characters!' : ''));
+  console.log(wordBombMiniChannel.id);
+  console.log(prompt);
+  sendMessage(wordBombMiniChannel, getRemarkEmoji("bomb") + ' **Quick!** Type a word containing:' + '\n\n' + getPromptRegexDisplayText(prompt) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") + (lengthRequired ? '\n\n• Must be **' + promptWord.length + '** characters!' : ''));
   
   lameBotClient.user.setPresence({
     activities: [{
@@ -88,7 +93,8 @@ async function startRound() {
   wordBombMiniChannel = await getChannel(await getDefaultGameChannel());
 
   // start a new round
-  startRound();
+  console.log("Starting a new round..");
+  await startRound();
 })();
 
 // setPresence("doodoo", true);
@@ -151,6 +157,8 @@ async function endRound() {
   } else {
 
   }
+
+  setTimeout(startRound, 7000);
 }
 
 // listen for messages from discord
@@ -162,14 +170,36 @@ lameBotClient.on('messageCreate', (message) => {
   if (!inProgress) return;
 
   // ignore messages not in the default game channel
-  if (message.channel.id !== getDefaultGameChannel()) return;
+  if (message.channel.id !== wordBombMiniChannel.id) return;
 
   // stop if this user has already solved
   if (solves.some(s => s.user === message.author.id)) return;
 
   // check if the guess is a solve and if it contains the prompt
-  let guess = cleanWord(message.content.toUpperCase());
-  if (isWord(guess) && guess.includes(prompt)) {
+  let guess = cleanWord(message.content);
+  if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
+    let repeatablePrompt = getPromptRepeatableText(prompt);
+    if (repeatablePrompt && (guess === repeatablePrompt || guess === repeatablePrompt + "S")) {
+      message.reply('<@' + message.author.id + '>, you cannot repeat the prompt!').catch((error) => {
+        console.log(error);
+      });
+      return;
+    }
+
+    if (lengthRequired) {
+      if (guess.length < promptWord.length) {
+        message.reply('<@' + message.author.id + '>, the word must be **' + promptWord.length + '** characters!\nYours was **' + guess.length + '**, go higher ' + getRemarkEmoji("higher")).catch((error) => {
+          console.log(error);
+        });
+        return;
+      } else if (guess.length > promptWord.length) {
+        message.reply('<@' + message.author.id + '>, the word must be **' + promptWord.length + '** characters!\nYours was **' + guess.length + '**, go lower ' + getRemarkEmoji("lower")).catch((error) => {
+          console.log(error);
+        });
+        return;
+      }
+    }
+
     // add the solve to the list of solves
     solves.push({
       user: message.author.id,
@@ -179,7 +209,7 @@ lameBotClient.on('messageCreate', (message) => {
 
     // if this player is the first to solve, start a timer to end the round after 300 milliseconds
     if (solves.length === 1) {
-      setTimeout(endRound, 300);
+      setTimeout(endRound, 350);
     }
   }
 });
