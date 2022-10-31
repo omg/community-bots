@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { registerClientAsCommandHandler } = require('../../src/command-handler');
 const path = require('node:path');
 
@@ -6,8 +6,13 @@ const lameBotClient = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages
-  ]
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ],
+  partials: [
+    Partials.Channel
+  ],
+  allowedMentions: { parse: ['users'] }
 });
 
 lameBotClient.on('ready', () => {
@@ -15,9 +20,7 @@ lameBotClient.on('ready', () => {
 });
 
 async function waitForReady() {
-  if (lameBotClient.isReady()) {
-    return;
-  }
+  if (lameBotClient.readyAt) return;
   await new Promise(resolve => {
     lameBotClient.once('ready', resolve);
   });
