@@ -1,12 +1,17 @@
-const { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount } = require('../../src/database/db.js');
-const { client } = require('../old/discord.js');
-const { isWord } = require('../../src/dictionary/dictionary.js');
+const { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount, getDefaultGameChannel } = require('../../src/database/db.js');
+const { isWord, generatePrompt, solverCache } = require('../../src/dictionary/dictionary.js');
+const { getRemarkEmoji, getPromptRegexDisplayText, getPromptRegexText } = require('../../src/emoji-renderer.js');
+const { lameBotClient, getChannel } = require('./client.js');
+
+let wordBombMiniChannel;
 
 let streak;
 let lastWinner;
 
 let prompt;
 let promptWord;
+let solutions;
+let lengthRequired;
 
 let rankRemarks;
 let solveRemarks;
@@ -48,25 +53,50 @@ let solves = [
 // Add statistics to all players
 // Update all-time leaderboard
 
-async function main() {
-  ({ streak, lastWinner } = await getCurrentRoundInfo());
-  // sendImportantMessageThatNeedsToBeReceived("813091079322599425", "hey");
-  // console.log("test")
-  // await sendImportantMessageThatNeedsToBeReceived("813091079322599425", "yo");
-  // console.log("test 2");
-  console.log(streak);
-  console.log(lastWinner);
-  console.log(await getAllTimeLeaderboardID());
+function isNumberVowelSound(x) {
+  return x == 11 || x.toString().startsWith('8');
 }
 
-// setPresence("doodoo", true);
+async function startRound() {
+  if (inProgress) return;
+  inProgress = true;
 
-async function endRound() {
-  // reset remarks strings
   rankRemarks = "";
   solveRemarks = "";
   promptStatRemarks = "";
   roundRemarks = "";
+
+  solves = [];
+  solverCache.clear();
+
+  // make prompt
+  ({ prompt, promptWord, solutions, lengthRequired } = generatePrompt());
+
+  // send prompt to the channel
+  wordBombMiniChannel.send(getRemarkEmoji("bomb") + ' **Quick!** Type a word containing:' + '\n\n' + getPromptRegexDisplayText(prompt) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") + (state.lengthRequired ? '\n\n• Must be **' + promptWord.length + '** characters!' : ''));
+  
+  lameBotClient.user.setPresence({
+    activities: [{
+      name: lengthRequired ? getPromptRegexText(prompt) + ' - ' + promptWord.length : getPromptRegexText(prompt)
+    }],
+    status: 'online'
+  });
+}
+
+(async function main() {
+  ({ streak, lastWinner } = await getCurrentRoundInfo());
+  wordBombMiniChannel = await getChannel(await getDefaultGameChannel());
+
+  // start a new round
+  startRound();
+})();
+
+// setPresence("doodoo", true);
+
+async function endRound() {
+  if (!inProgress) return;
+
+  lameBotClient.user.setPresence({ status: 'idle' });
 
   let winnerObject = solves[0];
   let winner = winnerObject.user;
@@ -124,7 +154,7 @@ async function endRound() {
 }
 
 // listen for messages from discord
-client.on('messageCreate', (message) => {
+lameBotClient.on('messageCreate', (message) => {
   // ignore messages from the bot
   if (message.author.bot) return;
 
@@ -144,7 +174,7 @@ client.on('messageCreate', (message) => {
     solves.push({
       user: message.author.id,
       solution: guess,
-      usedVivi: false // TODO
+      usedVivi: solverCache.has(message.author.id)
     });
 
     // if this player is the first to solve, start a timer to end the round after 300 milliseconds
@@ -153,7 +183,3 @@ client.on('messageCreate', (message) => {
     }
   }
 });
-
-main().then(() => {
-  console.log("Done!");
-})
