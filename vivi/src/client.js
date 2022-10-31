@@ -5,7 +5,8 @@ const path = require('node:path');
 const viviClient = new Client({
   intents: [
     GatewayIntentBits.Guilds
-  ]
+  ],
+  allowedMentions: { parse: ['users'] }
 });
 
 function updatePresence() {
