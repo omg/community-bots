@@ -8,25 +8,28 @@ const streakNumbersMap = require("../assets/emoji-maps/streak-numbers.js");
 
 const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 
+function getEmojiFromMap(emoji, emojiMap) {
+  if (emojiMap[emoji]) {
+    // if the emoji is a string, return it
+    if (typeof emojiMap[emoji] === "string") {
+      return emojiMap[emoji];
+    }
+    
+    // if the emoji is an array, return a random emoji from the array
+    if (Array.isArray(emojiMap[emoji])) {
+      return emojiMap[emoji][Math.floor(Math.random() * emojiMap[emoji].length)];
+    }
+  }
+
+  // return unknown from the emojiMap if it exists, otherwise return empty string
+  return emojiMap.unknown || "";
+}
+
 function replaceTextWithLetterMap(string, letterMap) {
   // replace every letter in the string with an emoji from the letterMap
   return string.split("").map((letter) => {
-    if (letterMap[letter]) {
-      return letterMap[letter];
-    } else {
-      // return unknown from the letterMap if it exists, otherwise return empty string
-      return letterMap.unknown || "";
-    }
+    return getEmojiFromMap(letter, letterMap);
   }).join("");
-}
-
-function getEmojiFromMap(emoji, emojiMap) {
-  if (emojiMap[emoji]) {
-    return emojiMap[emoji];
-  } else {
-    // return unknown from the emojiMap if it exists, otherwise return empty string
-    return emojiMap.unknown || "";
-  }
 }
 
 function getRemarkEmoji(emoji) {
@@ -95,9 +98,41 @@ function getPromptRegexDisplayText(regex) {
   return "`/" + regexString + "/`";
 }
 
+// TODO just incorporate this into the function above
+function getPromptRegexText(regex) {
+  // get the string of the regex
+  let regexString = regex.source;
+  // remove the anchors from the start and end of the regex
+  regexString = regexString.slice(1, regexString.length - 1);
+
+  // remove the first opening parenthesis from a string
+  regexString = regexString.replace(/\(/, "");
+  let lastParenthesisIndex = regexString.lastIndexOf(")");
+  // remove the last closing parenthesis from a string
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+
+  let startsWithWildcard = regexString.startsWith(".*");
+  let endsWithWildcard = regexString.endsWith(".*");
+  
+  if (startsWithWildcard && endsWithWildcard) {
+    let displayString = regexString.slice(2, regexString.length - 2);
+    if (!invalidPromptDisplayRegex.test(displayString)) {
+      return displayString;
+    }
+  }
+
+  if (startsWithWildcard) regexString = regexString.slice(2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (!startsWithWildcard) regexString = "^" + regexString;
+  if (!endsWithWildcard) regexString = regexString + "$";
+
+  return "/" + regexString + "/";
+}
+
 module.exports = {
   getRemarkEmoji,
   getSolveLetters,
   getStreakNumbers,
-  getPromptRegexDisplayText
+  getPromptRegexDisplayText,
+  getPromptRegexText
 }
