@@ -49,21 +49,21 @@ async function getUserSolveCount(user) {
 }
 
 // get amount of times a user has solved a prompt
-async function getUserSolveCountForPrompt(user, prompt) {
+async function getUserSolveCountForPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
-  let count = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: user, prompt });
+  let count = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: user, prompt: prompt.source, promptLength });
   return count;
 }
 
 // get a user's first solution to a specific prompt by completion timestamp
-async function getFirstSolutionToPrompt(user, prompt) {
+async function getFirstSolutionToPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
-  let solution = await client.db(dbName).collection('rounds').find({ gameID, winner: user, prompt }).sort({ completedAt: 1 }).limit(1).toArray();
+  let solution = await client.db(dbName).collection('rounds').find({ gameID, winner: user, prompt: prompt.source, promptLength }).sort({ completedAt: 1 }).limit(1).toArray();
   return solution[0];
 }
 
 // update database after a round is completed
-async function finishRound(solvers, startedAt, prompt, promptWord, solutionCount) {
+async function finishRound(solvers, startedAt, prompt, promptWord, promptLength, solutionCount) {
   let gameID = await getDefaultGameID();
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
 
@@ -76,8 +76,9 @@ async function finishRound(solvers, startedAt, prompt, promptWord, solutionCount
     solvers,
     startedAt,
     completedAt: Date.now(),
-    prompt,
+    prompt: prompt.source,
     promptWord,
+    promptLength,
     solutionCount,
     solution: solvers[0].solution,
     usedVivi: solvers[0].usedVivi,
