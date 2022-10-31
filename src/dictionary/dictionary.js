@@ -11,7 +11,7 @@ try {
 }
 
 function cleanWord(word) {
-  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim();
+  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim(); // TODO: trimming might ruin some searches
 }
 
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
@@ -82,7 +82,7 @@ function isWord(word) {
   return new RegExp("^.*" + cleanInput + ".*$", "m").test(dictionaryString);
 }
 
-async function solvePrompt(promptRegex) {
+function solvePrompt(promptRegex) {
   // recreate the regex with the global flag
   if (!promptRegex.flags.includes("g")) {
     promptRegex = new RegExp(promptRegex.source, promptRegex.flags + "g");
@@ -139,35 +139,43 @@ function solvePromptWithTimeout(promptRegex, timeout, user) {
   });
 }
 
+// TODO move this to utils
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 // TODO: remake this because it's inefficient
 function generatePrompt() {
   let promptLength = randInt(3, 5);
   let requiredCharacters = promptLength + 2;
 
-  let solutions = [];
+  let solves = [];
   let repeatedRegex = '';
-  for (let i = 0; i < requiredCharacters; i++) repeatedRegex += '[^\n\'\-]';
-  let regex = new RegExp('(' + repeatedRegex + '[^\n\'\-]*)$', 'gm');
+  for (let i = 0; i < requiredCharacters; i++) repeatedRegex += '[^\r\n\'\-]';
+  let regex = new RegExp('(' + repeatedRegex + '[^\r\n\'\-]*)$', 'gm');
 
   let match;
   while (match = regex.exec(dictionaryString)) {
-    solutions.push(match[1]);
+    solves.push(match[1]);
   }
 
   while (true) {
-    let randIndex = Math.floor(Math.random() * solutions.length);
-    let actualPromptWord = solutions[randIndex];
+    let randIndex = Math.floor(Math.random() * solves.length);
+    let actualPromptWord = solves[randIndex];
     let promptWord = actualPromptWord;
     let promptSubStart = randInt(0, promptWord.length - promptLength);
 
     let blanks = Math.min(promptLength - 2, 2);
     for (i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
-      promptWord = promptWord.substring(0, rand) + '.' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
+      promptWord = promptWord.substring(0, rand) + '`' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
 
+    let prompt = new RegExp("^.*(" + escapeRegExp(promptWord.slice(promptSubStart, promptSubStart + promptLength)).replace(/`/g, '.') + ").*$", "m");
+    console.log(prompt);
+
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
-    let solutions = solve(promptWord.substring(promptSubStart, promptSubStart + promptLength));
+    let solutions = solvePrompt(prompt);
     if (lengthRequired) {
       solutions = solutions.filter((word) => {
         return word.length == promptWord.length;
@@ -180,7 +188,33 @@ function generatePrompt() {
       promptWord: actualPromptWord,
       solutions: solutions.length,
       lengthRequired: lengthRequired,
-      prompt: new RegExp("^.*(" + escapeRegExp(promptWord.slice(promptSubStart, promptSubStart + promptLength)) + ").*$", "m")
+      prompt
+    }
+  }
+}
+
+const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
+
+// TODO: i'm going to lose my mind within the next 5 minutes
+function getPromptRepeatableText(regex) {
+  // get the string of the regex
+  let regexString = regex.source;
+  // remove the anchors from the start and end of the regex
+  regexString = regexString.slice(1, regexString.length - 1);
+
+  // remove the first opening parenthesis from a string
+  regexString = regexString.replace(/\(/, "");
+  let lastParenthesisIndex = regexString.lastIndexOf(")");
+  // remove the last closing parenthesis from a string
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+
+  let startsWithWildcard = regexString.startsWith(".*");
+  let endsWithWildcard = regexString.endsWith(".*");
+  
+  if (startsWithWildcard && endsWithWildcard) {
+    let displayString = regexString.slice(2, regexString.length - 2);
+    if (!invalidPromptDisplayRegex.test(displayString)) {
+      return displayString;
     }
   }
 }
@@ -192,5 +226,7 @@ module.exports = {
   solvePrompt,
   solvePromptWithTimeout,
   generatePrompt,
+  escapeRegExp,
+  getPromptRepeatableText,
   solverCache
 }
