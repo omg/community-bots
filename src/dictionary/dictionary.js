@@ -10,6 +10,7 @@ try {
   console.log("Couldn't read the English dictionary!");
 }
 
+// TODO: change the name of this since it's misleading
 function cleanWord(word) {
   return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim(); // TODO: trimming might ruin some searches
 }
@@ -59,6 +60,9 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     } catch (e) {
       throw new PromptException("The regex you've entered is invalid.");
     }
+
+    // let's see what /\r/ returns
+    console.log(regex);
 
     return regex;
   } else {

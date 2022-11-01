@@ -26,6 +26,7 @@ async function execute(interaction, preferBroadcast) {
   let prompt = Dictionary.cleanWord(interaction.options.get("prompt").value);
 
   try {
+    // cleanWord is called twice here on prompt
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
     let solutions = await Dictionary.solvePromptWithTimeout(regex, 180, interaction.user.id);
