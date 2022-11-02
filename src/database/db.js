@@ -48,6 +48,13 @@ async function getUserSolveCount(user) {
   return userStats[0].solves;
 }
 
+async function getUserExactSolves(user) {
+  let allTimeLeaderboardID = await getAllTimeLeaderboardID();
+  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID: allTimeLeaderboardID }).limit(1).toArray();
+  if (userStats.length === 0) return 0;
+  return userStats[0].exactSolves;
+}
+
 // get amount of times a user has solved a prompt
 async function getUserSolveCountForPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
@@ -58,38 +65,39 @@ async function getUserSolveCountForPrompt(user, prompt, promptLength) {
 // get a user's first solution to a specific prompt by completion timestamp
 async function getFirstSolutionToPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
-  let solution = await client.db(dbName).collection('rounds').find({ gameID, winner: user, prompt: prompt.source, promptLength }).sort({ completedAt: 1 }).limit(1).toArray();
-  return solution[0];
+  let solutionRound = await client.db(dbName).collection('rounds').find({ gameID, winner: user, prompt: prompt.source, promptLength }).sort({ completedAt: 1 }).limit(1).toArray();
+  if (solutionRound.length === 0) return null;
+  return solutionRound[0].solution;
 }
 
 // update database after a round is completed
-async function finishRound(solvers, startedAt, prompt, promptWord, promptLength, solutionCount) {
+async function finishRound(solves, startedAt, prompt, promptWord, promptLength, solutionCount) {
   let gameID = await getDefaultGameID();
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
 
-  let winner = solvers[0].user;
+  let winner = solves[0].user;
 
   // push round to rounds collection
   await client.db(dbName).collection('rounds').insertOne({
     gameID,
     winner,
-    solvers,
+    solvers: solves,
     startedAt,
     completedAt: Date.now(),
     prompt: prompt.source,
     promptWord,
     promptLength,
     solutionCount,
-    solution: solvers[0].solution,
-    usedVivi: solvers[0].usedVivi,
-    exact: promptWord === solvers[0].solution
+    solution: solves[0].solution,
+    usedVivi: solves[0].usedVivi,
+    exact: promptWord === solves[0].solution
   });
   
   // iterate through solvers
-  for (let solve of solvers) {
+  for (let solve of solves) {
     let { user, solution, usedVivi } = solve;
 
-    let isJinx = solvers.some(s => s.word === solution && s.user !== user);
+    let isJinx = solves.some(s => s.word === solution && s.user !== user);
     let isWinner = user === winner;
     let isExact = promptWord === solution;
 
@@ -117,6 +125,22 @@ async function getDefaultGameChannel() {
   if (defaultGameChannel) return defaultGameChannel;
   defaultGameChannel = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0].channel;
   return defaultGameChannel;
+}
+
+let defaultGameGuild;
+async function getDefaultGameGuild() {
+  if (defaultGameGuild) return defaultGameGuild;
+  defaultGameGuild = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0].guild;
+  return defaultGameGuild;
+}
+
+async function getReplyMessage() {
+  let replyMessage = (await client.db(dbName).collection('games').find({}).limit(1).toArray())[0].replyMessage;
+  return replyMessage;
+}
+
+async function setReplyMessage(message) {
+  await client.db(dbName).collection('games').updateOne({}, { $set: { replyMessage: message.id }});
 }
 
 let allTimeLeaderboardID;
@@ -165,12 +189,16 @@ async function getCurrentRoundInfo() {
 module.exports = {
   getSolutionCount,
   getUserSolveCount,
+  getUserExactSolves,
   getUserSolveCountForPrompt,
   getFirstSolutionToPrompt,
   finishRound,
   getDefaultGameID,
   getDefaultGameChannel,
+  getDefaultGameGuild,
   getAllTimeLeaderboardID,
   getUserRanking,
-  getCurrentRoundInfo
+  getCurrentRoundInfo,
+  getReplyMessage,
+  setReplyMessage
 }
