@@ -5,13 +5,44 @@ const path = require('path');
 // TODO: pull dictionaries from Vivi API
 try {
   var dictionaryString = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/dictionaries/english.txt'), 'utf8');
-  console.log("Retrieved the English dictionary from file.");
+  var related1String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/1-related.txt'), 'utf8');
+  var related100String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/100-related.txt'), 'utf8');
+  var related1000String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/1000-related.txt'), 'utf8');
+  var related10000String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/10000-related.txt'), 'utf8');
+  var relatedDoomString = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/doom-related.txt'), 'utf8');
 } catch (e) {
-  console.log("Couldn't read the English dictionary!");
+  throw "Couldn't retrieve word lists from files.";
 }
 
-// TODO: change the name of this since it's misleading
-function cleanWord(word) {
+// TODO holy copy-paste batman
+
+function is1Related(word) {
+  let cleanInput = standardizeWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related1String);
+}
+
+function is100Related(word) {
+  let cleanInput = standardizeWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related100String);
+}
+
+function is1000Related(word) {
+  let cleanInput = standardizeWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related1000String);
+}
+
+function is10000Related(word) {
+  let cleanInput = standardizeWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related10000String);
+}
+
+function isDoomRelated(word) {
+  let cleanInput = standardizeWord(escapeRegExp(word));
+  return new RegExp("^.*" + cleanInput + ".*$", "m").test(relatedDoomString);
+}
+
+// is standardize the best name for this?
+function standardizeWord(word) {
   return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim(); // TODO: trimming might ruin some searches
 }
 
@@ -23,7 +54,7 @@ function PromptException(message) {
 }
 
 function getPromptRegexFromPromptSearch(promptQuery) {
-  let cleanQuery = cleanWord(promptQuery);
+  let cleanQuery = standardizeWord(promptQuery);
   let regexResult = regexTest.exec(cleanQuery);
   
   // TODO find args in the query
@@ -31,7 +62,8 @@ function getPromptRegexFromPromptSearch(promptQuery) {
   if (regexResult) {
     // This has regex
 
-    if (cleanQuery.includes("`")) {
+    if (/[`\\]/.test(cleanQuery)) {
+      // i think removing the backslash sometime would be useful
       throw new PromptException("The regex you've entered is invalid.");
     }
 
@@ -72,6 +104,8 @@ function getPromptRegexFromPromptSearch(promptQuery) {
       throw new PromptException("The prompt you've entered is invalid.");
     }
 
+    console.log("NOT REGEX");
+
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
     return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ").*$", "m");
   }
@@ -82,7 +116,7 @@ function escapeRegExp(string) {
 }
 
 function isWord(word) {
-  let cleanInput = cleanWord(escapeRegExp(word));
+  let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^.*" + cleanInput + ".*$", "m").test(dictionaryString);
 }
 
@@ -91,6 +125,8 @@ function solvePrompt(promptRegex) {
   if (!promptRegex.flags.includes("g")) {
     promptRegex = new RegExp(promptRegex.source, promptRegex.flags + "g");
   }
+
+  console.log("Solving prompt with regex: " + promptRegex);
 
   let solutions = [];
 
@@ -224,7 +260,7 @@ function getPromptRepeatableText(regex) {
 }
 
 module.exports = {
-  cleanWord,
+  cleanWord: standardizeWord,
   getPromptRegexFromPromptSearch,
   isWord,
   solvePrompt,
@@ -232,5 +268,10 @@ module.exports = {
   generatePrompt,
   escapeRegExp,
   getPromptRepeatableText,
+  is1Related,
+  is100Related,
+  is1000Related,
+  is10000Related,
+  isDoomRelated,
   solverCache
 }
