@@ -26,6 +26,11 @@ async function waitForReady() {
   });
 }
 
+async function getGuild(guildID) {
+  await waitForReady();
+  return lameBotClient.guilds.cache.get(guildID);
+}
+
 async function getChannel(channelID) {
   await waitForReady();
   return lameBotClient.channels.cache.get(channelID);
@@ -52,6 +57,22 @@ async function sendMessage(channel, message) {
   }
 }
 
+async function sendMessageAsReply(replyMessage, message) {
+  await waitForReady();
+
+  let retryDelay = 500;
+  while (true) {
+    try {
+      return await replyMessage.reply(message);
+    } catch (error) {
+      console.error(error);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      
+      retryDelay = Math.min(retryDelay + 500, 5000);
+    }
+  }
+}
+
 //
 
 registerClientAsCommandHandler(lameBotClient, path.join(__dirname, '../commands'), process.env.LAME_CLIENT_ID, process.env.LAME_TOKEN);
@@ -61,6 +82,8 @@ registerClientAsCommandHandler(lameBotClient, path.join(__dirname, '../commands'
 module.exports = {
   lameBotClient,
   sendMessage,
+  sendMessageAsReply,
   getChannel,
+  getGuild,
   waitForReady
 }
