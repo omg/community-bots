@@ -54,6 +54,8 @@ function getSolveLetters(solution, promptRegex) {
   let capturingGroupString = regexString.slice(regexString.indexOf("(") + 1, regexString.lastIndexOf(")"));
   let capturingRegex = new RegExp(capturingGroupString);
 
+  // console.log("getting solve display from regex:", capturingRegex.source);
+
   let match = capturingRegex.exec(solution);
   if (!match) return getNormalLetters(solution);
 
@@ -131,10 +133,43 @@ function getPromptRegexText(regex) {
   return "/" + regexString + "/";
 }
 
+// TODO now we're just trolling
+function getPromptRegexInlineText(regex) {
+  // get the string of the regex
+  let regexString = regex.source;
+  // remove the anchors from the start and end of the regex
+  regexString = regexString.slice(1, regexString.length - 1);
+
+  // remove the first opening parenthesis from a string
+  regexString = regexString.replace(/\(/, "");
+  let lastParenthesisIndex = regexString.lastIndexOf(")");
+  // remove the last closing parenthesis from a string
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+
+  let startsWithWildcard = regexString.startsWith(".*");
+  let endsWithWildcard = regexString.endsWith(".*");
+  
+  if (startsWithWildcard && endsWithWildcard) {
+    let displayString = regexString.slice(2, regexString.length - 2);
+    displayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
+    if (!invalidPromptDisplayRegex.test(displayString)) {
+      return displayString;
+    }
+  }
+
+  if (startsWithWildcard) regexString = regexString.slice(2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (!startsWithWildcard) regexString = "^" + regexString;
+  if (!endsWithWildcard) regexString = regexString + "$";
+
+  return "`/" + regexString + "/`";
+}
+
 module.exports = {
   getRemarkEmoji,
   getSolveLetters,
   getStreakNumbers,
   getPromptRegexDisplayText,
-  getPromptRegexText
+  getPromptRegexText,
+  getPromptRegexInlineText
 }
