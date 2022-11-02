@@ -1,4 +1,4 @@
-const letterMap = {
+const emojiMap = {
   "A": "<:e:971179538350477412>",
   "B": "<:e:971191770958409778>",
   "C": "<:e:971191771008761897>",
@@ -42,4 +42,4 @@ const letterMap = {
   "unknown": "", // TODO - need graphic for unknown
 }
 
-export default letterMap;
+module.exports = emojiMap;
