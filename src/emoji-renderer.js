@@ -151,8 +151,8 @@ function getPromptRegexInlineText(regex) {
   
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
-    displayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
-    if (!invalidPromptDisplayRegex.test(displayString)) {
+    let testDisplayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
+    if (!invalidPromptDisplayRegex.test(testDisplayString)) {
       return displayString;
     }
   }
