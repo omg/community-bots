@@ -29,22 +29,22 @@ async function execute(interaction, preferBroadcast) {
   
   // check if the word only has valid characters
   if (invalidWordRegex.test(word)) {
-    replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
+    await replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
     return;
   }
 
   if (word.length > 34) {
-    replyToInteraction(interaction, "Word Status",
+    await replyToInteraction(interaction, "Word Status",
       '\n• **' + word.substring(0, 20) + '..'
       + '\n' + getRemarkEmoji("bad") + ' Too long** to be a valid English word.'
     , preferBroadcast);
   } else if (Dictionary.isWord(word)) {
-    replyToInteraction(interaction, "Word Status",
+    await replyToInteraction(interaction, "Word Status",
       '\n• **' + word
       + '\n' + getRemarkEmoji("good") + ' Available** on live servers.'
     , preferBroadcast);
   } else {
-    replyToInteraction(interaction, "Word Status",
+    await replyToInteraction(interaction, "Word Status",
       '\n• **' + word
       + '\n' + getRemarkEmoji("bad") + ' Not found** in the English dictionary.'
     , preferBroadcast);

@@ -30,38 +30,7 @@ let inProgress = false;
 let appearances = 0;
 let uniqueSolutions = 0;
 
-// for jinxes
-let solves = [
-  // {
-  //   user: "209023094092902490",
-  //   solution: "DANCER",
-  //   usedVivi: false
-  // }
-];
-
-// If the bot goes down at any point during a round - Lame will proceed with a new round
-
-// On a solve:
-// Calculate ranking movement remarks (rankRemarks)
-// Calculate solve remarks (solveRemarks)
-//   first solve - first solve being related to firstness - exact solve
-//   10,000th solve - related to 10,000thness
-//   1,000th solve - related to thousandness
-//   100th solve - related to hundredness
-//   69th and such solves
-//   666..6 and such solves - relatedness to devilish activities
-//   exact solves
-// Calculate prompt statistic remarks (promptStatRemarks)
-//   first time the solve has ever been used - once this happens less than 2 times in the past 150 solves
-//   promptiversary - using the same solve as your first time (only appears once) - probably add more to this remark
-// Add remarks for the player's streak (roundRemarks)
-// Add remark if player used the solver (roundRemarks)
-//   Wait for the end of the round for late solvers
-// Add remarks for late solvers (topRemarks)
-// Add remarks for jinxes (topRemarks)
-// Submit round to the database
-// Add statistics to all players
-// Update all-time leaderboard
+let solves = [];
 
 function isNumberVowelSound(x) {
   return x == 11 || x.toString().startsWith('8');
@@ -204,7 +173,7 @@ async function endRound() {
     for (let solve of solves) {
       let { user, solution } = solve;
 
-      let isJinx = solves.some(s => s.word === solution && s.user !== user);
+      let isJinx = solves.some(s => s.solution === solution && s.user !== user);
       if (isJinx) {
         jinxers.push(user);
         if (jinxWord) {
@@ -228,18 +197,6 @@ async function endRound() {
           return await getDisplayName(user);
         }));
         roundRemarks += getRemarkEmoji("jinx") + " **" + createEnglishList(jinxerNames) + "** just jinxed each other!\n";
-      }
-    }
-  }
-  
-  // rank remarks
-
-  if (rankingBefore) {
-    if (rankingAfter < rankingBefore) {
-      if (rankingAfter === 1) {
-        rankRemarks = getRemarkEmoji("firstPlace") + " **You have taken first place!** (All-Time)\n";
-      } else {
-        rankRemarks += getRemarkEmoji("rankingMovement") + " You went up **" + formatNumber(rankingBefore - rankingAfter) + "** place" + (rankingBefore - rankingAfter === 1 ? "" : "s") + ", you're now **" + formatPlacement(rankingAfter) + "**! (All-Time)\n";
       }
     }
   }
@@ -308,6 +265,18 @@ async function endRound() {
     // Solve is exact
     let exactSolves = await getUserExactSolves(winner);
     solveRemarks += getRemarkEmoji("exactSolve") + ` **Lucky!** That's your **${formatPlacementWithEnglishWords(exactSolves)}** exact solve!\n`;
+  }
+
+  // rank remarks
+
+  if (rankingBefore && solveNumber > 1) {
+    if (rankingAfter < rankingBefore) {
+      if (rankingAfter === 1) {
+        rankRemarks = getRemarkEmoji("firstPlace") + " **You have taken first place!** (All-Time)\n";
+      } else {
+        rankRemarks += getRemarkEmoji("rankingMovement") + " You went up **" + formatNumber(rankingBefore - rankingAfter) + "** place" + (rankingBefore - rankingAfter === 1 ? "" : "s") + ", you're now **" + formatPlacement(rankingAfter) + "**! (All-Time)\n";
+      }
+    }
   }
 
   // prompt stat remarks
@@ -411,6 +380,7 @@ lameBotClient.on('messageCreate', (message) => {
   if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
     let repeatablePrompt = getPromptRepeatableText(prompt);
     if (repeatablePrompt && (guess === repeatablePrompt || guess === repeatablePrompt + "S")) {
+      if (solves.length > 0) return;
       message.reply('<@' + message.author.id + '>, you cannot repeat the prompt!').catch((error) => {
         console.log(error);
       });
@@ -419,11 +389,13 @@ lameBotClient.on('messageCreate', (message) => {
 
     if (lengthRequired) {
       if (guess.length < promptWord.length) {
+        if (solves.length > 0) return;
         message.reply('<@' + message.author.id + '>, the word must be **' + promptWord.length + '** characters!\nYours was **' + guess.length + '**, go higher ' + getRemarkEmoji("higher")).catch((error) => {
           console.log(error);
         });
         return;
       } else if (guess.length > promptWord.length) {
+        if (solves.length > 0) return;
         message.reply('<@' + message.author.id + '>, the word must be **' + promptWord.length + '** characters!\nYours was **' + guess.length + '**, go lower ' + getRemarkEmoji("lower")).catch((error) => {
           console.log(error);
         });

@@ -75,7 +75,12 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
       await command.execute(interaction, preferBroadcast);
     } catch (error) {
       console.error(error);
-      replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
+      try {
+        // TODO this is getting janky
+        await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
+      } catch (error) {
+        console.error(error);
+      }
     }
   });
 
@@ -86,8 +91,8 @@ function isBroadcastChannel(channel) {
   return channel.name == "lame-bots";
 }
 
-function replyToInteraction(interaction, header, response, broadcast) {
-  interaction.reply({
+async function replyToInteraction(interaction, header, response, broadcast) {
+  await interaction.reply({
     content: "**" + header + " *｡✲ﾟ ——**"
     + (broadcast ? '\n\n<@' + interaction.user.id + '>' : '')
     + '\n' + response,

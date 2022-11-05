@@ -18,27 +18,27 @@ try {
 
 function is1Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related1String);
+  return new RegExp("^" + cleanInput + "$", "m").test(related1String);
 }
 
 function is100Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related100String);
+  return new RegExp("^" + cleanInput + "$", "m").test(related100String);
 }
 
 function is1000Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related1000String);
+  return new RegExp("^" + cleanInput + "$", "m").test(related1000String);
 }
 
 function is10000Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(related10000String);
+  return new RegExp("^" + cleanInput + "$", "m").test(related10000String);
 }
 
 function isDoomRelated(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(relatedDoomString);
+  return new RegExp("^" + cleanInput + "$", "m").test(relatedDoomString);
 }
 
 // is standardize the best name for this?
@@ -117,7 +117,7 @@ function escapeRegExp(string) {
 
 function isWord(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^.*" + cleanInput + ".*$", "m").test(dictionaryString);
+  return new RegExp("^" + cleanInput + "$", "m").test(dictionaryString);
 }
 
 function solvePrompt(promptRegex) {

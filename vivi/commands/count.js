@@ -32,9 +32,9 @@ async function execute(interaction, preferBroadcast) {
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
-      replyToInteraction(interaction, "Solve Count", "\n• That prompt is impossible.", preferBroadcast);
+      await replyToInteraction(interaction, "Solve Count", "\n• That prompt is impossible.", preferBroadcast);
     } else {
-      replyToInteraction(interaction, "Solve Count",
+      await replyToInteraction(interaction, "Solve Count",
         '\n• There '
         + (solutions.length === 1 ? 'is **1** solution' : 'are **' + formatNumber(solutions.length) + '** solutions')
         + ' for ' + getPromptRegexDisplayText(regex) + '.'
@@ -42,7 +42,7 @@ async function execute(interaction, preferBroadcast) {
     }
   } catch (error) {
     if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
-      replyToInteraction(interaction, "Solve Count", "\n• " + error.message, preferBroadcast);
+      await replyToInteraction(interaction, "Solve Count", "\n• " + error.message, preferBroadcast);
     } else {
       throw error;
     }
