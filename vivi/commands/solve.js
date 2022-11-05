@@ -33,7 +33,7 @@ async function execute(interaction, preferBroadcast) {
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
-      replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
+      await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
     } else {
       let solverString = 'I found '
         + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
@@ -58,11 +58,11 @@ async function execute(interaction, preferBroadcast) {
       solutionStrings.sort((a, b) => b.length - a.length || a.localeCompare(b));
       for (let solutionString of solutionStrings) solverString += solutionString;
 
-      replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
+      await replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
     }
   } catch (error) {
     if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
-      replyToInteraction(interaction, "Solver", "\n• " + error.message, preferBroadcast);
+      await replyToInteraction(interaction, "Solver", "\n• " + error.message, preferBroadcast);
     } else {
       throw error;
     }
