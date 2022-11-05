@@ -97,7 +97,7 @@ async function finishRound(solves, startedAt, prompt, promptWord, promptLength, 
   for (let solve of solves) {
     let { user, solution, usedVivi } = solve;
 
-    let isJinx = solves.some(s => s.word === solution && s.user !== user);
+    let isJinx = solves.some(s => s.solution === solution && s.user !== user);
     let isWinner = user === winner;
     let isExact = promptWord === solution;
 
@@ -177,10 +177,12 @@ async function getCurrentRoundInfo() {
   let lastRoundWinnerHasntWon = (await client.db(dbName).collection('rounds').find({ gameID, winner: { $ne: lastWinner } }).limit(1).toArray());
   let streak;
   if (lastRoundWinnerHasntWon.length == 0) {
+    console.log("Winner has never lost");
     streak = await client.db(dbName).collection('rounds').countDocuments({ gameID });
   } else {
     let lastTimeWinnerHasntWon = lastRoundWinnerHasntWon[0].completedAt;
-    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $gt: lastTimeWinnerHasntWon } });
+    console.log("Winner has last lost at " + lastTimeWinnerHasntWon);
+    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $lt: lastTimeWinnerHasntWon } }) - 1; // for some reason you subtract one
   }
 
   return { lastWinner, streak };
