@@ -285,17 +285,19 @@ async function endRound() {
 
   let solutionCount = await getSolutionCount(winnerSolution);
   let promptiversary = await getUserSolveCountForPrompt(winner, prompt, lengthRequired ? promptWord.length : null);
+  
   if (solutionCount === 1) {
     // First time this solution has ever been used
     uniqueSolutions++;
     // Uncomment this when there are enough unique solutions
     // promptStatRemarks += getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!\n";
   }
-  if (promptiversary > 1) {
-    // The winner has solved this prompt before!
+  
+  if (promptiversary === 5 || promptiversary === 10 || promptiversary % 25 === 0) {
+    // It's an important promptiversary for the winner!
     promptStatRemarks += getRemarkEmoji("promptiversary") + ` It's your **${formatPlacementWithEnglishWords(promptiversary)} promptiversary** with "${getCurrentPromptNameForMessage()}"!\n`;
 
-    if (promptiversary === 2) {
+    if (promptiversary === 5) {
       let firstSolutionToPrompt = await getFirstSolutionToPrompt(winner, prompt, lengthRequired ? promptWord.length : null);
       if (firstSolutionToPrompt === winnerSolution) {
         // The winner has solved this prompt with this solution before
