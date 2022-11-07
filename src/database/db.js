@@ -176,15 +176,14 @@ async function getCurrentRoundInfo() {
 
   let lastWinner = lastWinnerArray[0].winner;
 
-  let lastRoundWinnerHasntWon = (await client.db(dbName).collection('rounds').find({ gameID, winner: { $ne: lastWinner } }).limit(1).toArray());
+  let lastRoundWinnerHasntWon = await client.db(dbName).collection('rounds').find({ gameID, winner: { $ne: lastWinner } }).sort({ completedAt: -1 }).limit(1).toArray();
   let streak;
   if (lastRoundWinnerHasntWon.length == 0) {
-    console.log("Winner has never lost");
     streak = await client.db(dbName).collection('rounds').countDocuments({ gameID });
   } else {
     let lastTimeWinnerHasntWon = lastRoundWinnerHasntWon[0].completedAt;
     console.log("Winner has last lost at " + lastTimeWinnerHasntWon);
-    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $lt: lastTimeWinnerHasntWon } }) - 1; // for some reason you subtract one
+    streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $gte: lastTimeWinnerHasntWon } });
   }
 
   return { lastWinner, streak };
