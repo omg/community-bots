@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { registerClientAsCommandHandler } = require('../../src/command-handler');
 const path = require('node:path');
 
@@ -13,15 +13,11 @@ function updatePresence() {
   viviClient.user.setPresence({
     activities: [{
       name: '286.6K words',
-      type: 'WATCHING'
+      type: ActivityType.Watching
     }],
     status: 'online'
-  }).then(() => {
-    setTimeout(updatePresence, 86400000);
-  }).catch((error) => {
-    console.error(error);
-    setTimeout(updatePresence, 30000);
   });
+  setTimeout(updatePresence, 86400000);
 }
 
 viviClient.on('ready', () => {
