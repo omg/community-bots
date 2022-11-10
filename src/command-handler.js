@@ -1,4 +1,5 @@
 const { Collection, Events } = require("discord.js");
+const discordModals = require('discord-modals');
 const { Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const fs = require('node:fs');
@@ -84,6 +85,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     }
   });
 
+  discordModals(client);
   client.login(token);
 }
 
