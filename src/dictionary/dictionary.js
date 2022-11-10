@@ -46,6 +46,10 @@ function standardizeWord(word) {
   return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim(); // TODO: trimming might ruin some searches
 }
 
+function standardizeRegexInput(regexInput) {
+  return regexInput.replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...');
+}
+
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 
 function PromptException(message) {
@@ -54,18 +58,21 @@ function PromptException(message) {
 }
 
 function getPromptRegexFromPromptSearch(promptQuery) {
-  let cleanQuery = standardizeWord(promptQuery);
-  let regexResult = regexTest.exec(cleanQuery);
+  let regexResult = regexTest.exec(promptQuery);
   
   // TODO find args in the query
   
   if (regexResult) {
     // This has regex
+    let cleanQuery = standardizeRegexInput(promptQuery);
 
-    if (/[`\\]/.test(cleanQuery)) {
+    if (/[`]/.test(cleanQuery)) {
       // i think removing the backslash sometime would be useful
       throw new PromptException("The regex you've entered is invalid.");
     }
+
+    let notOK = /\\[nrt0v]/;
+    let OK = /\\[sSdDwWvg0-9pPk]/;
 
     let regexInput = regexResult[1];
 
@@ -99,6 +106,7 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     return regex;
   } else {
     // This isn't regex
+    let cleanQuery = standardizeWord(promptQuery);
 
     if (cleanQuery.includes("`")) {
       throw new PromptException("The prompt you've entered is invalid.");

@@ -23,7 +23,7 @@ const data = new SlashCommandBuilder()
 
 // create function to handle the command
 async function execute(interaction, preferBroadcast) {
-  let prompt = Dictionary.cleanWord(interaction.options.get("prompt").value);
+  let prompt = interaction.options.get("prompt").value; // not clean
 
   try {
     // cleanWord is called twice here on prompt
