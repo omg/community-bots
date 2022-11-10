@@ -16,8 +16,12 @@ function updatePresence() {
       type: 'WATCHING'
     }],
     status: 'online'
+  }).then(() => {
+    setTimeout(updatePresence, 86400000);
+  }).catch((error) => {
+    console.error(error);
+    setTimeout(updatePresence, 30000);
   });
-  setTimeout(updatePresence, 86400000);
 }
 
 viviClient.on('ready', () => {
