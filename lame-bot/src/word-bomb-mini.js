@@ -57,7 +57,7 @@ async function startRound() {
 
   solves = [];
   solverCache.clear();
-  startedAt = Date.now();
+  startedAt = new Date();
 
   // make prompt
   ({ prompt, promptWord, solutions, lengthRequired } = generatePrompt());
