@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder, ModalBuilder } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
+const { Modal, SelectMenuComponent } = require('discord-modals');
 
 const data = new SlashCommandBuilder()
   .setName('badge')
@@ -18,32 +19,28 @@ const data = new SlashCommandBuilder()
 
 // create function to handle the command
 async function execute(interaction) {
-  const modal = new ModalBuilder()
-		.setCustomId('badge-selector')
-		.setTitle('Badge Selector');
-  
-  const badgeSelector = new SelectMenuBuilder()
-    .setCustomId('badge')
-    .setPlaceholder('Select a badge')
-    .addOptions([
-      {
-        label: 'None',
-        value: 'none',
-        description: 'No badge',
-        emoji: '🚫'
-      },
-      {
-        label: 'OMG Community',
-        value: 'omg-community',
-        description: 'OMG Community badge',
-        emoji: '👑'
-      },
-    ]);
-
-  const row = new ActionRowBuilder(badgeSelector);
-  modal.addComponents(row);
-
-  await interaction.showModal(modal);
+  const modal = new Modal()
+	  .setCustomId('badge-selector')
+	  .setTitle('Modal')
+	  .addComponents(
+	  	new SelectMenuComponent()
+	  		.setCustomId('badge')
+	  		.setPlaceholder('Which badge would you like to wear?')
+	  		.addOptions(
+	  			{
+	  				label: 'None',
+	  				// description: 'Don't wear a badge.',
+	  				value: 'none',
+	  				// emoji: '',
+	  			},
+	  			{
+	  				label: 'Star',
+	  				// description: 'Earned from supporting OMG on Patreon.',
+	  				value: 'star',
+	  				emoji: '',
+	  			},
+	  		),
+	  );
 };
 
 // export the command
