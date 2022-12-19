@@ -29,7 +29,7 @@ async function execute(interaction, preferBroadcast) {
     // cleanWord is called twice here on prompt
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await Dictionary.solvePromptWithTimeout(regex, 555, interaction.user.id);
+    let solutions = await Dictionary.solvePromptWithTimeout(regex, 800, interaction.user.id);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
