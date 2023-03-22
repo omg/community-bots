@@ -1,0 +1,5 @@
+{
+  "requireAllModules": true,
+  "stopIfModuleHasNoBot": true,
+  "fallbackBot": ""
+}

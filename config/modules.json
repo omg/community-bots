@@ -1,0 +1,9 @@
+{
+  "lame": ["games"],
+  "mae": ["music"],
+  "vivi": ["vivi"],
+  "sleuth": ["moderation"],
+  "memo": ["moderation"],
+  "luna": ["emotes"],
+  "singleton": ["games", "emotes", "moderation", "vivi"]
+}
