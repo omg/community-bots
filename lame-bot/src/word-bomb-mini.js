@@ -44,6 +44,23 @@ function getCurrentPromptNameForMessage() {
   return getPromptRegexInlineText(prompt) + (lengthRequired ? ' - ' + promptWord.length : '');
 }
 
+function getDefaultGameInfo() {
+  return {
+    name: 'Word Bomb Mini',
+    prompt,
+    solutions,
+    lengthRequired,
+    inProgress
+  }
+}
+
+function getGameInfo(channel, useFallback) {
+  if (channel === wordBombMiniChannel) {
+    return getDefaultGameInfo();
+  }
+  return useFallback ? getDefaultGameInfo() : null;
+}
+
 async function startRound() {
   if (inProgress) return;
   inProgress = true;
