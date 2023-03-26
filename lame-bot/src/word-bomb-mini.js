@@ -320,7 +320,18 @@ async function endRound() {
     streak++;
     if (streak >= 3) {
       // Winner is on a solve streak
-      let solveStreakEmoji = winner === "711739947606081676" ? "solveStreakDubious" : "solveStreak";
+      let solveStreakEmoji;
+      switch (winner) {
+        case "320593811531235328":
+          solveStreakEmoji = "solveStreakChristine";
+          break;
+        case "711739947606081676":
+          solveStreakEmoji = "solveStreakDubious";
+          break;
+        default:
+          solveStreakEmoji = "solveStreak";
+          break;
+      }
       roundRemarks += `**${getRemarkEmoji(solveStreakEmoji)} You're on ${isNumberVowelSound(streak) ? "an" : "a"} ${getStreakNumbers(streak)} solve streak! ${getRemarkEmoji(solveStreakEmoji)}**\n`;
     }
   } else {

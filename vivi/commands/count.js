@@ -28,7 +28,7 @@ async function execute(interaction, preferBroadcast) {
   try {
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await Dictionary.solvePromptWithTimeout(regex, 555);
+    let solutions = await Dictionary.solvePromptWithTimeout(regex, 800);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
