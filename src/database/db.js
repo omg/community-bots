@@ -1,15 +1,63 @@
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
 // Connection URL
 const url = process.env.MONGO_URL;
-const client = new MongoClient(url, {
+const client = await mongoose.connect(url, {
   sslValidate: false
 });
 
-// let db;
-
 // Database Name
 const dbName = 'lame';
+
+const Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
+
+/*
+    gameID,
+    winner,
+    solvers: solves,
+    startedAt,
+    completedAt: Date.now(),
+    prompt: prompt.source,
+    promptWord,
+    promptLength,
+    solutionCount,
+    solution: solves[0].solution,
+    usedVivi: solves[0].usedVivi,
+    exact: promptWord === solves[0].solution
+*/
+
+const Round = new Schema({
+  gameID: { type: ObjectId, required: true },
+  winner: { type: String, required: true },
+  solvers: [{
+    user: String,
+    solution: String,
+    usedVivi: Boolean
+  }],
+  startedAt: { type: Date, required: true },
+  completedAt: { type: Date, default: Date.now },
+  prompt: String,
+  promptWord: String,
+  solutionCount: Number,
+  solution: String,
+  usedVivi: Boolean,
+  exact: Boolean
+});
+
+const Leaderboard = new Schema({
+  name: { type: String, required: true },
+  guild: String,
+  channel: String,
+  active: { type: Boolean, default: true },
+  auto: { type: Boolean, required: true },
+  startedAt: { type: Date, default: Date.now },
+  closedAt: Date
+});
+
+const Score = new Schema({
+
+});
 
 // Round collection document:
 // gameID
@@ -36,23 +84,24 @@ const dbName = 'lame';
 // Vivi uses
 // Jinxes
 
-async function getSolutionCount(solution) {
+async function getSolutionCount(solution, options = {}) {
   // get number of times solution appears in the rounds collection
-  let gameID = await getDefaultGameID();
-  let count = await client.db(dbName).collection('rounds').countDocuments({ gameID, solution });
+  // let gameID = await getDefaultGameID();
+  let count = await client.db(dbName).collection('rounds').countDocuments({ ...options, solution });
   return count;
 }
 
+// this would be better in mongoose using default values
 async function getUserSolveCount(user) {
-  let allTimeLeaderboardID = await getAllTimeLeaderboardID();
-  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID: allTimeLeaderboardID }).limit(1).toArray();
+  let leaderboardID = await getAllTimeLeaderboardID();
+  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID }).limit(1).toArray();
   if (userStats.length === 0) return 0;
   return userStats[0].solves;
 }
 
 async function getUserExactSolves(user) {
-  let allTimeLeaderboardID = await getAllTimeLeaderboardID();
-  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID: allTimeLeaderboardID }).limit(1).toArray();
+  let leaderboardID = await getAllTimeLeaderboardID();
+  let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID }).limit(1).toArray();
   if (userStats.length === 0) return 0;
   return userStats[0].exactSolves;
 }
@@ -148,7 +197,7 @@ async function setReplyMessage(message) {
 let allTimeLeaderboardID;
 async function getAllTimeLeaderboardID() {
   if (allTimeLeaderboardID) return allTimeLeaderboardID;
-  allTimeLeaderboardID = (await client.db(dbName).collection('leaderboards').find({}).limit(1).toArray())[0]._id;
+  allTimeLeaderboardID = (await client.db(dbName).collection('leaderboards').find({ global: true }).limit(1).toArray())[0]._id;
   return allTimeLeaderboardID;
 }
 
