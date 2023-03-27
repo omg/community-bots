@@ -27,7 +27,7 @@ const ObjectId = Schema.ObjectId;
     exact: promptWord === solves[0].solution
 */
 
-const Round = new Schema({
+const RoundSchema = new Schema({
   gameID: { type: ObjectId, required: true },
   winner: { type: String, required: true },
   solvers: [{
@@ -45,7 +45,7 @@ const Round = new Schema({
   exact: Boolean
 });
 
-const Leaderboard = new Schema({
+const LeaderboardSchema = new Schema({
   name: { type: String, required: true },
   guild: String,
   channel: String,
@@ -55,8 +55,30 @@ const Leaderboard = new Schema({
   closedAt: Date
 });
 
-const Score = new Schema({
+// i want some leaderboards to be auto - but if some blitz games go to the All-Time leaderboard, that would be terrible
+// all-time should be locked to normal games only at normal speeds
 
+const ScoreSchema = new Schema({
+  leaderboardID: { type: ObjectId, required: true },
+  user: { type: String, required: true },
+  score: { type: Number, default: 0 },
+  wins: { type: Number, default: 0 },
+  solves: { type: Number, default: 0 },
+  lateSolves: { type: Number, default: 0 },
+  exactSolves: { type: Number, default: 0 },
+  viviUses: { type: Number, default: 0 },
+  jinxes: { type: Number, default: 0 }
+});
+
+// with this type in GameSchema, maybe we can do games that extend past word bomb mini and into some other fun types of games
+
+const GameSchema = new Schema({
+  type: { type: String, required: true },
+  guild: String,
+  channel: String,
+  replyMessage: String,
+  startedAt: { type: Date, default: Date.now },
+  closedAt: Date,
 });
 
 // Round collection document:
