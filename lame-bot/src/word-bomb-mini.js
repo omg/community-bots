@@ -460,7 +460,7 @@ async function endRound() {
   }
 
   await Promise.all([
-    completeRoundData().then(([rankingBefore, rankingAfter, solveCount, exactSolves]) => {
+    completeRoundData().then(({ rankingBefore, rankingAfter, solveCount, exactSolves }) => {
       rankRemarks(rankingBefore, rankingAfter, solveCount);
       solveRemarks(solveCount, exactSolves);
     }),

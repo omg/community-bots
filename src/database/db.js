@@ -112,11 +112,13 @@ async function finishRound(solves, startedAt, prompt, promptWord, promptLength, 
           lateSolves: !isWinner ? 1 : 0,
           viviUses: usedVivi ? 1 : 0,
           jinxes: isJinx ? 1 : 0
-        },
+        } },
         upsert: true
       }
     }
-  }});
+  });
+
+  console.log(operations);
   
   const promises = [
     client.db(dbName).collection('rounds').insertOne(round),
