@@ -16,7 +16,7 @@ async function execute(interaction, preferBroadcast) {
   let max = interaction.options.get("max").value || 10;
 
   await interaction.reply({
-    content: "https://i.imgur.com/R1Sp5gS.gif"
+    content: "https://omg.games/assets/rolling.gif"
   });
 
   setTimeout(async () => {
