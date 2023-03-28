@@ -72,7 +72,7 @@ const ScoreSchema = new Schema({
 
 // with this type in GameSchema, maybe we can do games that extend past word bomb mini and into some other fun types of games
 
-const GameSchema = new Schema({
+export const GameSchema = new Schema({
   type: { type: String, required: true },
   guild: String,
   channel: String,
