@@ -30,5 +30,6 @@ async function execute(interaction, preferBroadcast) {
 // export the command
 module.exports = {
   data,
-  execute
+  execute,
+  cooldown: 8 * 1000
 };

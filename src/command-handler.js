@@ -3,8 +3,9 @@ const { Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const fs = require('node:fs');
 
-const COOLDOWN_TIME = 2000;
+const COOLDOWN_TIME = 3000;
 const commandCooldown = new Set();
+const perCommandCooldown = new Set();
 
 function commandToBroadcastOption(command) {
   return { type: 1, ...command };
@@ -53,13 +54,11 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
     
-    if (commandCooldown.has(interaction.user.id)) {
+    if (commandCooldown.has(interaction.user.id) || perCommandCooldown.has(interaction.user.id + interaction.commandName)) {
       // TODO Could personalize this message depending on the bot's personality
       replyToInteraction(interaction, "Cooldown", "\n• Hold on! You're sending commands too quickly!", false);
       return;
     }
-    commandCooldown.add(interaction.user.id);
-    setTimeout(() => commandCooldown.delete(interaction.user.id), COOLDOWN_TIME);
     
     let commandName = interaction.commandName;
     let preferBroadcast = isBroadcastChannel(interaction.channel);
@@ -70,6 +69,14 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     
     const command = commands.get(commandName);
     if (!command) return;
+    
+    commandCooldown.add(interaction.user.id);
+    setTimeout(() => commandCooldown.delete(interaction.user.id), COOLDOWN_TIME);
+
+    if (command.cooldown) {
+      perCommandCooldown.add(interaction.user.id + interaction.commandName);
+      setTimeout(() => perCommandCooldown.delete(interaction.user.id + interaction.commandName), command.cooldown);
+    }
     
     try {
       await command.execute(interaction, preferBroadcast);
