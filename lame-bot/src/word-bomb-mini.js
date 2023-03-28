@@ -75,7 +75,7 @@ function addRemark({ index, remark = "" }) {
 
 function getRemarkText() {
   let remarkText = "";
-  for (let i = 0; i < remarks.length; i++) {
+  for (let i = remarks.length; i >= 0; i--) {
     if (remarks[i]) {
       remarkText += remarks[i];
     }
@@ -338,7 +338,7 @@ async function endRound() {
 
     if (!rankingBefore) return;
     if (solveNumber <= 1) return;
-    if (rankingAfter > rankingBefore) return;
+    if (rankingAfter >= rankingBefore) return;
     
     if (rankingAfter === 1) {
       addRemark({
@@ -348,7 +348,7 @@ async function endRound() {
     } else {
       addRemark({
         index: REMARK.rankShift,
-        remark: getRemarkEmoji("rankingMovement") + ` You went up **${formatNumber(rankingBefore - rankingAfter)}** ${engLen(rankingBefore - rankingAfter, "place", "places")}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`
+        remark: getRemarkEmoji("rankingMovement") + ` You went up **${formatNumber(rankingBefore - rankingAfter)}** ${engNum(rankingBefore - rankingAfter, "place", "places")}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`
       });
     }
   }
@@ -478,7 +478,7 @@ async function endRound() {
     + getRemarkText()
   );
 
-  setTimeout(startRound, 8000);
+  setTimeout(startRound, 7000);
 }
 
 // listen for messages from discord
