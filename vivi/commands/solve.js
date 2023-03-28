@@ -35,7 +35,7 @@ async function execute(interaction, preferBroadcast) {
     if (solveCount === 0) {
       await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
     } else {
-      let solverString = 'I found '
+      let solverString = '\nI found '
         + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
         + '\n';
 
