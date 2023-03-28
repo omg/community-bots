@@ -1,3 +1,4 @@
+const { randomInt } = require("crypto");
 const { SlashCommandBuilder } = require("discord.js");
 const { replyToInteraction } = require("../../src/command-handler");
 const { escapeDiscordMarkdown, formatNumber } = require("../../src/utils");
@@ -19,6 +20,11 @@ async function execute(interaction, preferBroadcast) {
 
   let characterCount = query.length;
   let whitespaceCount = query.match(/\s/g)?.length ?? 0;
+
+  if (characterCount === 1 || characterCount === 0) {
+    characterCount = randomInt(1001, 99999);
+    whitespaceCount = randomInt(0, characterCount);
+  }
 
   await replyToInteraction(interaction, "Character Count",
     '\n> ' + (query.length > 300 ? escapeDiscordMarkdown(query.slice(0, 298) + '..') : escapeDiscordMarkdown(query))
