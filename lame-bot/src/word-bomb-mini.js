@@ -16,12 +16,33 @@ let promptWord;
 let solutions;
 let lengthRequired;
 
-let topRemarks;
-let funRemarks;
-let rankRemarks;
-let solveRemarks;
-let promptStatRemarks;
-let roundRemarks;
+const REMARK = {
+  // top remarks
+  "jinx": 97,
+  "tooLate": 94,
+
+  // separator
+  "topSeparator": 89,
+
+  // rank remarks
+  "rankShift": 79,
+
+  // solve remarks
+  "solveNumber": 59,
+  "exactSolve": 57,
+
+  // prompt stat remarks
+  "uniqueSolve": 39,
+  "promptiversary": 38,
+  "sameSolvePromptiversary": 37,
+
+  // round remarks
+  "solveStreak": 18,
+  "usedSolver": 17,
+  "promptOrigin": 16,
+};
+
+let remarks;
 
 let replyMessage;
 
@@ -44,16 +65,29 @@ function getCurrentPromptNameForMessage() {
   return getPromptRegexInlineText(prompt) + (lengthRequired ? ' - ' + promptWord.length : '');
 }
 
+function addRemark({ index, remark = "" }) {
+  if (remarks[index]) {
+    remarks[index] += remark + "\n";
+  } else {
+    remarks[index] = remark + "\n";
+  }
+}
+
+function getRemarkText() {
+  let remarkText = "";
+  for (let i = 0; i < remarks.length; i++) {
+    if (remarks[i]) {
+      remarkText += remarks[i];
+    }
+  }
+  return remarkText.replace(/\n{3,}/g, '\n\n');
+}
+
 async function startRound() {
   if (inProgress) return;
   inProgress = true;
 
-  topRemarks = "";
-  funRemarks = "";
-  rankRemarks = "";
-  solveRemarks = "";
-  promptStatRemarks = "";
-  roundRemarks = "";
+  remarks = [];
 
   solves = [];
   solverCache.clear();
@@ -117,7 +151,7 @@ async function getDisplayName(userID) {
   });
 }
 
-const numberWords = {
+const NUMBER_WORDS = {
   1: "first",
   2: "second",
   3: "third",
@@ -130,245 +164,318 @@ const numberWords = {
   10: "tenth",
 }
 
+const JINX_APPENDS = [
+  "just jinxed each other!",
+  "also jinxed each other!",
+  "jinxed each other too!",
+  "jinxed each other as well!",
+  "jinxed each other!"
+]
+
 // TODO: terrible name
 function formatPlacementWithEnglishWords(x) {
-  return numberWords[x] || formatPlacement(x);
+  return NUMBER_WORDS[x] || formatPlacement(x);
+}
+
+// TODO: terrible names?
+function engNum(x, singular, plural) {
+  return x === 1 ? singular : plural;
+}
+function engLen(x, singular, plural) {
+  return engNum(x.length, singular, plural);
 }
 
 async function endRound() {
   if (!inProgress) return;
-  inProgress = false;
 
+  // Stop the round
+  inProgress = false;
   lameBotClient.user.setPresence({ status: 'idle', activities: [] });
 
-  let winnerObject = solves[0];
-  let winner = winnerObject.user;
-  let winnerSolution = winnerObject.solution;
-  let winnerUsedVivi = winnerObject.usedVivi;
+  // Create helpful variables
+  let winnerUser = solves[0].user;
+  let winnerSolution = solves[0].solution;
+  let winnerUsedVivi = solves[0].usedVivi;
 
-  let rankingBefore = await getUserRanking(winner);
-  await finishRound(solves, startedAt, prompt, promptWord, lengthRequired ? promptWord.length : null, solutions);
-  let rankingAfter = await getUserRanking(winner);
+  let lateSolves = solves.slice(1);
 
-  let isSolveExact = winnerSolution === promptWord;
-  let hasRemarkedExactness = false;
+  async function completeRoundData() {
+    let rankingBefore = await getUserRanking(winnerUser);
+    await finishRound(solves, startedAt, prompt, promptWord, lengthRequired ? promptWord.length : null, solutions);
+    
+    // a bit of an odd place to put uniqueSolutionRemarks, but it seems like the most optimal...
+    let promises = [promptiversaryRemarks(), uniqueSolutionRemarks(), getUserSolveCount(winnerUser), getUserExactSolves(winnerUser)]
+    if (rankingBefore) promises.push(getUserRanking(winnerUser));
+    let [_a, _b, solveCount, exactSolves, rankingAfter] = await Promise.all(promises);
+  
+    return {
+      rankingBefore,
+      rankingAfter,
+      solveCount,
+      exactSolves
+    };
+  }
 
   // top remarks
 
-  if (solves.length > 1) {
-    // Add late solvers to the remarks
-    let lateSolverNames = await Promise.all(solves.slice(1).map(async solve => {
+  const lateRemarks = async () => {
+    if (lateSolves.length === 0) return;
+
+    let lateSolverNames = await Promise.all(lateSolves.map(async solve => {
       return await getDisplayName(solve.user);
     }));
-    topRemarks += `**${createEnglishList(lateSolverNames)}** ${lateSolverNames.length === 1 ? "was" : "were"} too late..\n`;
-  }
+    const getLateName = (user) => lateSolverNames[solves.findIndex(s => s.user === user) - 1] || "Lame Member";
+    
+    let jinxList = [];
+    let wordsUsed = [...new Set(solves.map(s => s.solution))]; // Sets in JS only store unique values, so this will remove any duplicates
+    let lateSolversWhoHaveNotJinxed = [...lateSolves];
 
-  // fun remarks
+    for (let word of wordsUsed) {
+      // get each player who used that word
+      let playersWhoUsedWord = solves.filter(s => s.solution === word).map(s => s.user);
 
-  if (solves.length > 1) {
-    // Find if anyone jinxed each other
-    let jinxers = [];
-    let jinxWord;
-    let areMultipleJinxWordsPresent = false;
-    for (let solve of solves) {
-      let { user, solution } = solve;
-
-      let isJinx = solves.some(s => s.solution === solution && s.user !== user);
-      if (isJinx) {
-        jinxers.push(user);
-        if (jinxWord) {
-          if (jinxWord !== solution) {
-            areMultipleJinxWordsPresent = true;
-          }
-        } else {
-          jinxWord = solution;
-        }
+      if (playersWhoUsedWord.length > 1) {
+        // jinx!
+        lateSolversWhoHaveNotJinxed = lateSolversWhoHaveNotJinxed.filter(s => !playersWhoUsedWord.includes(s.user));
+        jinxList.push(playersWhoUsedWord);
       }
     }
 
-    if (jinxers.length > 0) {
-      // People jinxed each other
-      if (areMultipleJinxWordsPresent) {
-        // Multiple jinx words - keep it simple
-        roundRemarks += getRemarkEmoji("jinx") + " **" + jinxers.length + " people** just jinxed each other!\n";
-      } else {
-        // One jinx word - be more specific on who jinxed who
-        let jinxerNames = await Promise.all(jinxers.map(async user => {
-          return await getDisplayName(user);
-        }));
-        roundRemarks += getRemarkEmoji("jinx") + " **" + createEnglishList(jinxerNames) + "** just jinxed each other!\n";
-      }
+    // add remarks for each jinx
+    for (let i = 0; i < jinxList.length; i++) {
+      let jinxers = jinxList[i];
+
+      let jinxerNames = jinxers.map(getLateName);
+      let jinxText = JINX_APPENDS[i] || JINX_APPENDS[JINX_APPENDS.length - 1];
+
+      addRemark({
+        index: REMARK.jinx,
+        remark: getRemarkEmoji("jinx") + " **" + createEnglishList(jinxerNames) + "** " + jinxText
+      });
     }
+    
+    let lateNames = lateSolversWhoHaveNotJinxed.map(getLateName);
+    addRemark({
+      index: REMARK.tooLate,
+      remark: `**${createEnglishList(lateNames)}** ${engLen(lateNames, "was", "were")} too late..`
+    });
   }
 
   // solve remarks
 
-  let solveNumber = await getUserSolveCount(winner);
-  let solveNumberOnlyHas6 = solveNumber.toString().split("").every((digit) => digit === "6");
-  let solveNumberEndsIn69 = solveNumber % 100 === 69;
-  let solveNumberStartsWith6 = solveNumber.toString().startsWith("6");
-  let solveNumberEndsWith9 = solveNumber.toString().endsWith("9");
-  let solveNumberOnlyHas6and9 = solveNumber.toString().split("").every((digit) => digit === "6" || digit === "9");
-  
-  if (solveNumber === 1) {
-    // Solve number is 1!
-    solveRemarks += getRemarkEmoji("solve1") + " Congratulations on your **first solve**!\n";
-    
-    // Solve number relates to the number 1
-    if (is1Related(winnerSolution)) {
-      solveRemarks += getRemarkEmoji("solve1Related") + ` **Amazing!** Your first solve was "${winnerSolution.toLowerCase()}"!\n`;
+  const solveRemarks = (solveNumber, exactSolves) => {
+    let isSolveExact = winnerSolution === promptWord;
+
+    let solveNumberOnlyHas6 = solveNumber.toString().split("").every((digit) => digit === "6");
+    let solveNumberEndsIn69 = solveNumber % 100 === 69;
+    let solveNumberStartsWith6 = solveNumber.toString().startsWith("6");
+    let solveNumberEndsWith9 = solveNumber.toString().endsWith("9");
+    let solveNumberOnlyHas6and9 = solveNumber.toString().split("").every((digit) => digit === "6" || digit === "9");
+
+    let solveRemark;
+    let hasRemarkedExactness = false;
+
+    if (solveNumber === 1) {
+      // First solve
+      solveRemark = getRemarkEmoji("solve1") + " Congratulations on your **first solve**!";
+      if (is1Related(winnerSolution)) {
+        solveRemark += "\n" + getRemarkEmoji("solve1Related") + ` **Amazing!** Your first solve was "${winnerSolution.toLowerCase()}"!`
+      }
+      if (isSolveExact) {
+        solveRemark += "\n" + getRemarkEmoji("solve1Exact") + " **What?!** It's your first exact solve too?!"
+        hasRemarkedExactness = true;
+      }
+    } else if (solveNumber % 10000 === 0) {
+      // 10,000-solve milestone
+      solveRemark = getRemarkEmoji("solve10000") + ` This is your **${formatNumber(solveNumber)}th solve**!!! Unbelievable!`;
+      if (solveNumber === 10000 && is10000Related(winnerSolution)) {
+        solveRemark += "\n" + getRemarkEmoji("solve10000Related") + ` **AMAZING!** Your 10,000th solve was "${winnerSolution.toLowerCase()}"!`;
+      }
+    } else if (solveNumber % 1000 === 0) {
+      // 1,000-solve milestone
+      solveRemark = getRemarkEmoji("solve1000") + ` This is your **${formatNumber(solveNumber)}th solve**!!! Awesome!`;
+      if (solveNumber === 1000 && is1000Related(winnerSolution)) {
+        solveRemark += "\n" + getRemarkEmoji("solve1000Related") + ` **Amazing!** Your 1,000th solve was "${winnerSolution.toLowerCase()}"!`;
+      }
+    } else if (solveNumber % 100 === 0) {
+      // 100-solve milestone
+      solveRemark = getRemarkEmoji("solve100") + ` This is your **${formatNumber(solveNumber)}th solve**!`;
+      if (solveNumber === 100 && is100Related(winnerSolution)) {
+        solveRemark += "\n" + getRemarkEmoji("solve100Related") + ` **Awesome!** Your 100th solve was "${winnerSolution.toLowerCase()}"!`;
+      }
+    } else if (solveNumberEndsIn69 || (solveNumberStartsWith6 && solveNumberEndsWith9 && solveNumberOnlyHas6and9)) {
+      // 69 milestones
+      solveRemark = getRemarkEmoji("solve69") + ` This is your **${formatNumber(solveNumber)}th solve**. Nice.`;
+    } else if (solveNumberOnlyHas6 && solveNumber > 600) {
+      // 666 milestones
+      solveRemark = getRemarkEmoji("solve666") + ` **${formatNumber(solveNumber)}th solve..**`;
+      if (isDoomRelated(winnerSolution)) {
+        solveRemark += "\n" + getRemarkEmoji("solve666Related") + ` **Of course,** you solved it with "${winnerSolution.toLowerCase()}"..`;
+      }
     }
 
-    // Solve is exact on the first solve :o
+    // Create the remark
+    if (solveRemark) {
+      addRemark({
+        index: REMARK.solveNumber,
+        remark: solveRemark
+      });
+    }
+
+    // Create an exact solve remark
     if (isSolveExact && !hasRemarkedExactness) {
-      solveRemarks += getRemarkEmoji("solve1Exact") + " **What?!** It's your first exact solve too?!\n";
-      hasRemarkedExactness = true;
+      addRemark({
+        index: REMARK.exactSolve,
+        remark: getRemarkEmoji("exactSolve") + ` **Lucky!** That's your **${formatPlacementWithEnglishWords(exactSolves)}** exact solve!`
+      });
     }
-  } else if (solveNumber % 10000 === 0) {
-    // Solve number is a multiple of 10000!
-    solveRemarks += getRemarkEmoji("solve10000") + ` This is your **${formatNumber(solveNumber)}th solve**!!! Unbelievable!\n`;
-
-    // Solve number is 10000 and relates to the number 10000
-    if (solveNumber === 10000 && is10000Related(winnerSolution)) {
-      solveRemarks += getRemarkEmoji("solve10000Related") + ` **AMAZING!** Your 10,000th solve was "${winnerSolution.toLowerCase()}"!\n`;
-    }
-  } else if (solveNumber % 1000 === 0) {
-    // Solve number is a multiple of 1000!
-    solveRemarks += getRemarkEmoji("solve1000") + ` This is your **${formatNumber(solveNumber)}th solve**!!! Awesome!\n`;
-
-    // Solve number is 1000 and relates to the number 1000
-    if (solveNumber === 1000 && is1000Related(winnerSolution)) {
-      solveRemarks += getRemarkEmoji("solve1000Related") + ` **Amazing!** Your 1,000th solve was "${winnerSolution.toLowerCase()}"!\n`;
-    }
-  } else if (solveNumber % 100 === 0) {
-    // Solve number is a multiple of 100!
-    solveRemarks += getRemarkEmoji("solve100") + ` This is your **${formatNumber(solveNumber)}th solve**!\n`;
-
-    // Solve number is 100 and relates to the number 100
-    if (solveNumber === 100 && is100Related(winnerSolution)) {
-      solveRemarks += getRemarkEmoji("solve100Related") + ` **Awesome!** Your 100th solve was "${winnerSolution.toLowerCase()}"!\n`;
-    }
-  } else if (solveNumberEndsIn69 || (solveNumberStartsWith6 && solveNumberEndsWith9 && solveNumberOnlyHas6and9)) {
-    // Solve number ends in 69 or starts with 6 and has 9 and only consists of 6s and 9s
-    solveRemarks += getRemarkEmoji("solve69") + ` This is your **${formatNumber(solveNumber)}th solve**. Nice.\n`;
-  } else if (solveNumberOnlyHas6 && solveNumber > 600) {
-    // Solve number only has 6s and has 3 digits
-    solveRemarks += getRemarkEmoji("solve666") + ` **${formatNumber(solveNumber)}th solve..**\n`;
-    
-    // Solve number relates to doomy stuff
-    if (isDoomRelated(winnerSolution)) {
-      solveRemarks += getRemarkEmoji("solve666Related") + ` **Of course,** you solved it with "${winnerSolution.toLowerCase()}"..\n`;
-    }
-  }
-
-  if (isSolveExact && !hasRemarkedExactness) {
-    // Solve is exact
-    let exactSolves = await getUserExactSolves(winner);
-    solveRemarks += getRemarkEmoji("exactSolve") + ` **Lucky!** That's your **${formatPlacementWithEnglishWords(exactSolves)}** exact solve!\n`;
   }
 
   // rank remarks
 
-  if (rankingBefore && solveNumber > 1) {
-    if (rankingAfter < rankingBefore) {
-      if (rankingAfter === 1) {
-        rankRemarks = getRemarkEmoji("firstPlace") + " **You have taken first place!** (All-Time)\n";
-      } else {
-        rankRemarks += getRemarkEmoji("rankingMovement") + " You went up **" + formatNumber(rankingBefore - rankingAfter) + "** place" + (rankingBefore - rankingAfter === 1 ? "" : "s") + ", you're now **" + formatPlacement(rankingAfter) + "**! (All-Time)\n";
-      }
+  // say who the next player to beat is
+  const rankRemarks = (rankingBefore, rankingAfter, solveNumber) => {
+
+    if (!rankingBefore) return;
+    if (solveNumber <= 1) return;
+    if (rankingAfter > rankingBefore) return;
+    
+    if (rankingAfter === 1) {
+      addRemark({
+        index: REMARK.rankShift,
+        remark: getRemarkEmoji("firstPlace") + " **You have taken first place!** (All-Time)"
+      });
+    } else {
+      addRemark({
+        index: REMARK.rankShift,
+        remark: getRemarkEmoji("rankingMovement") + ` You went up **${formatNumber(rankingBefore - rankingAfter)}** ${engLen(rankingBefore - rankingAfter, "place", "places")}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`
+      });
     }
   }
 
   // prompt stat remarks
 
-  appearances++;
+  // depends on the round to be published
+  const uniqueSolutionRemarks = async () => {
+    let solutionCount = await getSolutionCount(winnerSolution);
 
-  let solutionCount = await getSolutionCount(winnerSolution);
-  let promptiversary = await getUserSolveCountForPrompt(winner, prompt, lengthRequired ? promptWord.length : null);
-  
-  if (solutionCount === 1) {
-    // First time this solution has ever been used
-    uniqueSolutions++;
-    // Uncomment this when there are enough unique solutions
-    // promptStatRemarks += getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!\n";
+    if (solutionCount === 1) {
+      uniqueSolutions++;
+      // Uncomment this when there are enough unique solutions
+      // addRemark({
+      //   index: REMARK.uniqueSolve,
+      //   remark: getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"
+      // });
+    }
+
+    // Keep track of unique solutions in the console
+    appearances++;
+    console.log(appearances, formatPercentage(uniqueSolutions / appearances));
+    if (appearances > 99) {
+      appearances = 0;
+      uniqueSolutions = 0;
+    }
   }
-  
-  if (promptiversary === 5 || promptiversary === 10 || promptiversary % 25 === 0) {
-    // It's an important promptiversary for the winner!
-    promptStatRemarks += getRemarkEmoji("promptiversary") + ` It's your **${formatPlacementWithEnglishWords(promptiversary)} promptiversary** with "${getCurrentPromptNameForMessage()}"!\n`;
 
-    if (promptiversary === 5) {
-      let firstSolutionToPrompt = await getFirstSolutionToPrompt(winner, prompt, lengthRequired ? promptWord.length : null);
-      if (firstSolutionToPrompt === winnerSolution) {
-        // The winner has solved this prompt with this solution before
-        promptStatRemarks += getRemarkEmoji("promptiversaryStale") + " You solved this prompt with the **same word** as your first time!\n";
+  // depends on the round to be published
+  const promptiversaryRemarks = async () => {
+    let promptiversary = await getUserSolveCountForPrompt(winnerUser, prompt, lengthRequired ? promptWord.length : null);
+    
+    if (promptiversary === 5 || promptiversary === 10 || promptiversary % 25 === 0) {
+      // It's an important promptiversary for the winner!
+      addRemark({
+        index: REMARK.promptiversary,
+        remark: getRemarkEmoji("promptiversary") + ` It's your **${formatPlacementWithEnglishWords(promptiversary)} promptiversary** with "${getCurrentPromptNameForMessage()}"!`
+      });
+  
+      if (promptiversary === 5) {
+        // this variable is only required at the fifth promptiversary - which means we'll yield twice
+        let firstSolutionToPrompt = await getFirstSolutionToPrompt(winnerUser, prompt, lengthRequired ? promptWord.length : null);
+        
+        if (firstSolutionToPrompt === winnerSolution) {
+          // The winner has solved this prompt with this solution before
+          addRemark({
+            index: REMARK.sameSolvePromptiversary,
+            remark: getRemarkEmoji("promptiversaryStale") + " You solved this prompt with the **same word** as your first time!"
+          });
+        }
       }
     }
   }
 
-  console.log(appearances, formatPercentage(uniqueSolutions / appearances));
-  if (appearances > 99) {
-    appearances = 0;
-    uniqueSolutions = 0;
-  }
-
-  // round remarks
-
-  // Update solve streaks
-  if (lastWinner === winner) {
-    // Winner is the same as last winner
-    streak++;
-    if (streak >= 3) {
-      // Winner is on a solve streak
-      let solveStreakEmoji;
-      switch (winner) {
-        case "320593811531235328":
-          solveStreakEmoji = "solveStreakChristine";
-          break;
-        case "711739947606081676":
-          solveStreakEmoji = "solveStreakDubious";
-          break;
-        default:
-          solveStreakEmoji = "solveStreak";
-          break;
+  // this function yields to get the display name of the last winner
+  const roundRemarks = async () => {
+    // Update solve streaks
+    if (lastWinner === winnerUser) {
+      // Winner is the same as last winner
+      streak++;
+      if (streak >= 3) {
+        // Winner is on a solve streak
+        let solveStreakEmoji;
+        switch (winnerUser) {
+          case "320593811531235328":
+            solveStreakEmoji = "solveStreakChristine";
+            break;
+          case "711739947606081676":
+            solveStreakEmoji = "solveStreakDubious";
+            break;
+          default:
+            solveStreakEmoji = "solveStreak";
+            break;
+        }
+        addRemark({
+          index: REMARK.solveStreak,
+          remark: `**${getRemarkEmoji(solveStreakEmoji)} You're on ${isNumberVowelSound(streak) ? "an" : "a"} ${getStreakNumbers(streak)} solve streak! ${getRemarkEmoji(solveStreakEmoji)}**`
+        });
       }
-      roundRemarks += `**${getRemarkEmoji(solveStreakEmoji)} You're on ${isNumberVowelSound(streak) ? "an" : "a"} ${getStreakNumbers(streak)} solve streak! ${getRemarkEmoji(solveStreakEmoji)}**\n`;
+    } else {
+      // Winner is different from last winner
+      if (streak >= 3) {
+        // A streak has been broken
+        let lastWinnerName = await getDisplayName(lastWinner);
+        addRemark({
+          index: REMARK.solveStreak,
+          remark: getRemarkEmoji("streakEnded") + ` **${lastWinnerName + (lastWinnerName.endsWith("s") ? "'" : "'s")}** solve streak of **${streak}** has been ended!`
+        });
+      }
+      streak = 1;
+      lastWinner = winnerUser;
     }
-  } else {
-    // Winner is different from last winner
-    if (streak >= 3) {
-      // A streak has been broken
-      let lastWinnerName = await getDisplayName(lastWinner);
-      roundRemarks += getRemarkEmoji("streakEnded") + ` **${lastWinnerName + (lastWinnerName.endsWith("s") ? "'" : "'s")}** solve streak of **${streak}** has been ended!\n`;
-    }
-    streak = 1;
-    lastWinner = winner;
   }
 
-  if (winnerUsedVivi) {
-    // Winner used Vivi
-    roundRemarks += getRemarkEmoji("usedVivi") + " This player **used the solver** during this round.\n";
+  const basicRemarks = () => {
+    addRemark({ index: REMARK.topSeparator });
+
+    if (winnerUsedVivi) {
+      addRemark({
+        index: REMARK.usedSolver,
+        remark: getRemarkEmoji("usedVivi") + " This player **used the solver** during this round."
+      });
+    }
+
+    addRemark({
+      index: REMARK.promptOrigin,
+      remark: `This prompt was created from "${promptWord.toLowerCase()}"`
+    });
   }
 
-  roundRemarks += `This prompt was created from "${promptWord.toLowerCase()}"\n`;
+  await Promise.all([
+    completeRoundData().then(([rankingBefore, rankingAfter, solveCount, exactSolves]) => {
+      rankRemarks(rankingBefore, rankingAfter, solveCount);
+      solveRemarks(solveCount, exactSolves);
+    }),
+    lateRemarks(),
+    roundRemarks(),
+  ]);
 
-  // last details that i can't be arsed to organise
-
-  let solvedItString = `**${getRemarkEmoji("solvedIt")} <@${winner}> solved it! ${getRemarkEmoji("solvedIt")}**\n`;
-  let roundEndedString = getRemarkEmoji("roundEnded") + " **Round ended!**\n";
-  let solveDisplayString = getSolveLetters(winnerSolution, prompt) + "\n";
+  basicRemarks();
 
   // send the message
   await sendMessage(wordBombMiniChannel, 
-    solvedItString + "\n"
-    + roundEndedString
-    + solveDisplayString
-    + topRemarks + "\n"
-    + funRemarks
-    + rankRemarks
-    + solveRemarks
-    + promptStatRemarks
-    + roundRemarks
+    `**${getRemarkEmoji("solvedIt")} <@${winnerUser}> solved it! ${getRemarkEmoji("solvedIt")}**\n\n`
+    + getRemarkEmoji("roundEnded") + " **Round ended!**\n"
+    + getSolveLetters(winnerSolution, prompt) + "\n"
+    + getRemarkText()
   );
 
   setTimeout(startRound, 8000);
