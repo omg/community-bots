@@ -16,7 +16,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
 
   const JSONcommands = [];
   let broadcastCommand = {
-    name: "broadcast",
+    name: "shout",
     description: "Broadcast a command!",
     options: []
   };
@@ -63,7 +63,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     
     let commandName = interaction.commandName;
     let preferBroadcast = isBroadcastChannel(interaction.channel);
-    if (commandName === "broadcast") {
+    if (commandName === "shout") {
       commandName = interaction.options.getSubcommand();
       preferBroadcast = true;
     }
