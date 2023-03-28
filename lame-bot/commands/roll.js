@@ -13,7 +13,7 @@ const data = new SlashCommandBuilder()
       .setRequired(false));
 
 async function execute(interaction, preferBroadcast) {
-  let max = interaction.options.get("max").value || 10;
+  let max = interaction.options.get("max")?.value ?? 10;
 
   await interaction.reply({
     content: "https://omg.games/assets/rolling.gif"
