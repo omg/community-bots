@@ -24,7 +24,7 @@ async function execute(interaction, preferBroadcast) {
     await interaction.editReply({
       content: "<@" + interaction.user.id + "> rolls **" + formatNumber(Math.floor(Math.random() * max) + 1) + "/" + formatNumber(max) + "**."
     });
-  }, 1000);
+  }, 1200);
 };
 
 // export the command
