@@ -11,11 +11,11 @@ function commandToBroadcastOption(command) {
 }
 
 function isOnCooldown(userID, commandName = "") {
-  return commandCooldown.has(userID + commandName);
+  return getCooldown(userID, commandName) > 0;
 }
 
 function getCooldown(userID, commandName = "") {
-  return Math.max(commandCooldown.get(userID + commandName) - Date.now(), 0);
+  return Math.max((commandCooldown.get(userID + commandName) || 0) - Date.now(), 0);
 }
 
 function setOnCooldown(userID, commandName, cooldown) {
@@ -90,7 +90,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
       }
       return;
     }
-    
+
     setOnCooldown(interaction.user.id, commandName, command.cooldown);
     
     try {
