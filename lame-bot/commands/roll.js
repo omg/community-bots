@@ -13,7 +13,7 @@ const data = new SlashCommandBuilder()
       .setRequired(false));
 
 async function execute(interaction, preferBroadcast) {
-  let max = interaction.options.get("max").value;
+  let max = interaction.options.get("max").value || 10;
 
   await interaction.reply({
     content: "https://i.imgur.com/R1Sp5gS.gif"
