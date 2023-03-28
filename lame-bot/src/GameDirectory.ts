@@ -1,22 +1,12 @@
-import { WordBombMini } from "../games/WordBombMini";
 import LameGame from "../types/LameGame";
+import { _DIRECTORY } from "../games/directory/Directory";
 
-const GameCode = {
-  WordBombMini: "WordBombMini",
-} as const;
-
-const DIRECTORY = {
-  [GameCode.WordBombMini]: {
-    name: "Word Bomb Mini",
-    game: WordBombMini
-  },
-} as const;
-
-export type DirectoryInformation = {
+export type DirectoryGame = {
   name: string;
   game: typeof LameGame;
-}
+};
 
-export const GameDirectory: {[name: string]: DirectoryInformation} = DIRECTORY;
+export type DirectoryInformation = { [key in keyof typeof _DIRECTORY]: DirectoryGame };
+export const GameDirectory: DirectoryInformation = _DIRECTORY;
 
-let wbm: WordBombMini = new GameDirectory[GameCode.WordBombMini].game();
+// let wbm: WordBombMini = new GameDirectory.WordBombMini.game();
