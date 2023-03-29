@@ -65,7 +65,7 @@ function getLimitTime(member, commandName) {
 }
 
 function addLimits(member, command, commandName, channel) {
-  if (channel.name.includes("roll")) return;
+  if (channel.name.toLowerCase().includes("roll")) return;
 
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return;
