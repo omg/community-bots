@@ -239,10 +239,10 @@ async function endRound() {
   const lateRemarks = async () => {
     if (lateSolves.length === 0) return;
 
-    let lateSolverNames = await Promise.all(lateSolves.map(async solve => {
+    let solverNames = await Promise.all(solves.map(async solve => {
       return await getDisplayName(solve.user);
     }));
-    const getLateName = (user) => lateSolverNames[solves.findIndex(s => s.user === user) - 1] || "Lame Member";
+    const getName = (user) => solverNames[solves.findIndex(s => s.user === user)];
     
     let jinxList = [];
     let wordsUsed = [...new Set(solves.map(s => s.solution))]; // Sets in JS only store unique values, so this will remove any duplicates
@@ -263,7 +263,7 @@ async function endRound() {
     for (let i = 0; i < jinxList.length; i++) {
       let jinxers = jinxList[i];
 
-      let jinxerNames = jinxers.map(getLateName);
+      let jinxerNames = jinxers.map(getName);
       let jinxText = JINX_APPENDS[i] || JINX_APPENDS[JINX_APPENDS.length - 1];
 
       addRemark({
@@ -272,11 +272,13 @@ async function endRound() {
       });
     }
     
-    let lateNames = lateSolversWhoHaveNotJinxed.map((solve) => getLateName(solve.user));
-    addRemark({
-      index: REMARK.tooLate,
-      remark: `**${createEnglishList(lateNames)}** ${engLen(lateNames, "was", "were")} too late..`
-    });
+    let lateNames = lateSolversWhoHaveNotJinxed.map((solve) => getName(solve.user));
+    if (lateNames.length > 0) {
+      addRemark({
+        index: REMARK.tooLate,
+        remark: `**${createEnglishList(lateNames)}** ${engLen(lateNames, "was", "were")} too late..`
+      });
+    }
   }
 
   // solve remarks
