@@ -61,6 +61,7 @@ async function getUserExactSolves(user) {
 async function getUserSolveCountForPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
   let count = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: user, prompt: prompt.source, promptLength });
+  // this is really slow because there are so many rounds 
   return count;
 }
 
@@ -198,6 +199,8 @@ async function getCurrentRoundInfo() {
     console.log("Winner has last lost at " + lastTimeWinnerHasntWon);
     streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $gte: lastTimeWinnerHasntWon } });
   }
+
+  await client.db(dbName).collection('rounds').createIndex({ gameID: 1, solution: 1, winner: 1, prompt: 1, promptLength: 1 });
 
   return { lastWinner, streak };
 }
