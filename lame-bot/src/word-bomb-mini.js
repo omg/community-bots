@@ -54,7 +54,7 @@ let uniqueSolutions = 0;
 let solves = [];
 
 function isNumberVowelSound(x) {
-  return x == 11 || x.toString().startsWith('8');
+  return x == 11 || x == 18 || x.toString().startsWith('8');
 }
 
 function getCurrentPromptName() {
