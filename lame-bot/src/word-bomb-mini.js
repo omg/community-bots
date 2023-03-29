@@ -204,12 +204,27 @@ async function endRound() {
     let rankingBefore = await getUserRanking(winnerUser);
     await finishRound(solves, startedAt, prompt, promptWord, lengthRequired ? promptWord.length : null, solutions);
     console.log("Part 1 took " + (Date.now() - start) + "ms");
+
+    let _a = await promptiversaryRemarks();
+    console.log("Part 2 took " + (Date.now() - start) + "ms");
+
+    let _b = await uniqueSolutionRemarks();
+    console.log("Part 3 took " + (Date.now() - start) + "ms");
+
+    let solveCount = await getUserSolveCount(winnerUser);
+    console.log("Part 4 took " + (Date.now() - start) + "ms");
+
+    let exactSolves = await getUserExactSolves(winnerUser);
+    console.log("Part 5 took " + (Date.now() - start) + "ms");
+
+    let rankingAfter;
+    if (rankingBefore) rankingAfter = await getUserRanking(winnerUser);
+    console.log("Part 6 took " + (Date.now() - start) + "ms");
     
     // a bit of an odd place to put uniqueSolutionRemarks, but it seems like the most optimal...
-    let promises = [promptiversaryRemarks(), uniqueSolutionRemarks(), getUserSolveCount(winnerUser), getUserExactSolves(winnerUser)]
-    if (rankingBefore) promises.push(getUserRanking(winnerUser));
-    let [_a, _b, solveCount, exactSolves, rankingAfter] = await Promise.all(promises);
-    console.log("Part 2 took " + (Date.now() - start) + "ms");
+    // let promises = [, , , getUserExactSolves(winnerUser)]
+    // promises.push();
+    // let [_a, _b, solveCount, exactSolves, rankingAfter] = await Promise.all(promises);
   
     return {
       rankingBefore,
@@ -468,6 +483,7 @@ async function endRound() {
     completeRoundData().then(({ rankingBefore, rankingAfter, solveCount, exactSolves }) => {
       rankRemarks(rankingBefore, rankingAfter, solveCount);
       solveRemarks(solveCount, exactSolves);
+      console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
     }),
     lateRemarks(),
     roundRemarks(),
