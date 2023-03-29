@@ -161,19 +161,19 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
 
     if (isCommandLimited(interaction.member, command, commandName, interaction.channel)) {
       const timeLeft = Math.ceil(getLimitTime(interaction.member, commandName) / 1000 + 1);
-      replyToInteraction(interaction, "Limit", "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".", false);  
+      replyToInteraction(interaction, "Limit", "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".", false);
       return;
     }
 
     if (isOnCooldown(interaction.user.id, commandName)) {
       // TODO Could personalize this message depending on the bot's personality
       const timeLeft = Math.ceil(getCooldown(interaction.user.id, commandName) / 1000 + 1);
-      replyToInteraction(interaction, "Cooldown", "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."), false);  
+      replyToInteraction(interaction, "Cooldown", "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."), false);
       return;
     } else if (isOnCooldown(interaction.user.id)) {
       if (COOLDOWN_TIME > 2750) {
         const timeLeft = Math.ceil(getCooldown(interaction.user.id) / 1000 + 1);
-        replyToInteraction(interaction, "Cooldown", "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."), false);  
+        replyToInteraction(interaction, "Cooldown", "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."), false);
       } else {
         replyToInteraction(interaction, "Cooldown", "\n• Hold on! You're sending commands too quickly!", false);
       }
