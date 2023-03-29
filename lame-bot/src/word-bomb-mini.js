@@ -272,7 +272,7 @@ async function endRound() {
       });
     }
     
-    let lateNames = lateSolversWhoHaveNotJinxed.map(getLateName);
+    let lateNames = lateSolversWhoHaveNotJinxed.map((solve) => getLateName(solve.user));
     addRemark({
       index: REMARK.tooLate,
       remark: `**${createEnglishList(lateNames)}** ${engLen(lateNames, "was", "were")} too late..`
@@ -501,7 +501,7 @@ async function endRound() {
     + getRemarkText()
   );
 
-  setTimeout(startRound, 7000);
+  setTimeout(startRound, 8000);
 }
 
 // listen for messages from discord

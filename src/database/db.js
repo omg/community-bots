@@ -200,8 +200,6 @@ async function getCurrentRoundInfo() {
     streak = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: lastWinner, completedAt: { $gte: lastTimeWinnerHasntWon } });
   }
 
-  await client.db(dbName).collection('rounds').createIndex({ gameID: 1, solution: 1, winner: 1, prompt: 1, promptLength: 1 });
-
   return { lastWinner, streak };
 }
 
