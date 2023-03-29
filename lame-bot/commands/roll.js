@@ -27,9 +27,27 @@ async function execute(interaction, preferBroadcast) {
   }, 1200);
 };
 
+let limits = [];
+limits[0] = {
+  max: 3,
+  interval: 15 * 60 * 1000,
+  includeBotsChannel: false
+}
+limits[1] = {
+  max: 5,
+  interval: 3 * 60 * 1000,
+  includeBotsChannel: false
+}
+limits[2] = {
+  max: false,
+  includeBotsChannel: false
+}
+
 // export the command
 module.exports = {
   data,
   execute,
-  cooldown: 8 * 1000
+  cooldown: 8 * 1000,
+  type: ["fun", "annoying"],
+  limits
 };
