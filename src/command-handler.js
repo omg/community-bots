@@ -27,8 +27,8 @@ function setOnCooldown(userID, commandName, cooldown) {
 }
 
 function getMemberLevel(member) {
-  if (member.roles.cache.find(role => role.name === "regular")) return 1;
   if (member.roles.cache.find(role => role.name === "reliable")) return 2;
+  if (member.roles.cache.find(role => role.name === "regular")) return 1;
   return 0;
 }
 
@@ -44,9 +44,16 @@ function getCommandLimitsFor(member, command) {
   return limit;
 }
 
-function isCommandLimited(member, command, commandName) {
+function areLimitsIgnored(limits, channel) {
+  if (limits.includeBotsChannel) return false;
+  return channel.name.toLowerCase().includes("roll") || isBroadcastChannel(channel);
+}
+
+function isCommandLimited(member, command, commandName, channel) {
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return false;
+
+  if (areLimitsIgnored(limits, channel)) return false;
 
   let limitEnd = commandLimitEnd.get(member.id + commandName);
   if (limitEnd) {
@@ -65,10 +72,10 @@ function getLimitTime(member, commandName) {
 }
 
 function addLimits(member, command, commandName, channel) {
-  if (channel.name.toLowerCase().includes("roll")) return;
-
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return;
+
+  if (areLimitsIgnored(limits, channel)) return false;
 
   let limitEnd = commandLimitEnd.get(member.id + commandName);
   if (limitEnd) {
@@ -152,7 +159,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     const command = commands.get(commandName);
     if (!command) return;
 
-    if (isCommandLimited(interaction.member, command, commandName)) {
+    if (isCommandLimited(interaction.member, command, commandName, interaction.channel)) {
       const timeLeft = Math.ceil(getLimitTime(interaction.member, commandName) / 1000 + 1);
       replyToInteraction(interaction, "Limit", "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".", false);  
       return;
