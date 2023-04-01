@@ -29,17 +29,18 @@ async function execute(interaction, preferBroadcast) {
 
 let limits = [];
 limits[0] = {
-  max: 3,
-  interval: 15 * 60 * 1000,
+  max: 2,
+  interval: 10 * 60 * 1000,
   includeBotsChannel: false
 }
 limits[1] = {
-  max: 5,
-  interval: 3 * 60 * 1000,
+  max: 4,
+  interval: 5 * 60 * 1000,
   includeBotsChannel: false
 }
 limits[2] = {
-  max: false,
+  max: 20,
+  interval: 20 * 60 * 1000,
   includeBotsChannel: false
 }
 
