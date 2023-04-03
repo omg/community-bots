@@ -103,12 +103,12 @@ async function startRound() {
   
   await sendMessageAsReply(replyMessage, getRemarkEmoji("bomb") + ' **Quick!** Type a word containing:' + '\n\n' + getPromptRegexDisplayText(prompt) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") + (lengthRequired ? '\n\n• Must be **' + promptWord.length + '** characters!' : ''));
   
-  lameBotClient.user.setPresence({
-    activities: [{
-      name: getCurrentPromptName()
-    }],
-    status: 'online'
-  });
+  // lameBotClient.user.setPresence({
+  //   activities: [{
+  //     name: getCurrentPromptName()
+  //   }],
+  //   status: 'online'
+  // });
 }
 
 (async function main() {
@@ -190,7 +190,7 @@ async function endRound() {
 
   // Stop the round
   inProgress = false;
-  lameBotClient.user.setPresence({ status: 'idle', activities: [] });
+  // lameBotClient.user.setPresence({ status: 'idle', activities: [] });
 
   // Create helpful variables
   let winnerUser = solves[0].user;
