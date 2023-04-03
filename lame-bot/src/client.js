@@ -16,7 +16,7 @@ const lameBotClient = new Client({
 });
 
 function updatePresence() {
-  viviClient.user.setPresence({
+  lameBotClient.user.setPresence({
     activities: [{
       name: '1 game',
       type: ActivityType.Playing
