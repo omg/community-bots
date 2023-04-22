@@ -150,10 +150,12 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     if (!interaction.isChatInputCommand()) return;
 
     let commandName = interaction.commandName;
-    let preferBroadcast = isBroadcastChannel(interaction.channel);
+    let preferBroadcast;
     if (commandName === "shout") {
       commandName = interaction.options.getSubcommand();
       preferBroadcast = true;
+    } else {
+      preferBroadcast = command.noAutomaticBroadcast ? false : isBroadcastChannel(interaction.channel);
     }
     
     const command = commands.get(commandName);
