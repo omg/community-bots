@@ -132,6 +132,7 @@ async function getUserExactSolves(user) {
 async function getUserSolveCountForPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
   let count = await client.db(dbName).collection('rounds').countDocuments({ gameID, winner: user, prompt: prompt.source, promptLength });
+  // this is really slow because there are so many rounds 
   return count;
 }
 
@@ -145,13 +146,12 @@ async function getFirstSolutionToPrompt(user, prompt, promptLength) {
 
 // update database after a round is completed
 async function finishRound(solves, startedAt, prompt, promptWord, promptLength, solutionCount) {
-  let gameID = await getDefaultGameID();
-  let allTimeLeaderboardID = await getAllTimeLeaderboardID();
+  const gameID = await getDefaultGameID();
+  const allTimeLeaderboardID = await getAllTimeLeaderboardID();
 
-  let winner = solves[0].user;
+  const winner = solves[0].user;
 
-  // push round to rounds collection
-  await client.db(dbName).collection('rounds').insertOne({
+  const round = {
     gameID,
     winner,
     solvers: solves,
@@ -164,26 +164,40 @@ async function finishRound(solves, startedAt, prompt, promptWord, promptLength, 
     solution: solves[0].solution,
     usedVivi: solves[0].usedVivi,
     exact: promptWord === solves[0].solution
-  });
-  
-  // iterate through solvers
-  for (let solve of solves) {
-    let { user, solution, usedVivi } = solve;
-
-    let isJinx = solves.some(s => s.solution === solution && s.user !== user);
-    let isWinner = user === winner;
-    let isExact = promptWord === solution;
-
-    await client.db(dbName).collection('rankings').updateOne({ user, leaderboardID: allTimeLeaderboardID }, { $inc: {
-      wins: isWinner ? 1 : 0,
-      solves: isWinner ? 1 : 0,
-      score: isWinner ? 1 : 0,
-      exactSolves: isExact && isWinner ? 1 : 0,
-      lateSolves: !isWinner ? 1 : 0,
-      viviUses: usedVivi ? 1 : 0,
-      jinxes: isJinx ? 1 : 0
-    }}, { upsert: true });
   }
+
+  const operations = solves.map(solve => {
+    const { user, solution, usedVivi } = solve;
+
+    const isJinx = solves.some(s => s.solution === solution && s.user !== user);
+    const isWinner = user === winner;
+    const isExact = promptWord === solution;
+
+    return {
+      updateOne: {
+        filter: { user: solve.user, leaderboardID: allTimeLeaderboardID },
+        update: { $inc: {
+          wins: isWinner ? 1 : 0,
+          solves: isWinner ? 1 : 0,
+          score: isWinner ? 1 : 0,
+          exactSolves: isExact && isWinner ? 1 : 0,
+          lateSolves: !isWinner ? 1 : 0,
+          viviUses: usedVivi ? 1 : 0,
+          jinxes: isJinx ? 1 : 0
+        } },
+        upsert: true
+      }
+    }
+  });
+
+  console.log(operations);
+  
+  const promises = [
+    client.db(dbName).collection('rounds').insertOne(round),
+    client.db(dbName).collection('rankings').bulkWrite(operations)
+  ];
+
+  await Promise.all(promises);
 }
 
 let defaultGameID;

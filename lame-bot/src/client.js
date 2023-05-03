@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, ActivityType } = require('discord.js');
 const { registerClientAsCommandHandler } = require('../../src/command-handler');
 const path = require('node:path');
 
@@ -15,8 +15,20 @@ const lameBotClient = new Client({
   allowedMentions: { parse: ['users'] }
 });
 
+function updatePresence() {
+  lameBotClient.user.setPresence({
+    activities: [{
+      name: '1 game',
+      type: ActivityType.Playing
+    }],
+    status: 'online'
+  });
+  setTimeout(updatePresence, 86400000);
+}
+
 lameBotClient.on('ready', () => {
   console.log(`Logged in as ${lameBotClient.user.tag}!`);
+  updatePresence();
 });
 
 async function waitForReady() {
