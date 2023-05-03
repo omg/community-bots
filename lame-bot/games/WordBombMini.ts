@@ -10,7 +10,10 @@ type WordBombMiniState = {
   promptWord: string;
   solutions: number;
   lengthRequired: boolean;
-  topRemarks;
+  remarks: any; // really its an array with a bunch of remarks
+  replyMessage: string; // maybe
+  inProgress: boolean; // maybe
+  solves: any; // really it's an array with objects of all the solves
 }
 
 export default class WordBombMini extends Game {
