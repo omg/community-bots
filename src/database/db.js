@@ -43,6 +43,27 @@ async function getSolutionCount(solution) {
   return count;
 }
 
+async function getProfile(user) {
+  let profile = await client.db(dbName).collection('profiles').find({ user }).limit(1).toArray();
+  if (profile.length === 0) {
+    await client.db(dbName).collection('profiles').insertOne({ user, cash: 100, points: 0 });
+    profile = await client.db(dbName).collection('profiles').find({ user }).limit(1).toArray();
+  }
+  return profile[0];
+}
+
+async function getCash(user) {
+  let profile = await getProfile(user);
+  return profile.cash || 0;
+}
+
+async function spendCash(user, amount) {
+  if (amount < 0) return false;
+  let profile = await getProfile(user);
+  if (profile.cash < amount) return false;
+  await client.db(dbName).collection('profiles').updateOne({ user }, { $set: { cash: profile.cash - amount } });
+}
+
 async function getUserSolveCount(user) {
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
   let userStats = await client.db(dbName).collection('rankings').find({ user, leaderboardID: allTimeLeaderboardID }).limit(1).toArray();
@@ -217,5 +238,7 @@ module.exports = {
   getUserRanking,
   getCurrentRoundInfo,
   getReplyMessage,
-  setReplyMessage
+  setReplyMessage,
+  getCash,
+  spendCash
 }
