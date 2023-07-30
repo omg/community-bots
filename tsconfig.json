@@ -5,8 +5,6 @@
       "outDir": "./dist",
       "rootDir": "./",
       "allowJs": true,
-      "declaration": true,
-      "emitDeclarationOnly": true,
       "strict": true,
       "esModuleInterop": true
   },
