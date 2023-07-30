@@ -186,13 +186,7 @@ function registerClientAsCommandHandler(client, commandFolder, clientID, token) 
     try {
       await command.execute(interaction, preferBroadcast);
     } catch (error) {
-      console.error(error);
-      try {
-        // TODO this is getting janky
-        await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
-      } catch (error) {
-        console.error(error);
-      }
+      await replyToInteraction(interaction, "Error", "\n• Sorry, an error occurred while running that command.", preferBroadcast);
     }
   });
 
