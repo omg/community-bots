@@ -18,6 +18,7 @@ jobs:
 
       - name: Merge and Push
         run: |
-          git checkout deploy
+          git fetch origin deploy:deploy || echo "No deploy branch yet"
+          git checkout deploy || git checkout -b deploy
           git merge --no-edit master
-          git push
+          git push origin deploy
