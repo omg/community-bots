@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+      "target": "es6",
+      "module": "commonjs",
+      "outDir": "./dist",
+      "rootDir": "./",
+      "allowJs": true,
+      "strict": true,
+      "esModuleInterop": true
+  },
+  "include": [
+      "src/**/*.ts",
+      "src/**/*.js",
+      "lame-bot/**/*.ts",
+      "lame-bot/**/*.js",
+      "vivi/**/*.ts",
+      "vivi/**/*.js"
+  ],
+  "exclude": [
+      "node_modules"
+  ]
+}

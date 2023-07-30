@@ -1,15 +1,16 @@
 const { fork } = require('child_process');
 const fs = require('node:fs');
 const path = require('path');
+const appRoot = require('app-root-path');
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/dictionaries/english.txt'), 'utf8');
-  var related1String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/1-related.txt'), 'utf8');
-  var related100String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/100-related.txt'), 'utf8');
-  var related1000String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/1000-related.txt'), 'utf8');
-  var related10000String = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/10000-related.txt'), 'utf8');
-  var relatedDoomString = fs.readFileSync(path.join(__dirname, '../../assets/word-lists/lists/doom-related.txt'), 'utf8');
+  var dictionaryString = fs.readFileSync(appRoot.resolve('assets/word-lists/dictionaries/english.txt'), 'utf8');
+  var related1String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/1-related.txt'), 'utf8');
+  var related100String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/100-related.txt'), 'utf8');
+  var related1000String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/1000-related.txt'), 'utf8');
+  var related10000String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/10000-related.txt'), 'utf8');
+  var relatedDoomString = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/doom-related.txt'), 'utf8');
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
 }
@@ -206,7 +207,7 @@ function generatePrompt() {
     let promptSubStart = randInt(0, promptWord.length - promptLength);
 
     let blanks = Math.min(promptLength - 2, 2);
-    for (i = 0; i < blanks; i++) {
+    for (let i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
       promptWord = promptWord.substring(0, rand) + '`' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
