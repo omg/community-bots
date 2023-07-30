@@ -207,7 +207,7 @@ function generatePrompt() {
     let promptSubStart = randInt(0, promptWord.length - promptLength);
 
     let blanks = Math.min(promptLength - 2, 2);
-    for (i = 0; i < blanks; i++) {
+    for (let i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
       promptWord = promptWord.substring(0, rand) + '`' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
