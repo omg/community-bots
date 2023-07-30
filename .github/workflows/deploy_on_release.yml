@@ -1,0 +1,23 @@
+name: Deploy to DigitalOcean on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@example.com"
+
+      - name: Merge and Push
+        run: |
+          git checkout deploy
+          git merge --no-edit master
+          git push
