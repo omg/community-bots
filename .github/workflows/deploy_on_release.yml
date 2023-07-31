@@ -1,0 +1,26 @@
+name: Deploy to DigitalOcean on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@example.com"
+
+      - name: Merge and Push
+        run: |
+          git fetch origin deploy:deploy || echo "No deploy branch yet"
+          git checkout deploy || git checkout -b deploy
+          git merge --no-edit origin/master
+          git push origin deploy

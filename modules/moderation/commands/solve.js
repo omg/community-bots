@@ -29,13 +29,13 @@ async function execute(interaction, preferBroadcast) {
     // cleanWord is called twice here on prompt
     let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await Dictionary.solvePromptWithTimeout(regex, 800, interaction.user.id);
+    let solutions = await Dictionary.solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
       await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
     } else {
-      let solverString = 'I found '
+      let solverString = '\nI found '
         + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
         + '\n';
 

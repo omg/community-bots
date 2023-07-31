@@ -45,7 +45,7 @@ function shuffle(array) {
 }
 
 function escapeDiscordMarkdown(string) {
-  return string.replace(/[\\`_~\*\|:!#@><]/g, '\\$&');
+  return string.replace(/[\\`_~\*\|:#@><-]/g, '\\$&');
 }
 
 module.exports = {
