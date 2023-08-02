@@ -5,7 +5,6 @@
       "outDir": "./dist",
       "rootDir": "./",
       "allowJs": true,
-      "strict": true,
       "esModuleInterop": true
   },
   "include": [
