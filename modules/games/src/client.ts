@@ -1,44 +1,51 @@
-const { Client, GatewayIntentBits, Partials, ActivityType } = require('discord.js');
-const { registerClientAsCommandHandler } = require('../../src/command-handler');
-const path = require('node:path');
+import {
+  Client,
+  Guild,
+  GatewayIntentBits,
+  Partials,
+  ActivityType,
+} from "discord.js";
 
-const lameBotClient = new Client({
+import { registerClientAsCommandHandler } from "../../../src/command-handler";
+import path from "node:path";
+
+const lameBotClient: Client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
   ],
-  partials: [
-    Partials.Channel
-  ],
-  allowedMentions: { parse: ['users'] }
+  partials: [Partials.Channel],
+  allowedMentions: { parse: ["users"] },
 });
 
-function updatePresence() {
-  lameBotClient.user.setPresence({
-    activities: [{
-      name: '1 game',
-      type: ActivityType.Playing
-    }],
-    status: 'online'
+function updatePresence(): void {
+  lameBotClient.user?.setPresence({
+    activities: [
+      {
+        name: "1 game",
+        type: ActivityType.Playing,
+      },
+    ],
+    status: "online",
   });
   setTimeout(updatePresence, 86400000);
 }
 
-lameBotClient.on('ready', () => {
-  console.log(`Logged in as ${lameBotClient.user.tag}!`);
+lameBotClient.on("ready", () => {
+  console.log(`Logged in as ${lameBotClient.user?.tag}!`);
   updatePresence();
 });
 
 async function waitForReady() {
   if (lameBotClient.readyAt) return;
-  await new Promise(resolve => {
-    lameBotClient.once('ready', resolve);
+  await new Promise((resolve) => {
+    lameBotClient.once("ready", resolve);
   });
 }
 
-async function getGuild(guildID) {
+async function getGuild(guildID): Promise<Guild | undefined> {
   await waitForReady();
   return lameBotClient.guilds.cache.get(guildID);
 }
@@ -52,7 +59,7 @@ async function getChannel(channelID) {
 async function sendMessage(channel, message) {
   await waitForReady();
 
-  if (typeof channel === 'string') {
+  if (typeof channel === "string") {
     channel = await getChannel(channel);
   }
 
@@ -62,8 +69,8 @@ async function sendMessage(channel, message) {
       return await channel.send(message);
     } catch (error) {
       console.error(error);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
-      
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
       retryDelay = Math.min(retryDelay + 500, 5000);
     }
   }
@@ -78,8 +85,8 @@ async function sendMessageAsReply(replyMessage, message) {
       return await replyMessage.reply(message);
     } catch (error) {
       console.error(error);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
-      
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
       retryDelay = Math.min(retryDelay + 500, 5000);
     }
   }
@@ -87,7 +94,12 @@ async function sendMessageAsReply(replyMessage, message) {
 
 //
 
-registerClientAsCommandHandler(lameBotClient, path.join(__dirname, '../commands'), process.env.LAME_CLIENT_ID, process.env.LAME_TOKEN);
+registerClientAsCommandHandler(
+  lameBotClient,
+  path.join(__dirname, "../commands"),
+  process.env.LAME_CLIENT_ID,
+  process.env.LAME_TOKEN
+);
 
 //
 
@@ -97,5 +109,5 @@ module.exports = {
   sendMessageAsReply,
   getChannel,
   getGuild,
-  waitForReady
-}
+  waitForReady,
+};
