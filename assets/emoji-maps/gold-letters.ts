@@ -42,4 +42,4 @@ const emojiMap = {
   "unknown": "", // TODO - need graphic for unknown
 }
 
-module.exports = emojiMap;
+export const goldLettersMap = emojiMap;

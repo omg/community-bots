@@ -4,12 +4,15 @@ import {
   GatewayIntentBits,
   Partials,
   ActivityType,
+  Channel,
+  Message,
+  TextChannel,
 } from "discord.js";
 
 import { registerClientAsCommandHandler } from "../../../src/command-handler";
 import path from "node:path";
 
-const lameBotClient: Client = new Client({
+export const lameBotClient: Client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
@@ -20,7 +23,7 @@ const lameBotClient: Client = new Client({
   allowedMentions: { parse: ["users"] },
 });
 
-function updatePresence(): void {
+export function updatePresence(): void {
   lameBotClient.user?.setPresence({
     activities: [
       {
@@ -38,34 +41,43 @@ lameBotClient.on("ready", () => {
   updatePresence();
 });
 
-async function waitForReady() {
+export async function waitForReady(): Promise<void> {
   if (lameBotClient.readyAt) return;
   await new Promise((resolve) => {
     lameBotClient.once("ready", resolve);
   });
 }
 
-async function getGuild(guildID): Promise<Guild | undefined> {
+export async function getGuild(guildID: string): Promise<Guild | undefined> {
   await waitForReady();
   return lameBotClient.guilds.cache.get(guildID);
 }
 
-async function getChannel(channelID) {
+export async function getChannel(
+  channelID: string
+): Promise<Channel | undefined> {
   await waitForReady();
   return lameBotClient.channels.cache.get(channelID);
 }
 
 // async function to send a message to a channel and wait for it to be sent, retrying with backoff with a maximum length of 5 seconds
-async function sendMessage(channel, message) {
+// yo this is VILE please god remove this
+export async function sendMessage(
+  channel: TextChannel | string,
+  message: string
+): Promise<Message> {
   await waitForReady();
 
   if (typeof channel === "string") {
+    // FIXME: see issue #84
+    // @ts-ignore
     channel = await getChannel(channel);
   }
 
   let retryDelay = 500;
   while (true) {
     try {
+      // @ts-ignore, send is not a function for undefined, causes error
       return await channel.send(message);
     } catch (error) {
       console.error(error);
@@ -76,7 +88,10 @@ async function sendMessage(channel, message) {
   }
 }
 
-async function sendMessageAsReply(replyMessage, message) {
+export async function sendMessageAsReply(
+  replyMessage: Message,
+  message: string
+): Promise<Message> {
   await waitForReady();
 
   let retryDelay = 500;
@@ -102,12 +117,3 @@ registerClientAsCommandHandler(
 );
 
 //
-
-module.exports = {
-  lameBotClient,
-  sendMessage,
-  sendMessageAsReply,
-  getChannel,
-  getGuild,
-  waitForReady,
-};

@@ -1,23 +1,25 @@
-const { escapeDiscordMarkdown } = require("./utils.js");
+import { escapeDiscordMarkdown } from "./utils.js";
 
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
-const remarkEmojiMap = require("../assets/emoji-maps/remark-emojis.js");
-const goldLettersMap = require("../assets/emoji-maps/gold-letters.js");
-const whiteLettersMap = require("../assets/emoji-maps/white-letters.js");
-const streakNumbersMap = require("../assets/emoji-maps/streak-numbers.js");
+import { remarkEmojiMap } from "../assets/emoji-maps/remark-emojis";
+import { goldLettersMap } from "../assets/emoji-maps/gold-letters";
+import { whiteLettersMap } from "../assets/emoji-maps/white-letters";
+import { streakNumbersMap } from "../assets/emoji-maps/streak-numbers";
 
-const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
+export const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 
-function getEmojiFromMap(emoji, emojiMap) {
+export function getEmojiFromMap(emoji, emojiMap) {
   if (emojiMap[emoji]) {
     // if the emoji is a string, return it
     if (typeof emojiMap[emoji] === "string") {
       return emojiMap[emoji];
     }
-    
+
     // if the emoji is an array, return a random emoji from the array
     if (Array.isArray(emojiMap[emoji])) {
-      return emojiMap[emoji][Math.floor(Math.random() * emojiMap[emoji].length)];
+      return emojiMap[emoji][
+        Math.floor(Math.random() * emojiMap[emoji].length)
+      ];
     }
   }
 
@@ -25,33 +27,39 @@ function getEmojiFromMap(emoji, emojiMap) {
   return emojiMap.unknown || "";
 }
 
-function replaceTextWithLetterMap(string, letterMap) {
+export function replaceTextWithLetterMap(string, letterMap) {
   // replace every letter in the string with an emoji from the letterMap
-  return string.split("").map((letter) => {
-    return getEmojiFromMap(letter, letterMap);
-  }).join("");
+  return string
+    .split("")
+    .map((letter) => {
+      return getEmojiFromMap(letter, letterMap);
+    })
+    .join("");
 }
 
-function getRemarkEmoji(emoji) {
+export function getRemarkEmoji(emoji) {
   return getEmojiFromMap(emoji, remarkEmojiMap);
 }
 
-function getPromptLetters(prompt) {
+export function getPromptLetters(prompt) {
   return replaceTextWithLetterMap(prompt, goldLettersMap);
 }
 
-function getStreakNumbers(number) {
+export function getStreakNumbers(number) {
   return replaceTextWithLetterMap(number.toString(), streakNumbersMap);
 }
 
-function getNormalLetters(string) {
+export function getNormalLetters(string) {
   return replaceTextWithLetterMap(string, whiteLettersMap);
 }
 
-function getSolveLetters(solution, promptRegex) {
+export function getSolveLetters(solution, promptRegex): string {
   // slice the regex to only include the capturing group by finding the first and last parentheses
   let regexString = promptRegex.source;
-  let capturingGroupString = regexString.slice(regexString.indexOf("(") + 1, regexString.lastIndexOf(")"));
+  let capturingGroupString = regexString.slice(
+    regexString.indexOf("(") + 1,
+    regexString.lastIndexOf(")")
+  );
   let capturingRegex = new RegExp(capturingGroupString);
 
   // console.log("getting solve display from regex:", capturingRegex.source);
@@ -67,10 +75,14 @@ function getSolveLetters(solution, promptRegex) {
   let afterPrompt = solution.slice(promptEndIndex);
 
   // combine the matches together with the correct emojiMaps
-  return getNormalLetters(beforePrompt) + getPromptLetters(promptLetters) + getNormalLetters(afterPrompt);
+  return (
+    getNormalLetters(beforePrompt) +
+    getPromptLetters(promptLetters) +
+    getNormalLetters(afterPrompt)
+  );
 }
 
-function getPromptRegexDisplayText(regex) {
+export function getPromptRegexDisplayText(regex) {
   // get the string of the regex
   let regexString = regex.source;
   // remove the anchors from the start and end of the regex
@@ -80,11 +92,13 @@ function getPromptRegexDisplayText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+  regexString =
+    regexString.slice(0, lastParenthesisIndex) +
+    regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
-  
+
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
     displayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
@@ -94,7 +108,8 @@ function getPromptRegexDisplayText(regex) {
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard)
+    regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 
@@ -102,7 +117,7 @@ function getPromptRegexDisplayText(regex) {
 }
 
 // TODO just incorporate this into the function above
-function getPromptRegexText(regex) {
+export function getPromptRegexText(regex) {
   // get the string of the regex
   let regexString = regex.source;
   // remove the anchors from the start and end of the regex
@@ -112,21 +127,27 @@ function getPromptRegexText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+  regexString =
+    regexString.slice(0, lastParenthesisIndex) +
+    regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
-  
+
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
-    let testDisplayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
+    let testDisplayString = displayString.replace(
+      /(?<!\\)(?:(?:\\\\)*)\./g,
+      " "
+    ); // replace all periods that aren't escaped with a space for prompt rendering
     if (!invalidPromptDisplayRegex.test(testDisplayString)) {
       return displayString;
     }
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard)
+    regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 
@@ -134,7 +155,7 @@ function getPromptRegexText(regex) {
 }
 
 // TODO now we're just trolling
-function getPromptRegexInlineText(regex) {
+export function getPromptRegexInlineText(regex) {
   // get the string of the regex
   let regexString = regex.source;
   // remove the anchors from the start and end of the regex
@@ -144,32 +165,29 @@ function getPromptRegexInlineText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
+  regexString =
+    regexString.slice(0, lastParenthesisIndex) +
+    regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
-  
+
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
-    let testDisplayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
+    let testDisplayString = displayString.replace(
+      /(?<!\\)(?:(?:\\\\)*)\./g,
+      " "
+    ); // replace all periods that aren't escaped with a space for prompt rendering
     if (!invalidPromptDisplayRegex.test(testDisplayString)) {
       return displayString;
     }
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard)
+    regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 
   return "`/" + regexString + "/`";
-}
-
-module.exports = {
-  getRemarkEmoji,
-  getSolveLetters,
-  getStreakNumbers,
-  getPromptRegexDisplayText,
-  getPromptRegexText,
-  getPromptRegexInlineText
 }

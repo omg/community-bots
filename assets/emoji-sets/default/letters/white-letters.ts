@@ -1,4 +1,4 @@
-const mapInfo = {
+export const mapInfo = {
   "name": "white-letters",
   "map": {
     "A": "<:e:971179538350477412>",
@@ -45,4 +45,4 @@ const mapInfo = {
   }
 }
 
-module.exports = mapInfo; // ?
+export const whiteLettersMap = mapInfo;

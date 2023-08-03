@@ -42,4 +42,4 @@ const emojiMap = {
   "unknown": "",
 }
 
-module.exports = emojiMap;
+export const blueLettersMap = emojiMap;

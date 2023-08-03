@@ -1,5 +1,4 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { Message } from "discord.js"; // dont really Want to import this here but it's needed for the type hinting
 
 // Connection URL
 const url = process.env.MONGO_URL;
@@ -37,7 +36,7 @@ const dbName = "lame";
 // Vivi uses
 // Jinxes
 
-async function getSolutionCount(solution: string): Promise<number> {
+export async function getSolutionCount(solution: string): Promise<number> {
   // get number of times solution appears in the rounds collection
   let gameID: ObjectId = await getDefaultGameID();
   let count = await client
@@ -47,7 +46,7 @@ async function getSolutionCount(solution: string): Promise<number> {
   return count;
 }
 
-async function getProfile(user) {
+export async function getProfile(user) {
   let profile = await client
     .db(dbName)
     .collection("profiles")
@@ -69,12 +68,12 @@ async function getProfile(user) {
   return profile[0];
 }
 
-async function getCash(user) {
+export async function getCash(user) {
   let profile = await getProfile(user);
   return profile.cash || 0;
 }
 
-async function spendCash(user, amount) {
+export async function spendCash(user, amount) {
   if (amount < 0) return false;
   let profile = await getProfile(user);
   if (profile.cash < amount) return false;
@@ -84,7 +83,7 @@ async function spendCash(user, amount) {
     .updateOne({ user }, { $set: { cash: profile.cash - amount } });
 }
 
-async function getUserSolveCount(user) {
+export async function getUserSolveCount(user) {
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
   let userStats = await client
     .db(dbName)
@@ -96,7 +95,7 @@ async function getUserSolveCount(user) {
   return userStats[0].solves;
 }
 
-async function getUserExactSolves(user) {
+export async function getUserExactSolves(user) {
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
   let userStats = await client
     .db(dbName)
@@ -109,7 +108,7 @@ async function getUserExactSolves(user) {
 }
 
 // get amount of times a user has solved a prompt
-async function getUserSolveCountForPrompt(user, prompt, promptLength) {
+export async function getUserSolveCountForPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
   let count = await client.db(dbName).collection("rounds").countDocuments({
     gameID,
@@ -122,7 +121,7 @@ async function getUserSolveCountForPrompt(user, prompt, promptLength) {
 }
 
 // get a user's first solution to a specific prompt by completion timestamp
-async function getFirstSolutionToPrompt(user, prompt, promptLength) {
+export async function getFirstSolutionToPrompt(user, prompt, promptLength) {
   let gameID = await getDefaultGameID();
   let solutionRound = await client
     .db(dbName)
@@ -136,7 +135,7 @@ async function getFirstSolutionToPrompt(user, prompt, promptLength) {
 }
 
 // update database after a round is completed
-async function finishRound(
+export async function finishRound(
   solves,
   startedAt,
   prompt,
@@ -206,7 +205,7 @@ async function finishRound(
 }
 
 let defaultGameID;
-async function getDefaultGameID(): Promise<ObjectId> {
+export async function getDefaultGameID(): Promise<ObjectId> {
   if (defaultGameID) return defaultGameID;
   defaultGameID = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
@@ -216,7 +215,7 @@ async function getDefaultGameID(): Promise<ObjectId> {
 
 // these next 3 all return a channel/guild id, but its stored as a string in mongodb
 let defaultGameChannel;
-async function getDefaultGameChannel(): Promise<string> {
+export async function getDefaultGameChannel(): Promise<string> {
   if (defaultGameChannel) return defaultGameChannel;
   defaultGameChannel = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
@@ -225,7 +224,7 @@ async function getDefaultGameChannel(): Promise<string> {
 }
 
 let defaultGameGuild;
-async function getDefaultGameGuild(): Promise<string> {
+export async function getDefaultGameGuild(): Promise<string> {
   if (defaultGameGuild) return defaultGameGuild;
   defaultGameGuild = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
@@ -233,7 +232,7 @@ async function getDefaultGameGuild(): Promise<string> {
   return defaultGameGuild;
 }
 
-async function getReplyMessage(): Promise<string> {
+export async function getReplyMessage(): Promise<string> {
   let replyMessage = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
   )[0].replyMessage;
@@ -241,7 +240,7 @@ async function getReplyMessage(): Promise<string> {
 }
 
 // void is typically inferred (and it is here) but its fine either way
-async function setReplyMessage(message: string): Promise<void> {
+export async function setReplyMessage(message: string): Promise<void> {
   await client
     .db(dbName)
     .collection("games")
@@ -249,7 +248,7 @@ async function setReplyMessage(message: string): Promise<void> {
 }
 
 let allTimeLeaderboardID;
-async function getAllTimeLeaderboardID(): Promise<ObjectId> {
+export async function getAllTimeLeaderboardID(): Promise<ObjectId> {
   if (allTimeLeaderboardID) return allTimeLeaderboardID;
   allTimeLeaderboardID = (
     await client
@@ -264,7 +263,7 @@ async function getAllTimeLeaderboardID(): Promise<ObjectId> {
 
 // TODO this can be expensive to call twice
 // get user ranking in the default leaderboard by score using rank aggregation
-async function getUserRanking(user: string): Promise<number | null> {
+export async function getUserRanking(user: string): Promise<number | null> {
   let leaderboardID = await getAllTimeLeaderboardID();
   let ranking = await client
     .db(dbName)
@@ -284,7 +283,7 @@ async function getUserRanking(user: string): Promise<number | null> {
   return ranking[0].rank;
 }
 
-async function getCurrentRoundInfo(): Promise<{
+export async function getCurrentRoundInfo(): Promise<{
   lastWinner: undefined | string,
   streak: number,
 }> {
@@ -329,22 +328,3 @@ async function getCurrentRoundInfo(): Promise<{
 
   return { lastWinner, streak };
 }
-
-module.exports = {
-  getSolutionCount,
-  getUserSolveCount,
-  getUserExactSolves,
-  getUserSolveCountForPrompt,
-  getFirstSolutionToPrompt,
-  finishRound,
-  getDefaultGameID,
-  getDefaultGameChannel,
-  getDefaultGameGuild,
-  getAllTimeLeaderboardID,
-  getUserRanking,
-  getCurrentRoundInfo,
-  getReplyMessage,
-  setReplyMessage,
-  getCash,
-  spendCash,
-};

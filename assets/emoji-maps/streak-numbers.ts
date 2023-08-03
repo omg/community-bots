@@ -11,4 +11,4 @@ const emojiMap = {
   "9": "<:e:775293751891066901>"
 };
 
-module.exports = emojiMap;
+export const streakNumbersMap = emojiMap;
