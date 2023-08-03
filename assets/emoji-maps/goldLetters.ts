@@ -1,4 +1,4 @@
-const emojiMap = {
+const goldLetters = {
   "A": "<:e:971184700167188510>",
   "B": "<:e:971193840348332043>",
   "C": "<:e:971193840369283132>",
@@ -42,4 +42,4 @@ const emojiMap = {
   "unknown": "", // TODO - need graphic for unknown
 }
 
-module.exports = emojiMap;
+export default goldLetters;
