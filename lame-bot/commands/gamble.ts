@@ -19,7 +19,10 @@ export const data = new SlashCommandBuilder()
 export const cooldown = 4 * 1000;
 export const tags = ["fun", "annoying"];
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(
+  interaction: CommandInteraction,
+  preferBroadcast: boolean
+) {
   let cash = interaction.options.get("cash").value;
 
   let userCash = await getCash(interaction.user.id);
@@ -27,7 +30,9 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     await replyToInteraction(
       interaction,
       "Gamble",
-      "\n• You don't have enough cash for that. You have " + formatNumber(userCash) + " cash.",
+      "\n• You don't have enough cash for that. You have " +
+        formatNumber(userCash) +
+        " cash.",
       false
     );
     return;
@@ -38,19 +43,31 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   let rolled = Math.floor(Math.random() * max) + 1;
 
   await interaction.reply({
-    content: "<@" + interaction.user.id + "> is gambling **" + formatNumber(cash) + " cash**!"
+    content:
+      "<@" +
+      interaction.user.id +
+      "> is gambling **" +
+      formatNumber(cash) +
+      " cash**!",
   });
 
   setTimeout(async () => {
     await interaction.editReply({
-      content: "https://omg.games/assets/rolling.gif"
+      content: "https://omg.games/assets/rolling.gif",
     });
 
     setTimeout(async () => {
       // edit the reply with @user rolls X/max
       await interaction.editReply({
-        content: "<@" + interaction.user.id + "> rolls **" + formatNumber(rolled) + "/100**."
-          + "\nYou need to roll 88 or higher! You lose **" + formatNumber(cash) + " cash**!"
+        content:
+          "<@" +
+          interaction.user.id +
+          "> rolls **" +
+          formatNumber(rolled) +
+          "/100**." +
+          "\nYou need to roll 88 or higher! You lose **" +
+          formatNumber(cash) +
+          " cash**!",
       });
     }, 1200);
   }, 3000);
