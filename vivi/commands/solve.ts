@@ -1,11 +1,11 @@
-const { replyToInteraction } = require('../../src/command-handler.js');
-const { getSolveLetters } = require('../../src/emoji-renderer.js');
-const { SlashCommandBuilder } = require('discord.js');
-const { formatNumber, shuffle } = require('../../src/utils.js');
+import { replyToInteraction } from '../../src/command-handler.js';
+import { getSolveLetters } from '../../src/emoji-renderer.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { formatNumber, shuffle } from '../../src/utils.js';
 
-const Dictionary = require('../../src/dictionary/dictionary.js');
+import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary.js';
 
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName('solve')
   .setDescription('Solve a prompt!')
   .addStringOption(option =>
@@ -22,14 +22,14 @@ const data = new SlashCommandBuilder()
       }));
 
 // create function to handle the command
-async function execute(interaction, preferBroadcast) {
-  let prompt = Dictionary.cleanWord(interaction.options.get("prompt").value);
+export async function execute(interaction, preferBroadcast) {
+  let prompt = cleanWord(interaction.options.get("prompt").value);
 
   try {
     // cleanWord is called twice here on prompt
-    let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
+    let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await Dictionary.solvePromptWithTimeout(regex, 1300, interaction.user.id);
+    let solutions = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
@@ -69,9 +69,4 @@ async function execute(interaction, preferBroadcast) {
   }
 };
 
-// export the command
-module.exports = {
-  data,
-  execute,
-  broadcastable: true
-};
+export const broadcastable = true;

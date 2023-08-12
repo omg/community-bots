@@ -1,8 +1,8 @@
-const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
-const { registerClientAsCommandHandler } = require('../../src/command-handler');
-const path = require('node:path');
+import { Client, GatewayIntentBits, ActivityType } from 'discord.js';
+import { registerClientAsCommandHandler } from '../../src/command-handler';
+import path from 'node:path';
 
-const viviClient = new Client({
+export const viviClient = new Client({
   intents: [
     GatewayIntentBits.Guilds
   ],
@@ -30,7 +30,3 @@ viviClient.on('ready', () => {
 registerClientAsCommandHandler(viviClient, path.join(__dirname, '../commands'), process.env.VIVI_CLIENT_ID, process.env.VIVI_TOKEN);
 
 //
-
-module.exports = {
-  viviClient
-}

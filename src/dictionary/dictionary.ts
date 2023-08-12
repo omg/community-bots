@@ -1,7 +1,7 @@
-const { fork } = require("child_process");
-const fs = require("node:fs");
-const path = require("path");
-const appRoot = require("app-root-path");
+import { fork } from "child_process";
+import fs from "node:fs";
+import path from "path";
+import appRoot from "app-root-path";
 
 // TODO: pull dictionaries from Vivi API
 try {
@@ -172,7 +172,7 @@ export function SolveWorkerException(message) {
 
 export let solverCache = new Set();
 
-export function solvePromptWithTimeout(promptRegex, timeout, user) {
+export function solvePromptWithTimeout(promptRegex, timeout, user): Promise<any> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
