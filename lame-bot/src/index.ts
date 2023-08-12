@@ -1,2 +1,2 @@
-require("./client.js");
-require("./word-bomb-mini.js");
+require("./client.ts");
+require("./word-bomb-mini.ts");
