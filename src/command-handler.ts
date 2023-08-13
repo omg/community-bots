@@ -171,6 +171,9 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
+    // This is a GuildMember because it's a slash command
+    let member = interaction.member as GuildMember;
+
     let commandName = interaction.commandName;
     let preferBroadcast = isBroadcastChannel(interaction.channel);
     if (commandName === "shout") {
@@ -181,10 +184,8 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     const command = commands.get(commandName);
     if (!command) return;
 
-    // @ts-ignore
-    if (isCommandLimited(interaction.member, command, commandName, interaction.channel)) {
-      // @ts-ignore
-      const timeLeft = Math.ceil(getLimitTime(interaction.member, commandName) / 1000 + 1);
+    if (isCommandLimited(member, command, commandName, interaction.channel)) {
+      const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);
       replyToInteraction(
         interaction,
         "Limit",
@@ -226,8 +227,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     
     setOnCooldown(interaction.user.id, commandName, command.cooldown);
-    // @ts-ignore
-    addLimits(interaction.member, command, commandName, interaction.channel);
+    addLimits(member, command, commandName, interaction.channel);
 
     try {
       await command.execute(interaction, preferBroadcast);
