@@ -1,9 +1,9 @@
-import { replyToInteraction } from '../../src/command-handler.js';
-import { getSolveLetters } from '../../src/emoji-renderer.js';
+import { replyToInteraction } from '../../src/command-handler';
+import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { formatNumber, shuffle } from '../../src/utils.js';
+import { formatNumber, shuffle } from '../../src/utils';
 
-import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary.js';
+import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
