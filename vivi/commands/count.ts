@@ -1,6 +1,6 @@
 import { replyToInteraction } from '../../src/command-handler.js';
 import { getPromptRegexDisplayText } from '../../src/emoji-renderer.js';
-import { SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber } from '../../src/utils.js';
 
 import { cleanWord, solvePromptWithTimeout, getPromptRegexFromPromptSearch } from '../../src/dictionary/dictionary.js';
@@ -21,8 +21,10 @@ export const data = new SlashCommandBuilder()
         value: 'English'
       }));
 
+export const broadcastable = true;
+
 // create function to handle the command
-export async function execute(interaction, preferBroadcast) {
+export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let prompt = cleanWord(interaction.options.get("prompt").value);
   
   try {
@@ -48,5 +50,3 @@ export async function execute(interaction, preferBroadcast) {
     }
   }
 };
-
-export const broadcastable = true;

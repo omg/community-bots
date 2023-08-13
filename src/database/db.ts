@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 // Connection URL
 const url = process.env.MONGO_URL;
 const client = new MongoClient(url, {
-  sslValidate: false,
+  sslValidate: false
 });
 
 // let db;
@@ -135,14 +135,7 @@ export async function getFirstSolutionToPrompt(user, prompt, promptLength) {
 }
 
 // update database after a round is completed
-export async function finishRound(
-  solves,
-  startedAt,
-  prompt,
-  promptWord,
-  promptLength,
-  solutionCount
-) {
+export async function finishRound(solves, startedAt, prompt, promptWord, promptLength, solutionCount) {
   const gameID = await getDefaultGameID();
   const allTimeLeaderboardID = await getAllTimeLeaderboardID();
 
@@ -160,7 +153,7 @@ export async function finishRound(
     solutionCount,
     solution: solves[0].solution,
     usedVivi: solves[0].usedVivi,
-    exact: promptWord === solves[0].solution,
+    exact: promptWord === solves[0].solution
   };
 
   const operations = solves.map((solve) => {
@@ -183,11 +176,11 @@ export async function finishRound(
             exactSolves: isExact && isWinner ? 1 : 0,
             lateSolves: !isWinner ? 1 : 0,
             viviUses: usedVivi ? 1 : 0,
-            jinxes: isJinx ? 1 : 0,
-          },
+            jinxes: isJinx ? 1 : 0
+          }
         },
-        upsert: true,
-      },
+        upsert: true
+      }
     };
   });
 
@@ -268,10 +261,10 @@ export async function getUserRanking(user) {
       {
         $setWindowFields: {
           sortBy: { score: -1 },
-          output: { rank: { $rank: {} } },
-        },
+          output: { rank: { $rank: {} } }
+        }
       },
-      { $match: { user } },
+      { $match: { user } }
     ])
     .toArray();
   if (ranking.length === 0) return null;
@@ -314,7 +307,7 @@ export async function getCurrentRoundInfo() {
       .countDocuments({
         gameID,
         winner: lastWinner,
-        completedAt: { $gte: lastTimeWinnerHasntWon },
+        completedAt: { $gte: lastTimeWinnerHasntWon }
       });
   }
 

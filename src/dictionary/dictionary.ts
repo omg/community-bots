@@ -5,30 +5,12 @@ import appRoot from "app-root-path";
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/dictionaries/english.txt"),
-    "utf8"
-  );
-  var related1String = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/lists/1-related.txt"),
-    "utf8"
-  );
-  var related100String = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/lists/100-related.txt"),
-    "utf8"
-  );
-  var related1000String = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/lists/1000-related.txt"),
-    "utf8"
-  );
-  var related10000String = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/lists/10000-related.txt"),
-    "utf8"
-  );
-  var relatedDoomString = fs.readFileSync(
-    appRoot.resolve("assets/word-lists/lists/doom-related.txt"),
-    "utf8"
-  );
+  var dictionaryString = fs.readFileSync(appRoot.resolve("assets/word-lists/dictionaries/english.txt"), "utf8");
+  var related1String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1-related.txt"), "utf8");
+  var related100String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/100-related.txt"), "utf8");
+  var related1000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8");
+  var related10000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8");
+  var relatedDoomString = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8");
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
 }
@@ -131,10 +113,7 @@ export function getPromptRegexFromPromptSearch(promptQuery) {
     console.log("NOT REGEX");
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp(
-      "^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, ".") + ").*$",
-      "m"
-    );
+    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, ".") + ").*$", "m");
   }
 }
 
@@ -180,11 +159,7 @@ export function solvePromptWithTimeout(promptRegex, timeout, user): Promise<any>
 
     let timeoutId = setTimeout(() => {
       worker.kill();
-      reject(
-        new SolveWorkerException(
-          "Your regex took too long to compute and timed out."
-        )
-      );
+      reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
     }, timeout);
 
     worker.on("message", (solutions) => {
@@ -225,8 +200,8 @@ export function generatePrompt() {
   for (let i = 0; i < requiredCharacters; i++) repeatedRegex += "[^\r\n'-]";
   let regex = new RegExp("(" + repeatedRegex + "[^\r\n'-]*)$", "gm");
 
-  let match;
-  while ((match = regex.exec(dictionaryString))) {
+  let match: RegExpExecArray;
+  while (match = regex.exec(dictionaryString)) {
     solves.push(match[1]);
   }
 
@@ -239,12 +214,10 @@ export function generatePrompt() {
     let blanks = Math.min(promptLength - 2, 2);
     for (let i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
-      promptWord =
-        promptWord.substring(0, rand) +
-        "`" +
-        promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
+      promptWord = promptWord.substring(0, rand) + "`" + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
 
+    // completely unreadable
     let prompt = new RegExp(
       "^.*(" +
         escapeRegExp(
@@ -269,7 +242,7 @@ export function generatePrompt() {
       promptWord: actualPromptWord,
       solutions: solutions.length,
       lengthRequired: lengthRequired,
-      prompt,
+      prompt
     };
   }
 }
@@ -287,9 +260,7 @@ export function getPromptRepeatableText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString =
-    regexString.slice(0, lastParenthesisIndex) +
-    regexString.slice(lastParenthesisIndex + 1);
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");

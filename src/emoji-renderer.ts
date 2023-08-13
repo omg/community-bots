@@ -75,11 +75,7 @@ export function getSolveLetters(solution, promptRegex) {
   let afterPrompt = solution.slice(promptEndIndex);
 
   // combine the matches together with the correct emojiMaps
-  return (
-    getNormalLetters(beforePrompt) +
-    getPromptLetters(promptLetters) +
-    getNormalLetters(afterPrompt)
-  );
+  return getNormalLetters(beforePrompt) + getPromptLetters(promptLetters) + getNormalLetters(afterPrompt);
 }
 
 export function getPromptRegexDisplayText(regex) {
@@ -92,9 +88,7 @@ export function getPromptRegexDisplayText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString =
-    regexString.slice(0, lastParenthesisIndex) +
-    regexString.slice(lastParenthesisIndex + 1);
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
@@ -108,8 +102,7 @@ export function getPromptRegexDisplayText(regex) {
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard)
-    regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 
@@ -127,27 +120,21 @@ export function getPromptRegexText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString =
-    regexString.slice(0, lastParenthesisIndex) +
-    regexString.slice(lastParenthesisIndex + 1);
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
 
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
-    let testDisplayString = displayString.replace(
-      /(?<!\\)(?:(?:\\\\)*)\./g,
-      " "
-    ); // replace all periods that aren't escaped with a space for prompt rendering
+    let testDisplayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
     if (!invalidPromptDisplayRegex.test(testDisplayString)) {
       return displayString;
     }
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard)
-    regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 
@@ -165,27 +152,21 @@ export function getPromptRegexInlineText(regex) {
   regexString = regexString.replace(/\(/, "");
   let lastParenthesisIndex = regexString.lastIndexOf(")");
   // remove the last closing parenthesis from a string
-  regexString =
-    regexString.slice(0, lastParenthesisIndex) +
-    regexString.slice(lastParenthesisIndex + 1);
+  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
 
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
-    let testDisplayString = displayString.replace(
-      /(?<!\\)(?:(?:\\\\)*)\./g,
-      " "
-    ); // replace all periods that aren't escaped with a space for prompt rendering
+    let testDisplayString = displayString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " "); // replace all periods that aren't escaped with a space for prompt rendering
     if (!invalidPromptDisplayRegex.test(testDisplayString)) {
       return displayString;
     }
   }
 
   if (startsWithWildcard) regexString = regexString.slice(2);
-  if (endsWithWildcard)
-    regexString = regexString.slice(0, regexString.length - 2);
+  if (endsWithWildcard) regexString = regexString.slice(0, regexString.length - 2);
   if (!startsWithWildcard) regexString = "^" + regexString;
   if (!endsWithWildcard) regexString = regexString + "$";
 

@@ -1,13 +1,4 @@
-import {
-  Client,
-  Guild,
-  GatewayIntentBits,
-  Partials,
-  ActivityType,
-  Channel,
-  Message,
-  TextChannel,
-} from "discord.js";
+import { Client, Guild, GatewayIntentBits, Partials, ActivityType, Channel, Message, TextChannel, TextBasedChannel, GuildTextBasedChannel } from "discord.js";
 
 import { registerClientAsCommandHandler } from "../../src/command-handler";
 import path from "node:path";
@@ -17,13 +8,13 @@ export const lameBotClient: Client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.MessageContent
   ],
   partials: [Partials.Channel],
-  allowedMentions: { parse: ["users"] },
+  allowedMentions: { parse: ["users"] }
 });
 
-export function updatePresence(): void {
+function updatePresence() {
   lameBotClient.user?.setPresence({
     activities: [
       {
@@ -31,7 +22,7 @@ export function updatePresence(): void {
         type: ActivityType.Playing,
       },
     ],
-    status: "online",
+    status: "online"
   });
   setTimeout(updatePresence, 86400000);
 }
@@ -53,9 +44,7 @@ export async function getGuild(guildID: string): Promise<Guild | undefined> {
   return lameBotClient.guilds.cache.get(guildID);
 }
 
-export async function getChannel(
-  channelID: string
-): Promise<Channel | undefined> {
+export async function getChannel(channelID: string): Promise<Channel | undefined> {
   await waitForReady();
   return lameBotClient.channels.cache.get(channelID);
 }
@@ -88,10 +77,8 @@ export async function sendMessage(
   }
 }
 
-export async function sendMessageAsReply(
-  replyMessage: Message,
-  message: string
-): Promise<Message> {
+// There must be a better way of making it known that this will retry sending the message until it is sent - it is not immediately obvious (same as the function above)
+export async function sendMessageAsReply(replyMessage: Message, message: string): Promise<Message> {
   await waitForReady();
 
   let retryDelay = 500;

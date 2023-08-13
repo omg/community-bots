@@ -14,8 +14,8 @@ process.on("message", (data: SolveData) => {
 
   let solutions = [];
 
-  let match;
-  while ((match = promptRegex.exec(dictionaryString))) {
+  let match: RegExpExecArray;
+  while (match = promptRegex.exec(dictionaryString)) {
     solutions.push(match[0]);
   }
 

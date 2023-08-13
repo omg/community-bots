@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getRemarkEmoji } from '../../src/emoji-renderer';
 import { replyToInteraction } from '../../src/command-handler';
 
@@ -20,11 +20,13 @@ export const data = new SlashCommandBuilder()
         value: 'English'
       }));
 
+export const broadcastable = true;
+
 // TODO - this should really be moved
 const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
 
 // create function to handle the command
-export async function execute(interaction, preferBroadcast) {
+export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let word = cleanWord(interaction.options.get("word").value);
   
   // check if the word only has valid characters
@@ -49,13 +51,4 @@ export async function execute(interaction, preferBroadcast) {
       + '\n' + getRemarkEmoji("bad") + ' Not found** in the English dictionary.'
     , preferBroadcast);
   }
-};
-
-export const broadcastable = true;
-
-// export the command
-module.exports = {
-  data,
-  execute,
-  broadcastable: true
 };

@@ -21,8 +21,7 @@ export function createEnglishList(items) {
   if (items.length === 1) return items[0];
   if (items.length === 2) return items[0] + " and " + items[1];
   let listString = items[0];
-  for (let i = 1; i < items.length; i++)
-    listString += (i == items.length - 1 ? ", and " : ", ") + items[i];
+  for (let i = 1; i < items.length; i++) listString += (i == items.length - 1 ? ", and " : ", ") + items[i];
   return listString;
 }
 
