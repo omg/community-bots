@@ -1,1 +1,1 @@
-require("./client.ts");
+require("./client");
