@@ -1,4 +1,4 @@
-const emojiMap = {
+const absentLetters = {
   "A": "<:e:738317731308503091>",
   "B": "<:e:738317731241132074>",
   "C": "<:e:738317731404972042>",
@@ -42,4 +42,4 @@ const emojiMap = {
   "unknown": "", // TODO - need graphic for unknown
 }
 
-module.exports = emojiMap;
+export default absentLetters;

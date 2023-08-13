@@ -1,11 +1,11 @@
-const { replyToInteraction } = require('../../src/command-handler.js');
-const { getPromptRegexDisplayText } = require('../../src/emoji-renderer.js');
-const { SlashCommandBuilder } = require('discord.js');
-const { formatNumber } = require('../../src/utils.js');
+import { replyToInteraction } from '../../src/command-handler';
+import { getPromptRegexDisplayText } from '../../src/emoji-renderer';
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { formatNumber } from '../../src/utils';
 
-const Dictionary = require('../../src/dictionary/dictionary.js');
+import { cleanWord, solvePromptWithTimeout, getPromptRegexFromPromptSearch } from '../../src/dictionary/dictionary';
 
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName('count')
   .setDescription('Find the amount of solves for a prompt!')
   .addStringOption(option =>
@@ -21,14 +21,16 @@ const data = new SlashCommandBuilder()
         value: 'English'
       }));
 
+export const broadcastable = true;
+
 // create function to handle the command
-async function execute(interaction, preferBroadcast) {
-  let prompt = Dictionary.cleanWord(interaction.options.get("prompt").value);
+export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+  let prompt = cleanWord(interaction.options.get("prompt").value);
   
   try {
-    let regex = Dictionary.getPromptRegexFromPromptSearch(prompt);
+    let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await Dictionary.solvePromptWithTimeout(regex, 1300);
+    let solutions = await solvePromptWithTimeout(regex, 1300, null);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
@@ -47,11 +49,4 @@ async function execute(interaction, preferBroadcast) {
       throw error;
     }
   }
-};
-
-// export the command
-module.exports = {
-  data,
-  execute,
-  broadcastable: true
 };

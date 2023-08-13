@@ -1,10 +1,10 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { getRemarkEmoji } = require('../../src/emoji-renderer.js');
-const { replyToInteraction } = require('../../src/command-handler.js');
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { getRemarkEmoji } from '../../src/emoji-renderer';
+import { replyToInteraction } from '../../src/command-handler';
 
-const Dictionary = require('../../src/dictionary/dictionary.js');
+import { cleanWord, isWord } from '../../src/dictionary/dictionary';
 
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName('check')
   .setDescription('Check if a word is in the dictionary!')
   .addStringOption(option =>
@@ -20,12 +20,14 @@ const data = new SlashCommandBuilder()
         value: 'English'
       }));
 
+export const broadcastable = true;
+
 // TODO - this should really be moved
 const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
 
 // create function to handle the command
-async function execute(interaction, preferBroadcast) {
-  let word = Dictionary.cleanWord(interaction.options.get("word").value);
+export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+  let word = cleanWord(interaction.options.get("word").value);
   
   // check if the word only has valid characters
   if (invalidWordRegex.test(word)) {
@@ -38,7 +40,7 @@ async function execute(interaction, preferBroadcast) {
       '\n• **' + word.substring(0, 20) + '..'
       + '\n' + getRemarkEmoji("bad") + ' Too long** to be a valid English word.'
     , preferBroadcast);
-  } else if (Dictionary.isWord(word)) {
+  } else if (isWord(word)) {
     await replyToInteraction(interaction, "Word Status",
       '\n• **' + word
       + '\n' + getRemarkEmoji("good") + ' Available** on live servers.'
@@ -49,11 +51,4 @@ async function execute(interaction, preferBroadcast) {
       + '\n' + getRemarkEmoji("bad") + ' Not found** in the English dictionary.'
     , preferBroadcast);
   }
-};
-
-// export the command
-module.exports = {
-  data,
-  execute,
-  broadcastable: true
 };

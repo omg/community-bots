@@ -1,4 +1,4 @@
-const emojiMap = {
+const streakNumbers = {
   "0": "<:e:775834581327675402>",
   "1": "<:e:775292858676019220>",
   "2": "<:e:775292858751516692>",
@@ -11,4 +11,4 @@ const emojiMap = {
   "9": "<:e:775293751891066901>"
 };
 
-module.exports = emojiMap;
+export default streakNumbers;

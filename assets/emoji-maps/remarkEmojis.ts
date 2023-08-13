@@ -1,4 +1,4 @@
-const emojiMap = {
+const remarkEmojis = {
   solvedIt: ['🎊'],
   roundEnded: ['<:e:775931479570120744>', '<:e:853372979978829884>'],
   jinx: ['<:e:1035636160548044871>'],
@@ -33,4 +33,4 @@ const emojiMap = {
   lower: ['<:e:775287808063569930>']
 };
 
-module.exports = emojiMap;
+export default remarkEmojis;

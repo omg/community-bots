@@ -1,65 +1,70 @@
-const { fork } = require('child_process');
-const fs = require('node:fs');
-const path = require('path');
-const appRoot = require('app-root-path');
+import { fork } from "child_process";
+import fs from "node:fs";
+import path from "path";
+import appRoot from "app-root-path";
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync(appRoot.resolve('assets/word-lists/dictionaries/english.txt'), 'utf8');
-  var related1String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/1-related.txt'), 'utf8');
-  var related100String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/100-related.txt'), 'utf8');
-  var related1000String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/1000-related.txt'), 'utf8');
-  var related10000String = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/10000-related.txt'), 'utf8');
-  var relatedDoomString = fs.readFileSync(appRoot.resolve('assets/word-lists/lists/doom-related.txt'), 'utf8');
+  var dictionaryString = fs.readFileSync(appRoot.resolve("assets/word-lists/dictionaries/english.txt"), "utf8");
+  var related1String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1-related.txt"), "utf8");
+  var related100String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/100-related.txt"), "utf8");
+  var related1000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8");
+  var related10000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8");
+  var relatedDoomString = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8");
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
 }
 
 // TODO holy copy-paste batman
 
-function is1Related(word) {
+export function is1Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related1String);
 }
 
-function is100Related(word) {
+export function is100Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related100String);
 }
 
-function is1000Related(word) {
+export function is1000Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related1000String);
 }
 
-function is10000Related(word) {
+export function is10000Related(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related10000String);
 }
 
-function isDoomRelated(word) {
+export function isDoomRelated(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(relatedDoomString);
 }
 
 // is standardize the best name for this?
-function standardizeWord(word) {
-  return word.toUpperCase().replace(/[‘’]/g, "'").replace(/\-/g, '\-').replace(/…/g, '...').trim(); // TODO: trimming might ruin some searches
+export function standardizeWord(word) {
+  return word
+    .toUpperCase()
+    .replace(/[‘’]/g, "'")
+    .replace(/\-/g, "-")
+    .replace(/…/g, "...")
+    .trim(); // TODO: trimming might ruin some searches
 }
 
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 
-function PromptException(message) {
-   this.message = message;
-   this.name = "PromptException";
+export function PromptException(message) {
+  this.message = message;
+  this.name = "PromptException";
 }
 
-function getPromptRegexFromPromptSearch(promptQuery) {
+export function getPromptRegexFromPromptSearch(promptQuery) {
   let cleanQuery = standardizeWord(promptQuery);
   let regexResult = regexTest.exec(cleanQuery);
-  
+
   // TODO find args in the query
-  
+
   if (regexResult) {
     // This has regex
 
@@ -108,20 +113,20 @@ function getPromptRegexFromPromptSearch(promptQuery) {
     console.log("NOT REGEX");
 
     // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, '.') + ").*$", "m");
+    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, ".") + ").*$", "m");
   }
 }
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
-function isWord(word) {
+export function isWord(word) {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(dictionaryString);
 }
 
-function solvePrompt(promptRegex) {
+export function solvePrompt(promptRegex) {
   // recreate the regex with the global flag
   if (!promptRegex.flags.includes("g")) {
     promptRegex = new RegExp(promptRegex.source, promptRegex.flags + "g");
@@ -132,70 +137,70 @@ function solvePrompt(promptRegex) {
   let solutions = [];
 
   let match;
-  while (match = promptRegex.exec(dictionaryString)) {
+  while ((match = promptRegex.exec(dictionaryString))) {
     solutions.push(match[0]);
   }
-  
+
   return solutions;
 }
 
-function SolveWorkerException(message) {
+export function SolveWorkerException(message) {
   this.message = message;
   this.name = "SolveWorkerException";
 }
 
-let solverCache = new Set();
+export let solverCache = new Set();
 
-function solvePromptWithTimeout(promptRegex, timeout, user) {
+export function solvePromptWithTimeout(promptRegex, timeout, user): Promise<any> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
-    const worker = fork(path.join(__dirname, 'solve-worker.js'));
+    const worker = fork(path.join(__dirname, "solve-worker.ts"));
 
     let timeoutId = setTimeout(() => {
       worker.kill();
       reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
     }, timeout);
-    
-    worker.on('message', (solutions) => {
+
+    worker.on("message", (solutions) => {
       clearTimeout(timeoutId);
       worker.kill();
       resolve(solutions);
     });
-    
-    worker.on('error', (e) => {
+
+    worker.on("error", (e) => {
       clearTimeout(timeoutId);
       worker.kill();
       reject(e);
     });
-    
-    worker.on('exit', (code) => {
+
+    worker.on("exit", (code) => {
       if (code !== 0) {
         clearTimeout(timeoutId);
-        reject(new SolveWorkerException('Your regex failed to compute.'));
+        reject(new SolveWorkerException("Your regex failed to compute."));
       }
     });
-    
+
     worker.send({ dictionaryString, regexSource: promptRegex.source });
   });
 }
 
 // TODO move this to utils
-function randInt(min, max) {
+export function randInt(min, max): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 // TODO: remake this because it's inefficient
-function generatePrompt() {
+export function generatePrompt() {
   let promptLength = randInt(3, 5);
   let requiredCharacters = promptLength + 2;
 
   let solves = [];
-  let repeatedRegex = '';
-  for (let i = 0; i < requiredCharacters; i++) repeatedRegex += '[^\r\n\'\-]';
-  let regex = new RegExp('(' + repeatedRegex + '[^\r\n\'\-]*)$', 'gm');
+  let repeatedRegex = "";
+  for (let i = 0; i < requiredCharacters; i++) repeatedRegex += "[^\r\n'-]";
+  let regex = new RegExp("(" + repeatedRegex + "[^\r\n'-]*)$", "gm");
 
-  let match;
+  let match: RegExpExecArray;
   while (match = regex.exec(dictionaryString)) {
     solves.push(match[1]);
   }
@@ -209,10 +214,18 @@ function generatePrompt() {
     let blanks = Math.min(promptLength - 2, 2);
     for (let i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
-      promptWord = promptWord.substring(0, rand) + '`' + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
+      promptWord = promptWord.substring(0, rand) + "`" + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
 
-    let prompt = new RegExp("^.*(" + escapeRegExp(promptWord.slice(promptSubStart, promptSubStart + promptLength)).replace(/`/g, '.') + ").*$", "m");
+    // completely unreadable
+    let prompt = new RegExp(
+      "^.*(" +
+        escapeRegExp(
+          promptWord.slice(promptSubStart, promptSubStart + promptLength)
+        ).replace(/`/g, ".") +
+        ").*$",
+      "m"
+    );
     console.log(prompt);
 
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
@@ -230,14 +243,14 @@ function generatePrompt() {
       solutions: solutions.length,
       lengthRequired: lengthRequired,
       prompt
-    }
+    };
   }
 }
 
 const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 
 // TODO: i'm going to lose my mind within the next 5 minutes
-function getPromptRepeatableText(regex) {
+export function getPromptRepeatableText(regex) {
   // get the string of the regex
   let regexString = regex.source;
   // remove the anchors from the start and end of the regex
@@ -251,7 +264,7 @@ function getPromptRepeatableText(regex) {
 
   let startsWithWildcard = regexString.startsWith(".*");
   let endsWithWildcard = regexString.endsWith(".*");
-  
+
   if (startsWithWildcard && endsWithWildcard) {
     let displayString = regexString.slice(2, regexString.length - 2);
     if (!invalidPromptDisplayRegex.test(displayString)) {
@@ -260,19 +273,5 @@ function getPromptRepeatableText(regex) {
   }
 }
 
-module.exports = {
-  cleanWord: standardizeWord,
-  getPromptRegexFromPromptSearch,
-  isWord,
-  solvePrompt,
-  solvePromptWithTimeout,
-  generatePrompt,
-  escapeRegExp,
-  getPromptRepeatableText,
-  is1Related,
-  is100Related,
-  is1000Related,
-  is10000Related,
-  isDoomRelated,
-  solverCache
-}
+// maybe just change the function name tbh
+export const cleanWord = standardizeWord;

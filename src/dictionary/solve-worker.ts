@@ -1,4 +1,9 @@
-process.on('message', (data) => {
+type SolveData = {
+  dictionaryString: string;
+  regexSource: RegExp;
+};
+
+process.on("message", (data: SolveData) => {
   const { dictionaryString, regexSource } = data;
   const promptRegex = new RegExp(regexSource, "gm");
 
@@ -9,7 +14,7 @@ process.on('message', (data) => {
 
   let solutions = [];
 
-  let match;
+  let match: RegExpExecArray;
   while (match = promptRegex.exec(dictionaryString)) {
     solutions.push(match[0]);
   }
