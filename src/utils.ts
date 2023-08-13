@@ -1,12 +1,12 @@
-export function formatNumber(x): String {
+export function formatNumber(x): string {
   return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function formatPercentage(x): String {
+export function formatPercentage(x): string {
   return (x * 100).toFixed(1) + "%";
 }
 
-export function formatPlacement(x: number): String {
+export function formatPlacement(x: number): string {
   let checker = BigInt(x) % BigInt(100);
   if (checker > 10 && checker < 20) return x + "th";
   checker %= BigInt(10);
@@ -45,6 +45,6 @@ export function shuffle(array) {
   return array;
 }
 
-export function escapeDiscordMarkdown(string: String) {
+export function escapeDiscordMarkdown(string: string) {
   return string.replace(/[\\`_~\*\|:#@><-]/g, "\\$&");
 }
