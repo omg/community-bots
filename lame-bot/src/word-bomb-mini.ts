@@ -1,53 +1,10 @@
-import {
-  getCurrentRoundInfo,
-  getAllTimeLeaderboardID,
-  getUserRanking,
-  getSolutionCount,
-  getUserSolveCount,
-  getDefaultGameChannel,
-  finishRound,
-  getUserExactSolves,
-  getUserSolveCountForPrompt,
-  getFirstSolutionToPrompt,
-  getDefaultGameGuild,
-  getReplyMessage,
-  setReplyMessage,
-} from "../../src/database/db";
-import {
-  isWord,
-  generatePrompt,
-  solverCache,
-  cleanWord,
-  escapeRegExp,
-  getPromptRepeatableText,
-  is1Related,
-  is1000Related,
-  is10000Related,
-  is100Related,
-  isDoomRelated,
-} from "../../src/dictionary/dictionary";
-import {
-  getRemarkEmoji,
-  getPromptRegexDisplayText,
-  getPromptRegexText,
-  getPromptRegexInlineText,
-  getStreakNumbers,
-  getSolveLetters,
-} from "../../src/emoji-renderer";
-import {
-  formatNumber,
-  formatPlacement,
-  escapeDiscordMarkdown,
-  createEnglishList,
-  formatPercentage,
-} from "../../src/utils";
-import {
-  lameBotClient,
-  getChannel,
-  sendMessage,
-  getGuild,
-  sendMessageAsReply,
-} from "./client";
+import { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount, getDefaultGameChannel, finishRound, getUserExactSolves,
+  getUserSolveCountForPrompt, getFirstSolutionToPrompt, getDefaultGameGuild, getReplyMessage, setReplyMessage } from "../../src/database/db";
+import { isWord, generatePrompt, solverCache, cleanWord, escapeRegExp, getPromptRepeatableText, is1Related, is1000Related, is10000Related, is100Related,
+  isDoomRelated } from "../../src/dictionary/dictionary";
+import { getRemarkEmoji, getPromptRegexDisplayText, getPromptRegexText, getPromptRegexInlineText, getStreakNumbers, getSolveLetters } from "../../src/emoji-renderer";
+import { formatNumber, formatPlacement, escapeDiscordMarkdown, createEnglishList, formatPercentage } from "../../src/utils";
+import { lameBotClient, getChannel, sendMessage, getGuild, sendMessageAsReply } from "./client";
 
 let guild;
 let wordBombMiniChannel;
@@ -84,7 +41,7 @@ const REMARK = {
   // round remarks
   solveStreak: 18,
   usedSolver: 17,
-  promptOrigin: 16,
+  promptOrigin: 16
 };
 
 let remarks;
@@ -154,16 +111,11 @@ async function startRound() {
 
   await sendMessageAsReply(
     replyMessage,
-    getRemarkEmoji("bomb") +
-      " **Quick!** Type a word containing:" +
-      "\n\n" +
-      getPromptRegexDisplayText(prompt) +
-      " ***｡✲ﾟ** (" +
-      formatNumber(solutions) +
-      (solutions === 1 ? " solution)" : " solutions)") +
-      (lengthRequired
-        ? "\n\n• Must be **" + promptWord.length + "** characters!"
-        : "")
+    (
+      getRemarkEmoji("bomb") + " **Quick!** Type a word containing:" +
+      "\n\n" + getPromptRegexDisplayText(prompt) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") +
+      (lengthRequired ? "\n\n• Must be **" + promptWord.length + "** characters!" : "")
+    )
   );
 
   // lameBotClient.user.setPresence({
