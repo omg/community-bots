@@ -130,7 +130,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   const commands: Collection<string, BotCommand> = new Collection();
   const commandFiles = fs
     .readdirSync(commandFolder)
-    .filter((file) => file.endsWith(".js"));
+    .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 
   const JSONcommands = [];
   let broadcastCommand = {
