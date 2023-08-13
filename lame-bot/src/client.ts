@@ -51,22 +51,29 @@ export async function getChannel(channelID: string): Promise<Channel | undefined
 
 // async function to send a message to a channel and wait for it to be sent, retrying with backoff with a maximum length of 5 seconds
 // yo this is VILE please god remove this
-export async function sendMessage(
-  channel: TextChannel | string,
-  message: string
-): Promise<Message> {
+export async function sendMessage(channel: GuildTextBasedChannel | string, message: string): Promise<Message> {
   await waitForReady();
 
   if (typeof channel === "string") {
     // FIXME: see issue #84
-    // @ts-ignore
-    channel = await getChannel(channel);
+    let queriedChannel = await getChannel(channel);
+
+    // Throwing an error may now cause issues, but we'll see if this ever causes problems
+    if (!queriedChannel) {
+      throw new Error("Channel not found");
+    }
+
+    // Check if the channel is a GuildTextBasedChannel in the most hacky way possible
+    if (!("send" in queriedChannel)) {
+      throw new Error("Channel is not a GuildTextBasedChannel");
+    }
+
+    channel = queriedChannel as GuildTextBasedChannel;
   }
 
   let retryDelay = 500;
   while (true) {
     try {
-      // @ts-ignore, send is not a function for undefined, causes error
       return await channel.send(message);
     } catch (error) {
       console.error(error);
