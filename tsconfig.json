@@ -13,7 +13,9 @@
       "lame-bot/**/*.ts",
       "lame-bot/**/*.js",
       "vivi/**/*.ts",
-      "vivi/**/*.js"
+      "vivi/**/*.js",
+      "sleuth/**/*.ts",
+      "sleuth/**/*.js",
   ],
   "exclude": [
       "node_modules"
