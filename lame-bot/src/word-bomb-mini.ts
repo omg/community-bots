@@ -150,7 +150,7 @@ async function startRound() {
 })();
 
 function getCleanName(name) {
-  let cleanName = escapeDiscordMarkdown(name.replace(/﷽/g, ""));
+  let cleanName = escapeDiscordMarkdown(name.replace(/﷽𒐫𒈙⸻꧅ဪ/g, ""));
   if (cleanName === "") {
     if (name.length === 0) {
       return "Lame Member";
