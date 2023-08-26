@@ -1,8 +1,13 @@
-import { ApplicationCommandPermissionType, ApplicationCommandPermissions } from "discord.js";
+import { ApplicationCommandPermissionType, ApplicationCommandPermissions, Client, GuildBasedChannel } from "discord.js";
 
+// have constants such as
 // noGameChannels, enforceLameLock, enforceCommandLock, noChatChannels, noVoiceChannels, etc.
+// in the future
 
-export function allChannels(guildID: string, permission: boolean): ApplicationCommandPermissions {
+const guildID = process.env.GUILD_ID;
+
+
+export function allChannels(permission: boolean): ApplicationCommandPermissions {
   return {
     id: (BigInt(guildID) - BigInt(1)).toString(),
     type: ApplicationCommandPermissionType.Channel,
@@ -10,7 +15,7 @@ export function allChannels(guildID: string, permission: boolean): ApplicationCo
   }
 }
 
-export function everyone(guildID: string, permission: boolean): ApplicationCommandPermissions {
+export function everyone(permission: boolean): ApplicationCommandPermissions {
   return {
     id: guildID,
     type: ApplicationCommandPermissionType.Role,
@@ -34,38 +39,38 @@ export function role(roleID: string, permission: boolean): ApplicationCommandPer
   }
 }
 
-export function allChannelsExcept(guildID: string, channelID: string[] | string): ApplicationCommandPermissions[] {
+export function allChannelsExcept(channelID: string[] | string): ApplicationCommandPermissions[] {
   if (typeof channelID === "string") channelID = [channelID];
 
   return [
-    allChannels(guildID, true),
+    allChannels(true),
     ...channelID.map(id => channel(id, false))
   ];
 }
 
-export function everyoneExcept(guildID: string, roleID: string[] | string): ApplicationCommandPermissions[] {
+export function everyoneExcept(roleID: string[] | string): ApplicationCommandPermissions[] {
   if (typeof roleID === "string") roleID = [roleID];
 
   return [
-    everyone(guildID, true),
+    everyone(true),
     ...roleID.map(id => role(id, false))
   ];
 }
 
-export function onlyTheseChannels(guildID: string, channelID: string[] | string): ApplicationCommandPermissions[] {
+export function onlyTheseChannels(channelID: string[] | string): ApplicationCommandPermissions[] {
   if (typeof channelID === "string") channelID = [channelID];
 
   return [
-    everyone(guildID, false),
+    everyone(false),
     ...channelID.map(id => channel(id, true))
   ];
 }
 
-export function onlyTheseRoles(guildID: string, roleID: string[] | string): ApplicationCommandPermissions[] {
+export function onlyTheseRoles(roleID: string[] | string): ApplicationCommandPermissions[] {
   if (typeof roleID === "string") roleID = [roleID];
 
   return [
-    everyone(guildID, false),
+    everyone(false),
     ...roleID.map(id => role(id, true))
   ];
 }
