@@ -47,15 +47,14 @@ export function allChannels(): PermissionsObject {
 
 type PermissionsList = PermissionsObject[] | PermissionsObject;
 
-export type Permissions = {
-  roles?: {
-    allowed: PermissionsList,
-    denied: PermissionsList
-  },
-  channels?: {
+type Overrides = {
     allowed: PermissionsList,
     denied: PermissionsList
   }
+
+export type Permissions = {
+  roles?: Overrides,
+  channels?: Overrides
 }
 
 type RateLimit = {
