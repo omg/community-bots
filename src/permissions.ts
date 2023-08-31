@@ -29,14 +29,14 @@ export function role(roleName: string): PermissionsObject {
 export function everyone(): PermissionsObject {
   return {
     type: "role",
-    name: "@everyone"
+    name: "*"
   }
 }
 
 export function allChannels(): PermissionsObject {
   return {
     type: "channel",
-    name: "@all"
+    name: "*"
   }
 }
 
