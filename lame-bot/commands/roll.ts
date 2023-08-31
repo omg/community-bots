@@ -37,7 +37,7 @@ export function getRateLimits(): RateLimits {
         max: 4
       },
       {
-        roles: role("reputable"),
+        roles: role("reliable"),
         window: 60 * 20,
         max: 20
       }
