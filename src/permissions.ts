@@ -40,6 +40,35 @@ export function allChannels(): PermissionsObject {
   }
 }
 
+
+export function allChannelsExcept(channels: PermissionsList): Overrides {
+  return {
+    allowed: allChannels(),
+    denied: channels
+  };
+}
+
+export function everyoneExcept(roles: PermissionsList): Overrides {
+  return {
+    allowed: everyone(),
+    denied: roles
+  }
+}
+
+export function onlyTheseChannels(channels: PermissionsList): Overrides {
+  return {
+    allowed: channels,
+    denied: allChannels()
+  }
+}
+
+export function onlyTheseRoles(roles: PermissionsList): Overrides {
+  return {
+    allowed: roles,
+    denied: everyone()
+  }
+}
+
 // Everyone and all channels
 
 // everyone: guildID
@@ -48,9 +77,9 @@ export function allChannels(): PermissionsObject {
 type PermissionsList = PermissionsObject[] | PermissionsObject;
 
 type Overrides = {
-    allowed: PermissionsList,
-    denied: PermissionsList
-  }
+  allowed: PermissionsList,
+  denied: PermissionsList
+}
 
 export type Permissions = {
   roles?: Overrides,
