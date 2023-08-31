@@ -1,6 +1,6 @@
 // Specific channels, categories, and roles
 
-type PermissionsObject = {
+export type PermissionsObject = {
   type: "channel" | "category" | "role",
   name: string,
 }
@@ -74,9 +74,9 @@ export function onlyTheseRoles(roles: PermissionsList): Overrides {
 // everyone: guildID
 // all channels: guildID - 1
 
-type PermissionsList = PermissionsObject[] | PermissionsObject;
+export type PermissionsList = PermissionsObject[] | PermissionsObject;
 
-type Overrides = {
+export type Overrides = {
   allowed: PermissionsList,
   denied: PermissionsList
 }
@@ -86,7 +86,7 @@ export type Permissions = {
   channels?: Overrides
 }
 
-type RateLimit = {
+export type RateLimit = {
   roles: PermissionsList,
   window: number,
   max: number
