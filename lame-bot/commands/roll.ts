@@ -1,5 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { Permissions, RateLimits, allChannels, category, everyone, role } from "../../src/permissions";
+import { Permissions, RateLimits, allChannelsExcept, category, everyone, role } from "../../src/permissions";
 import { formatNumber } from "../../src/utils";
 
 export const data = new SlashCommandBuilder()
@@ -16,13 +16,10 @@ export const data = new SlashCommandBuilder()
 
 export function getPermissions(): Permissions {
   return {
-    channels: {
-      allowed: allChannels(),
-      denied: [
-        category("Dictionary Contributions"),
-        category("Lame Land")
-      ]
-    }
+    channels: allChannelsExcept([
+      category("Dictionary Contributions"),
+      category("Lame Land")
+    ])
   }
 }
 
