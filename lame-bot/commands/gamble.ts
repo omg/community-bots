@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-
+import { Permissions, RateLimits, allChannels, category, everyone, role } from "../../src/permissions";
 import { replyToInteraction } from "../../src/command-handler";
 import { formatNumber } from "../../src/utils";
 import { getCash, spendCash } from "../../src/database/db";
@@ -15,6 +15,35 @@ export const data = new SlashCommandBuilder()
       .setMinValue(1)
       .setRequired(true)
   );
+
+export function getPermissions(): Permissions {
+  return {
+    roles: {
+      denied: everyone(),
+      allowed: role("regular")
+    },
+    channels: {
+      allowed: allChannels(),
+      denied: [
+        category("Dictionary Contributions"),
+        category("Lame Land")
+      ]
+    }
+  }
+}
+
+export function getRateLimits(): RateLimits {
+  return {
+    limits: [
+      {
+        roles: everyone(),
+        window: 60 * 10,
+        max: 3
+      }
+    ],
+    includeBotsChannel: false
+  }
+}
 
 export const cooldown = 4 * 1000;
 export const tags = ["fun", "annoying"];

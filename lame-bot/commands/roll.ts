@@ -1,4 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { Permissions, RateLimits, allChannels, category, everyone, role } from "../../src/permissions";
 import { formatNumber } from "../../src/utils";
 
 export const data = new SlashCommandBuilder()
@@ -13,25 +14,43 @@ export const data = new SlashCommandBuilder()
       .setRequired(false)
   );
 
+export function getPermissions(): Permissions {
+  return {
+    channels: {
+      allowed: allChannels(),
+      denied: [
+        category("Dictionary Contributions"),
+        category("Lame Land")
+      ]
+    }
+  }
+}
+
+export function getRateLimits(): RateLimits {
+  return {
+    limits: [
+      {
+        roles: everyone(),
+        window: 60 * 10,
+        max: 2
+      },
+      {
+        roles: role("regular"),
+        window: 60 * 5,
+        max: 4
+      },
+      {
+        roles: role("reputable"),
+        window: 60 * 20,
+        max: 20
+      }
+    ],
+    includeBotsChannel: false
+  }
+}
+
 export const cooldown = 8 * 1000;
 export const type = ["fun", "annoying"];
-
-export const limits = [];
-limits[0] = {
-  max: 2,
-  interval: 10 * 60 * 1000,
-  includeBotsChannel: false
-};
-limits[1] = {
-  max: 4,
-  interval: 5 * 60 * 1000,
-  includeBotsChannel: false
-};
-limits[2] = {
-  max: 20,
-  interval: 20 * 60 * 1000,
-  includeBotsChannel: false
-};
 
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let max = interaction.options.get("max")?.value as number ?? 10;
