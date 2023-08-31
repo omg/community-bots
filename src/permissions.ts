@@ -1,105 +1,70 @@
-import { ApplicationCommandPermissionType, ApplicationCommandPermissions, Client, GuildBasedChannel } from "discord.js";
+// Specific channels, categories, and roles
 
-// have constants such as
-// noGameChannels, enforceLameLock, enforceCommandLock, noChatChannels, noVoiceChannels, etc.
-// in the future
-
-const guildID = process.env.GUILD_ID;
-
-export function getChannelIDsInCategoryID(client: Client, category: string): string[] {
-  let guild = client.guilds.cache.get(process.env.GUILD_ID);
-  let channels = guild.channels.cache.filter((channel: GuildBasedChannel) => channel.isTextBased() && channel.parentId === category);
-  return channels.map(c => c.id);
+type PermissionsObject = {
+  type: "channel" | "category" | "role",
+  name: string,
 }
 
-export function getChannelIDsInCategoryName(client: Client, category: string): string[] {
-  let guild = client.guilds.cache.get(process.env.GUILD_ID);
-  let channels = guild.channels.cache.filter((channel: GuildBasedChannel) => channel.isTextBased() && channel.parent?.name === category);
-  return channels.map(c => c.id);
-}
-
-export function getChannelIDsByChannelName(client: Client, name: string): string[] {
-  let guild = client.guilds.cache.get(process.env.GUILD_ID);
-  let channels = guild.channels.cache.filter((channel: GuildBasedChannel) => channel.isTextBased() && channel.name === name);
-  return channels.map(c => c.id);
-}
-
-export function allChannels(permission: boolean): ApplicationCommandPermissions {
+export function channel(channelName: string): PermissionsObject {
   return {
-    id: (BigInt(guildID) - BigInt(1)).toString(),
-    type: ApplicationCommandPermissionType.Channel,
-    permission: permission
+    type: "channel",
+    name: channelName
   }
 }
 
-export function everyone(permission: boolean): ApplicationCommandPermissions {
+export function category(categoryName: string): PermissionsObject {
   return {
-    id: guildID,
-    type: ApplicationCommandPermissionType.Role,
-    permission: permission
+    type: "category",
+    name: categoryName
   }
 }
 
-export function channel(channelID: string, permission: boolean): ApplicationCommandPermissions {
+export function role(roleName: string): PermissionsObject {
   return {
-    id: channelID,
-    type: ApplicationCommandPermissionType.Channel,
-    permission: permission
+    type: "role",
+    name: roleName
   }
 }
 
-export function role(roleID: string, permission: boolean): ApplicationCommandPermissions {
+export function everyone(): PermissionsObject {
   return {
-    id: roleID,
-    type: ApplicationCommandPermissionType.Role,
-    permission: permission
+    type: "role",
+    name: "@everyone"
   }
 }
 
-export function roleFromName(client: Client, roleName: string, permission: boolean): ApplicationCommandPermissions {
-  let guild = client.guilds.cache.get(process.env.GUILD_ID);
-  let role = guild.roles.cache.find(r => r.name === roleName);
-  if (!role) return null;
-
+export function allChannels(): PermissionsObject {
   return {
-    id: role.id,
-    type: ApplicationCommandPermissionType.Role,
-    permission: permission
+    type: "channel",
+    name: "@all"
   }
 }
 
-export function allChannelsExcept(channelID: string[] | string): ApplicationCommandPermissions[] {
-  if (typeof channelID === "string") channelID = [channelID];
+// Everyone and all channels
 
-  return [
-    allChannels(true),
-    ...channelID.map(id => channel(id, false))
-  ];
+// everyone: guildID
+// all channels: guildID - 1
+
+type PermissionsList = PermissionsObject[] | PermissionsObject;
+
+export type Permissions = {
+  roles?: {
+    allowed: PermissionsList,
+    denied: PermissionsList
+  },
+  channels?: {
+    allowed: PermissionsList,
+    denied: PermissionsList
+  }
 }
 
-export function everyoneExcept(roleID: string[] | string): ApplicationCommandPermissions[] {
-  if (typeof roleID === "string") roleID = [roleID];
-
-  return [
-    everyone(true),
-    ...roleID.map(id => role(id, false))
-  ];
+type RateLimit = {
+  roles: PermissionsList,
+  window: number,
+  max: number
 }
 
-export function onlyTheseChannels(channelID: string[] | string): ApplicationCommandPermissions[] {
-  if (typeof channelID === "string") channelID = [channelID];
-
-  return [
-    everyone(false),
-    ...channelID.map(id => channel(id, true))
-  ];
-}
-
-export function onlyTheseRoles(roleID: string[] | string): ApplicationCommandPermissions[] {
-  if (typeof roleID === "string") roleID = [roleID];
-
-  return [
-    everyone(false),
-    ...roleID.map(id => role(id, true))
-  ];
+export type RateLimits = {
+  limits?: RateLimit[],
+  includeBotsChannel?: boolean
 }
