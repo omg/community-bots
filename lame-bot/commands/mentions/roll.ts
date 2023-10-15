@@ -11,7 +11,7 @@ export const limits = roll.limits;
 export const index = 20;
 
 export function matches(text: string) {
-  return /%/i.test(text) || /cha?nce?s?/i.test(text) || /pe?rce?nt/i.test(text);
+  return /%/i.test(text);
 }
 
 export async function execute(message: Message, text: string) {
