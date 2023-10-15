@@ -1,6 +1,7 @@
-import { Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Routes } from "discord.js";
+import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
 import fs from "node:fs";
+import { escapeDiscordMarkdown } from "./utils";
 
 const COOLDOWN_TIME = 2000;
 const commandCooldown = new Map();
@@ -14,12 +15,21 @@ type CommandLimit = {
   includeBotsChannel: boolean;
 }
 
-type BotCommand = {
-  data: any;
+type BaseCommand = {
   cooldown: number;
   limits?: CommandLimit[];
   tags?: string[];
+}
+
+type BotCommand = BaseCommand & {
+  data: any;
   execute: (interaction: any, preferBroadcast: boolean) => Promise<void>;
+}
+
+type MentionCommand = BaseCommand & {
+  NAME_DUMB: string; // temporarily required
+  matches: (text: string) => boolean;
+  execute: (message: Message, text: string) => Promise<void>;
 }
 
 function commandToBroadcastOption(command: BotCommand) {
@@ -49,7 +59,7 @@ function getMemberLevel(member: GuildMember) {
   return 0;
 }
 
-function getCommandLimitsFor(member: GuildMember, command: BotCommand): CommandLimit {
+function getCommandLimitsFor(member: GuildMember, command: BaseCommand): CommandLimit {
   if (!command.limits) return undefined;
   const memberLevel = getMemberLevel(member);
   let limit: CommandLimit;
@@ -66,7 +76,7 @@ function areLimitsIgnored(limit: CommandLimit, channel: GuildTextBasedChannel) {
   return channel.name.toLowerCase().includes("roll") || isBroadcastChannel(channel);
 }
 
-function isCommandLimited(member: GuildMember, command: BotCommand, commandName: string, channel: GuildTextBasedChannel) {
+function isCommandLimited(member: GuildMember, command: BaseCommand, commandName: string, channel: GuildTextBasedChannel) {
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return false;
 
@@ -88,7 +98,7 @@ function getLimitTime(member: GuildMember, commandName: string) {
   return Math.max(limitEnd - Date.now(), 0);
 }
 
-function addLimits(member: GuildMember, command: BotCommand, commandName: string, channel: GuildTextBasedChannel) {
+function addLimits(member: GuildMember, command: BaseCommand, commandName: string, channel: GuildTextBasedChannel) {
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return;
 
@@ -128,8 +138,14 @@ function secondsToEnglish(seconds: number) {
 
 export function registerClientAsCommandHandler(client: Client, commandFolder: string, clientID: string, token: string) {
   const commands: Collection<string, BotCommand> = new Collection();
+  const mentionCommands: Collection<string, MentionCommand> = new Collection();
+
   const commandFiles = fs
     .readdirSync(commandFolder)
+    .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
+
+  const mentionCommandFiles = fs
+    .readdirSync(commandFolder + "/mentions")
     .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 
   const JSONcommands = [];
@@ -154,6 +170,14 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     }
   }
 
+  for (const file of mentionCommandFiles) {
+    const command = require(`${commandFolder}/mentions/${file}`);
+    // check if matches and execute are defined in command
+    if (command.matches && command.execute) {
+      mentionCommands.set(command.name, command);
+    }
+  }
+
   if (broadcastCommand.options.length > 0) JSONcommands.push(broadcastCommand);
 
   const rest = new REST({ version: "10" }).setToken(token);
@@ -167,6 +191,41 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       console.error(error);
     }
   })();
+
+  client.on(Events.MessageCreate, async (message) => {
+    if (!message.member) return;
+    if (message.author.bot) return;
+    if (!message.guild) return;
+    if (message.channel.type !== ChannelType.GuildText) return;
+    
+    // check if it mentions the bot
+    if (!message.mentions.has(client.user.id)) return;
+
+    let member = message.member as GuildMember;
+    let channel = message.channel as GuildTextBasedChannel;
+
+    // replace the mention with nothing and trim the message, removing double spaces too
+    let text = escapeDiscordMarkdown(message.content.replace("<@" + client.user.id + ">", "").replace(/ +/g, " ").trim());
+    
+    for (const [, command] of mentionCommands) {
+      if (command.matches(text)) {
+        console.log(command.NAME_DUMB);
+        if (isCommandLimited(member, command, command.NAME_DUMB, channel)) return;
+        if (isOnCooldown(member.id, command.NAME_DUMB)) return;
+        if (isOnCooldown(member.id)) return;
+        
+        setOnCooldown(message.member.id, command.NAME_DUMB, command.cooldown);
+        addLimits(message.member, command, command.NAME_DUMB, message.channel);
+
+        try {
+          await command.execute(message, text);
+        } catch (error) {
+          console.error(error);
+        }
+        return;
+      }
+    }
+  });
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -183,6 +242,8 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     const command = commands.get(commandName);
     if (!command) return;
+
+    console.log(commandName);
 
     if (isCommandLimited(member, command, commandName, interaction.channel)) {
       const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);

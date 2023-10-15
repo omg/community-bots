@@ -50,6 +50,8 @@ const responses = [
   "Very doubtful."
 ];
 
+export const getResponse = () => "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
+
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let max = interaction.options.get("max")?.value as number ?? 10;
 
@@ -60,7 +62,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   setTimeout(async () => {
     // edit the reply with @user rolls X/max
     await interaction.editReply({
-      content: "<@" + interaction.user.id + "> **•** _" + responses[Math.floor(Math.random() * responses.length)] + ".._"
+      content: "<@" + interaction.user.id + "> **•** " + getResponse()
     });
   }, 1200);
 }
