@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
-import * as magic8 from "../magic-8";
+import * as magic8 from "../magic8";
 
-export const NAME_DUMB = "magic-8"
+export const NAME_DUMB = "magic8"
 
 export const cooldown = magic8.cooldown;
 export const type = magic8.type;
