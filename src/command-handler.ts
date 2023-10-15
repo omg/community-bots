@@ -174,7 +174,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     const command = require(`${commandFolder}/mentions/${file}`);
     // check if matches and execute are defined in command
     if (command.matches && command.execute) {
-      mentionCommands.set(command.name, command);
+      mentionCommands.set(command.NAME_DUMB, command);
     }
   }
 
@@ -206,8 +206,10 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     // replace the mention with nothing and trim the message, removing double spaces too
     let text = escapeDiscordMarkdown(message.content.replace("<@" + client.user.id + ">", "").replace(/ +/g, " ").trim());
+    console.log(text);
     
     for (const [, command] of mentionCommands) {
+      console.log(command.NAME_DUMB);
       if (command.matches(text)) {
         console.log(command.NAME_DUMB);
         if (isCommandLimited(member, command, command.NAME_DUMB, channel)) return;
@@ -242,8 +244,6 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     const command = commands.get(commandName);
     if (!command) return;
-
-    console.log(commandName);
 
     if (isCommandLimited(member, command, commandName, interaction.channel)) {
       const finishedTimestamp = Math.ceil((Date.now() + getLimitTime(member, commandName)) / 1000);
