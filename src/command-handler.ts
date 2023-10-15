@@ -246,35 +246,78 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     console.log(commandName);
 
     if (isCommandLimited(member, command, commandName, interaction.channel)) {
-      const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);
+      const finishedTimestamp = Math.ceil((Date.now() + getLimitTime(member, commandName)) / 1000);
+      let limitTime = getLimitTime(member, commandName);
+      let subCommand = interaction.options.getSubcommand(false);
+      let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
+
       replyToInteraction(
         interaction,
         "Limit",
-        "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".",
+        "\n• You've used this command too much! You can use it again <t:" + finishedTimestamp + ":R>.",
         false
       );
+
+      if (limitTime < 20 * 1000) {
+        setTimeout(() => {
+          editInteractionReply(
+            interaction,
+            "Limit",
+            "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
+            false
+          )
+        }, limitTime + Math.random() * 750);
+      }
       return;
     }
 
     if (isOnCooldown(interaction.user.id, commandName)) {
       // TODO Could personalize this message depending on the bot's personality
-      const timeLeft = Math.ceil(getCooldown(interaction.user.id, commandName) / 1000 + 1);
+      const finishedTimestamp = Math.ceil(commandCooldown.get(interaction.user.id + commandName) / 1000);
+      let cooldownTime = getCooldown(interaction.user.id, commandName);
+      let subCommand = interaction.options.getSubcommand(false);
+      let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
+
       replyToInteraction(
         interaction,
         "Cooldown",
-        "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
+        "\n• Hold on! You can use this command again <t:" + finishedTimestamp + ":R>.",
         false
       );
+
+      if (cooldownTime < 20 * 1000) {
+        setTimeout(() => {
+          editInteractionReply(
+            interaction,
+            "Cooldown",
+            "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
+            false
+          )
+        }, cooldownTime);
+      }
       return;
     } else if (isOnCooldown(interaction.user.id)) {
       if (COOLDOWN_TIME > 2750) {
-        const timeLeft = Math.ceil(getCooldown(interaction.user.id) / 1000 + 1);
+        const finishedTimestamp = Math.ceil(commandCooldown.get(interaction.user.id) / 1000);
+        let cooldownTime = getCooldown(interaction.user.id);
+
         replyToInteraction(
           interaction,
           "Cooldown",
-          "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
+          "\n• Hold on! You can use another command <t:" + finishedTimestamp + ":R>.",
           false
         );
+
+        if (cooldownTime < 20 * 1000) {
+          setTimeout(() => {
+            editInteractionReply(
+              interaction,
+              "Cooldown",
+              "\n• You can now use commands again.",
+              false
+            )
+          }, cooldownTime);
+        }
       } else {
         replyToInteraction(
           interaction,
@@ -310,12 +353,21 @@ function isBroadcastChannel(channel: GuildTextBasedChannel) {
   return channel.name == "lame-bots";
 }
 
+function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+  return "**" + header + " *｡✲ﾟ ——**" +
+  (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
+  "\n" + response;
+}
+
 export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   await interaction.reply({
-    content:
-      "**" + header + " *｡✲ﾟ ——**" +
-      (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
-      "\n" + response,
+    content: getInteractionContent(interaction, header, response, broadcast),
     ephemeral: !broadcast,
+  });
+}
+
+export async function editInteractionReply(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+  await interaction.editReply({
+    content: getInteractionContent(interaction, header, response, broadcast),
   });
 }
