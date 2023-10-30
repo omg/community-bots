@@ -37,20 +37,34 @@ const responses = [
   "Yes.",
   "Signs point to yes.",
 
-  "Reply hazy, try again.",
-  "Ask again later.",
-  "Better not tell you now.",
-  "Cannot predict now.",
-  "Concentrate and ask again.",
+  // "Reply hazy, try again.",
+  // "Ask again later.",
+  // "Better not tell you now.",
+  // "Cannot predict now.",
+  // "Concentrate and ask again.",
 
   "Don't count on it.",
   "My reply is no.",
   "My sources say no.",
   "Outlook not so good.",
-  "Very doubtful."
+  "Very doubtful.",
+
+  "No.",
 ];
 
-export const getResponse = () => "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
+const terribleResponses = [
+  "Whatever <@971202946895339550> thinks.",
+  "Shut up.",
+  "heheheeh >:3 You'll never get the answer i wont tell you :3c >w<.",
+  "<:e:948803642327203860>."
+]
+
+export function getResponse() {
+  if (Math.random() < 0.0175) {
+    return "_" + terribleResponses[Math.floor(Math.random() * terribleResponses.length)] + ".._";
+  }
+  return "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
+}
 
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let max = interaction.options.get("max")?.value as number ?? 10;
