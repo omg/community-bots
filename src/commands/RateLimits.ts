@@ -6,7 +6,7 @@ export type RateLimit = {
   max: number
 }
 
-export type NormalizedRateLimit = RateLimit & {
+export type NormalizedRateLimit = Omit<RateLimit, 'roles'> & {
   roles: PermissionEntity[]
 }
 
