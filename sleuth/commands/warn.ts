@@ -1,8 +1,10 @@
+import { SlashCommandFileData } from "../../src/commands/commands";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { Permissions, onlyTheseRoles, role } from "../../src/permissions";
+import { onlyTheseRoles, role } from "../../src/commands/Permissions";
 import { replyToInteraction } from "../../src/command-handler";
 
-export const data = new SlashCommandBuilder()
+const command: SlashCommandFileData = {
+  builder: new SlashCommandBuilder()
   .setName("warn")
   .setDescription("Warn a user.")
   .addUserOption((option) =>
@@ -16,16 +18,15 @@ export const data = new SlashCommandBuilder()
       .setName("reason")
       .setDescription("The reason to warn them")
       .setRequired(false)
-  );
+  ),
+  
+  permissions: {
+    roles: role("mod")
+  },
 
-export function getPermissions(): Permissions {
-  return {
-    roles: onlyTheseRoles([
-      role("mod")
-    ])
+  async execute(interaction: CommandInteraction, broadcast: boolean) {
+    
   }
 }
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  
-}
+export default command;
