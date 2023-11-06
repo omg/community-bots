@@ -7,35 +7,37 @@ export type PermissionEntity = {
   name: string,
 }
 
-export type PermissionGroup = PermissionEntity[] | PermissionEntity;
+export type PermissionGroup = PermissionEntity | PermissionEntity[];
 
 //
 
 export type ChannelPermissionEntity = PermissionEntity & { type: "channel" | "category" }
 export type RolePermissionEntity = PermissionEntity & { type: "role" }
 
-export type ChannelPermissionGroup = ChannelPermissionEntity[] | ChannelPermissionEntity;
-export type RolePermissionGroup = RolePermissionEntity[] | RolePermissionEntity;
+export type ChannelPermissionGroup = ChannelPermissionEntity | ChannelPermissionEntity[];
+export type RolePermissionGroup = RolePermissionEntity | RolePermissionEntity[];
 
 //
 
-export type LooseSpecificOverrides<T extends PermissionGroup> = {
-  allowed: T,
-  denied: T
+export type LooseSpecificOverrides<T extends PermissionEntity> = {
+  allowed: T | T[],
+  denied: T | T[]
 }
 
 // a PermissionGroup can be Overrides where everyone in the PermissionGroup is allowed and everyone else is denied
-export type BroadOverrides<T extends PermissionGroup> = LooseSpecificOverrides<T> | PermissionGroup;
+export type BroadOverrides<T extends PermissionEntity> = LooseSpecificOverrides<T> | T | T[];
 
 export type StrictSpecificOverrides<T extends PermissionEntity> = {
   allowed: T[],
   denied: T[]
-} & Omit<LooseSpecificOverrides<T[]>, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
+} & Omit<LooseSpecificOverrides<T>, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
 
 //
 
+// type EnsureArray<T> = T extends any[] ? T : T[];
+
 export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionEntity>(
-  overrides?: BroadOverrides<T[]> | BroadOverrides<T>
+  overrides?: BroadOverrides<T>
 ): StrictSpecificOverrides<T> {
   // If there are no overrides, return empty StrictSpecificOverrides
   if (!overrides) {
@@ -83,8 +85,8 @@ export type LooseSpecificRoleOverrides = {
 //
 
 export type LoosePermissions = {
-  roles?: BroadOverrides<RolePermissionGroup>,
-  channels?: BroadOverrides<ChannelPermissionGroup>
+  roles?: BroadOverrides<RolePermissionEntity>,
+  channels?: BroadOverrides<ChannelPermissionEntity>
 }
 
 export type StrictPermissions = {
