@@ -1,12 +1,13 @@
 import { CommandInteraction } from "discord.js";
 import { getCommandDataFromFileData } from "./commands";
-import { CommandData, SlashCommandFileData, StrictConstraints, StrictPermissions } from "./Permissions";
+import { CommandData, Constraint, SlashCommandFileData, StrictConstraints, StrictPermissions } from "./Permissions";
 
 export class Command implements CommandData {
   name: string;
 
   permissions: StrictPermissions;
   constraints: StrictConstraints;
+  limits: Constraint<"global">;
 
   tags: string[];
   broadcastable: boolean;
@@ -21,6 +22,7 @@ export class Command implements CommandData {
     
     this.permissions = commandData.permissions;
     this.constraints = commandData.constraints;
+    this.limits = commandData.limits;
 
     this.tags = commandData.tags;
     this.broadcastable = commandData.broadcastable;

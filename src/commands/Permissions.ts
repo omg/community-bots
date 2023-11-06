@@ -227,6 +227,7 @@ export type StrictConstraints = {
 export type CommandData = {
   permissions: StrictPermissions;
   constraints: StrictConstraints;
+  limits: Constraint<"global">;
 
   tags: string[];
   broadcastable: boolean;
@@ -242,6 +243,7 @@ export type SlashCommandFileData = {
 
   permissions?: LoosePermissions;
   constraints?: LooseConstraints;
+  limits?: Constraint<"global">;
 
   // details?: CommandDetails; // what's the point of details instead of just putting it in the command itself?
 
