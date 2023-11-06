@@ -1,37 +1,5 @@
 import { CommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
-import { Permissions, GroupPermissions, NormalizedOverrides, NormalizedPermissions, PermissionType } from "./Permissions";
-import { RateLimits, NormalizedRateLimits, RateLimit, NormalizedRateLimit } from "./RateLimits";
-
-export type CommandDetails = {
-  cooldown?: number;
-  tags?: string[];
-  broadcastable?: boolean;
-}
-
-export type NormalizedCommandDetails = {
-  cooldown: number;
-  tags: string[];
-  broadcastable: boolean;
-}
-
-export type CommandData = {
-  permissions: NormalizedPermissions;
-  rateLimits: NormalizedRateLimits;
-  details: NormalizedCommandDetails;
-}
-
-// instead of making all of the commands their own classes that extend Command, why not just make them functions and data that are then fed into a new Command()?
-// for that same reason - what's the point of making Game classes in OMG?
-
-export type SlashCommandFileData = {
-  builder: any;
-
-  permissions?: Permissions;
-  rateLimits?: RateLimits;
-  details?: CommandDetails;
-
-  execute(interaction: CommandInteraction, broadcast: boolean): Promise<void>;
-}
+import { LoosePermissions, BroadOverrides, StrictSpecificOverrides, StrictPermissions, PermissionType, SlashCommandFileData, CommandData, convertBroadOverridesToStrictSpecificOverrides } from "./Permissions";
 
 // export type SlashCommand = {
 //   // name: string;
@@ -44,21 +12,43 @@ export type SlashCommandFileData = {
 // } & CommandData;
 
 export function getCommandDataFromFileData(command: SlashCommandFileData): CommandData {
-  // Get the defined permissions for this command
+  // Get the defined permissions for this command (or a default empty object if none are defined)
   const permissions = command.permissions ?? {};
 
-  // Normalize the permissions to arrays of PermissionEntities
-  const normalizedPermissions: NormalizedPermissions = {
-    roles: convertToNormalizedOverrides(permissions.roles),
-    channels: convertToNormalizedOverrides(permissions.channels)
+  // Convert the loose permissions to strict permissions (making the data uniform)
+  const strictPermissions: StrictPermissions = {
+    roles: convertBroadOverridesToStrictSpecificOverrides(permissions.roles),
+    channels: convertBroadOverridesToStrictSpecificOverrides(permissions.channels)
   }
 
   // Fix the permissions to ensure validity (removing duplicates, enforcing global permissions, etc.)
-  fixNormalizedOverrides(normalizedPermissions.roles, ["role"])
-  fixNormalizedOverrides(normalizedPermissions.channels, ["channel", "category"])
+  fixStrictSpecificOverrides(strictPermissions.roles, ["role"])
+  fixStrictSpecificOverrides(strictPermissions.channels, ["channel", "category"])
+
+  /**
+   * SlashCommandFileData
+          {
+            builder: any; // useless but can get the name from it at least
+            permissions?: LoosePermissions; // done (maybe check if the default is okay)
+            constraints?: LooseConstraints;
+            tags?: string[];
+            broadcastable?: boolean;
+            execute(interaction: CommandInteraction, broadcast: boolean): Promise<void>;
+          }
+   */
+
+  /**
+   * CommandData
+          {
+            permissions: StrictPermissions;
+            constraints: StrictConstraints;
+            tags: string[];
+            broadcastable: boolean;
+          }
+   */
 
   // Get the defined rate limits for this command
-  const rateLimits = command.rateLimits ?? {};
+  const rateLimits = command.constraints ?? {};
 
   // Normalize the rate limits to arrays of PermissionEntities
   const normalizedRateLimits: NormalizedRateLimits = {
@@ -80,16 +70,17 @@ export function getCommandDataFromFileData(command: SlashCommandFileData): Comma
   }
 
   return {
-    permissions: normalizedPermissions,
+    permissions: strictPermissions,
     rateLimits: normalizedRateLimits,
     details: normalizedDetails
   }
 }
 
-function fixNormalizedOverrides(overrides: NormalizedOverrides, allowedTypes: PermissionType[]) {
+function fixStrictSpecificOverrides(overrides: StrictSpecificOverrides<any>) {
+  // no longer necessary due to type checking
   // Remove PermissionsObjects of the incorrect type
-  overrides.allowed = overrides.allowed.filter(perm => allowedTypes.includes(perm.type));
-  overrides.denied = overrides.denied.filter(perm => allowedTypes.includes(perm.type));
+  // overrides.allowed = overrides.allowed.filter(perm => allowedTypes.includes(perm.type));
+  // overrides.denied = overrides.denied.filter(perm => allowedTypes.includes(perm.type));
 
   // Remove duplicates
   overrides.allowed = overrides.allowed.filter((perm, index, self) => {
@@ -99,7 +90,7 @@ function fixNormalizedOverrides(overrides: NormalizedOverrides, allowedTypes: Pe
     return self.findIndex(p => p.name === perm.name) === index;
   });
 
-  // Remove roles from the allowed list if they are in the denied list
+  // Remove roles from the allowed list if they are in the denied list (Discord prioritizes allow - but to be safe for us, we will prioritize deny)
   overrides.allowed = overrides.allowed.filter(perm => {
     return !overrides.denied.some(denied => denied.name === perm.name);
   });
@@ -109,69 +100,41 @@ function fixNormalizedOverrides(overrides: NormalizedOverrides, allowedTypes: Pe
     if (overrides.allowed.length === 0) {
       // Add global to the allowed list if there are no allowed roles
       overrides.allowed.push({
-        type: allowedTypes[0],
+        type: allowedTypes[0], // seems like a bit of an issue
         name: "*"
       });
     } else {
       // Otherwise, add global to the denied list
       overrides.denied.push({
-        type: allowedTypes[0],
+        type: allowedTypes[0], // seems like a bit of an issue
         name: "*"
       });
     }
   }
 }
 
-function convertToNormalizedOverrides(permissions: GroupPermissions): NormalizedOverrides {
-  // If there are no permissions, return empty Overrides
-  if (!permissions) {
-    return {
-      allowed: [],
-      denied: []
-    }
+function convertToNormalizedConstraints(constraints?: Constraint[]): NormalizedConstraint[] {
+  // If there are no constraints, return an empty array
+  if (!constraints) {
+    return [];
   }
 
-  // If it's an array, put it in the allowed list of new Overrides
-  if (permissions instanceof Array) {
-    return {
-      allowed: permissions,
-      denied: []
-    }
-  }
-
-  // If it's a single object, add it to the allowed list of new Overrides
-  if ("type" in permissions) {
-    return {
-      allowed: [permissions],
-      denied: []
-    }
-  }
-
-  // It now must be an Overrides object
-  // Convert the allowed and denied lists to arrays if they aren't already
-  return {
-    allowed: permissions.allowed instanceof Array ? permissions.allowed : [permissions.allowed],
-    denied: permissions.denied instanceof Array ? permissions.denied : [permissions.denied]
-  }
+  // Map through the constraints and normalize them
+  return constraints.map(constraint => ({
+    ...constraint, 
+    roles: Array.isArray(constraint.roles) ? constraint.roles : [constraint.roles]
+  }));
 }
 
-function convertToNormalizedRateLimits(rateLimits: RateLimit[]): NormalizedRateLimit[] {
-  // If there are no rate limits, return an empty array
-  if (!rateLimits) return [];
-
-  // Otherwise, convert roles in rate limits to arrays
-  const normalizedRateLimits: NormalizedRateLimit[] = rateLimits.map(limit => {
-    const newLimit: NormalizedRateLimit = {
-      roles: limit.roles instanceof Array ? limit.roles : [limit.roles],
-      window: limit.window,
-      max: limit.max
-    }
-
-    return newLimit;
+function removeConstraintsOfIncorrectType(constraints: NormalizedConstraint[]) {
+  // Remove constraints that have incorrect types in their roles list
+  return constraints.map(constraint => {
+    constraint.roles = constraint.roles.filter(role => role.type === "role");
+    return constraint;
   });
-
-  return normalizedRateLimits;
 }
+
+// should allow for everyoneExcept() and stuff
 
 function fixNormalizedRateLimits(rateLimits: NormalizedRateLimits) {
   // Remove incorrect types from the roles list of each rate limit
