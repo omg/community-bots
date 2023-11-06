@@ -1,6 +1,5 @@
-import { SlashCommandFileData } from "../../src/commands/commands";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { onlyTheseRoles, role } from "../../src/commands/Permissions";
+import { SlashCommandFileData, onlyTheseRoles, role } from "../../src/commands/Permissions";
 import { replyToInteraction } from "../../src/command-handler";
 
 const command: SlashCommandFileData = {

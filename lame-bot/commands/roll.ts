@@ -1,7 +1,6 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { formatNumber } from "../../src/utils";
-import { SlashCommandFileData } from "../../src/commands/commands";
-import { allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
+import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
 
 const command: SlashCommandFileData = {
   builder: new SlashCommandBuilder()
@@ -23,31 +22,35 @@ const command: SlashCommandFileData = {
     ])
   },
 
-  rateLimits: {
-    limits: [
+  constraints: {
+    rules: [
       {
         roles: everyone(),
-        window: 60 * 10,
-        max: 2
+        rateLimit: {
+          window: 60 * 10,
+          max: 2
+        }
       },
       {
         roles: role("regular"),
-        window: 60 * 5,
-        max: 4
+        rateLimit: {
+          window: 60 * 5,
+          max: 4
+        }
       },
       {
         roles: role("reliable"),
-        window: 60 * 20,
-        max: 20
+        rateLimit: "local",
       }
     ],
-    includeBotsChannel: false
+    enforceRulesInBotsChannel: false
   },
 
-  details: {
-    cooldown: 8 * 1000,
-    tags: ["fun", "annoying"],
+  limits: {
+    cooldown: 8
   },
+
+  tags: ["fun", "annoying"],
 
   async execute(interaction: CommandInteraction, broadcast: boolean) {
     let max = interaction.options.get("max")?.value as number ?? 10;
