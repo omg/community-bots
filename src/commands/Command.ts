@@ -1,14 +1,15 @@
 import { CommandInteraction } from "discord.js";
-import { CommandData, NormalizedCommandDetails, SlashCommandFileData, getCommandDataFromFileData } from "./commands";
-import { NormalizedRateLimits } from "./RateLimits";
-import { NormalizedPermissions } from "./Permissions";
+import { getCommandDataFromFileData } from "./commands";
+import { CommandData, SlashCommandFileData, StrictConstraints, StrictPermissions } from "./Permissions";
 
 export class Command implements CommandData {
   name: string;
 
-  permissions: NormalizedPermissions;
-  rateLimits: NormalizedRateLimits;
-  details: NormalizedCommandDetails;
+  permissions: StrictPermissions;
+  constraints: StrictConstraints;
+
+  tags: string[];
+  broadcastable: boolean;
 
   executeFunction: (interaction: CommandInteraction, broadcast: boolean) => Promise<void>;
 
@@ -19,8 +20,10 @@ export class Command implements CommandData {
     this.executeFunction = fileData.execute;
     
     this.permissions = commandData.permissions;
-    this.rateLimits = commandData.rateLimits;
-    this.details = commandData.details;
+    this.constraints = commandData.constraints;
+
+    this.tags = commandData.tags;
+    this.broadcastable = commandData.broadcastable;
   }
 
   async execute(interaction: CommandInteraction, broadcast: boolean): Promise<void> {
