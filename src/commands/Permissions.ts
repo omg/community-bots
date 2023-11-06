@@ -34,8 +34,6 @@ export type StrictSpecificOverrides<T extends PermissionEntity> = {
 
 //
 
-// type EnsureArray<T> = T extends any[] ? T : T[];
-
 export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionEntity>(
   overrides?: BroadOverrides<T>
 ): StrictSpecificOverrides<T> {
