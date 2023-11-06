@@ -19,18 +19,55 @@ export type RolePermissionGroup = RolePermissionEntity[] | RolePermissionEntity;
 
 //
 
-export type LooseSpecificOverrides = {
-  allowed: PermissionGroup,
-  denied: PermissionGroup
+export type LooseSpecificOverrides<T extends PermissionGroup> = {
+  allowed: T,
+  denied: T
 }
 
 // a PermissionGroup can be Overrides where everyone in the PermissionGroup is allowed and everyone else is denied
-export type BroadOverrides = LooseSpecificOverrides | PermissionGroup;
+export type BroadOverrides<T extends PermissionGroup> = LooseSpecificOverrides<T> | PermissionGroup;
 
-export type StrictSpecificOverrides = {
-  allowed: PermissionEntity[],
-  denied: PermissionEntity[]
-} & Omit<LooseSpecificOverrides, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
+export type StrictSpecificOverrides<T extends PermissionEntity> = {
+  allowed: T[],
+  denied: T[]
+} & Omit<LooseSpecificOverrides<T[]>, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
+
+//
+
+export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionEntity>(
+  overrides?: BroadOverrides<T[]> | BroadOverrides<T>
+): StrictSpecificOverrides<T> {
+  // If there are no overrides, return empty StrictSpecificOverrides
+  if (!overrides) {
+    return {
+      allowed: [],
+      denied: []
+    }
+  }
+
+  // If it's an array, it's a PermissionEntity[]. Put it in the allowed list of new Overrides
+  if (Array.isArray(overrides)) {
+    return {
+      allowed: overrides as T[], // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
+      denied: []
+    }
+  }
+
+  // If it has a type, it's a PermissionEntity. Add it to the allowed list of new Overrides
+  if ("type" in overrides) {
+    return {
+      allowed: [overrides] as T[], // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
+      denied: []
+    }
+  }
+
+  // At this point, we've determined they are LooseSpecificOverrides. Convert them to StrictSpecificOverrides
+  const { allowed, denied } = overrides;
+  return {
+    allowed: Array.isArray(allowed) ? allowed : [allowed],
+    denied: Array.isArray(denied) ? denied : [denied]
+  }
+}
 
 //
 
@@ -46,13 +83,13 @@ export type LooseSpecificRoleOverrides = {
 //
 
 export type LoosePermissions = {
-  roles?: BroadOverrides,
-  channels?: BroadOverrides
+  roles?: BroadOverrides<RolePermissionGroup>,
+  channels?: BroadOverrides<ChannelPermissionGroup>
 }
 
 export type StrictPermissions = {
-  roles: StrictSpecificOverrides,
-  channels: StrictSpecificOverrides
+  roles: StrictSpecificOverrides<RolePermissionEntity>,
+  channels: StrictSpecificOverrides<ChannelPermissionEntity>
 }
 
 export function channel(channelName: string): ChannelPermissionEntity {
