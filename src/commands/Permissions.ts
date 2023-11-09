@@ -1,40 +1,36 @@
 import { CommandInteraction } from "discord.js";
 
-export type PermissionType = "channel" | "category" | "role";
+export type ChannelTypes = "channel" | "category" | "global";
+export type RoleTypes = "role" | "global";
+export type GlobalType = "global";
 
-export type PermissionEntity = {
-  type: PermissionType,
+export type PermissionType = ChannelTypes | RoleTypes;
+
+export type PermissionEntity<T extends PermissionType> = {
+  type: T,
   name: string,
 }
 
-export type PermissionGroup = PermissionEntity | PermissionEntity[];
+export type PermissionGroup<T extends PermissionType> = PermissionEntity<T> | PermissionEntity<T>[];
 
 //
 
-export type ChannelPermissionEntity = PermissionEntity & { type: "channel" | "category" }
-export type RolePermissionEntity = PermissionEntity & { type: "role" }
-
-export type ChannelPermissionGroup = ChannelPermissionEntity | ChannelPermissionEntity[];
-export type RolePermissionGroup = RolePermissionEntity | RolePermissionEntity[];
-
-//
-
-export type LooseSpecificOverrides<T extends PermissionEntity> = {
-  allowed: T | T[],
-  denied: T | T[]
+export type LooseSpecificOverrides<T extends PermissionType> = {
+  allowed: PermissionGroup<T>,
+  denied: PermissionGroup<T>
 }
 
 // a PermissionGroup can be Overrides where everyone in the PermissionGroup is allowed and everyone else is denied
-export type BroadOverrides<T extends PermissionEntity> = LooseSpecificOverrides<T> | T | T[];
+export type BroadOverrides<T extends PermissionType> = LooseSpecificOverrides<T> | PermissionGroup<T>;
 
-export type StrictSpecificOverrides<T extends PermissionEntity> = {
-  allowed: T[],
-  denied: T[]
+export type StrictSpecificOverrides<T extends PermissionType> = {
+  allowed: PermissionEntity<T>[],
+  denied: PermissionEntity<T>[]
 } & Omit<LooseSpecificOverrides<T>, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
 
 //
 
-export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionEntity>(
+export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionType>(
   overrides?: BroadOverrides<T>
 ): StrictSpecificOverrides<T> {
   // If there are no overrides, return empty StrictSpecificOverrides
@@ -48,7 +44,7 @@ export function convertBroadOverridesToStrictSpecificOverrides<T extends Permiss
   // If it's an array, it's a PermissionEntity[]. Put it in the allowed list of new Overrides
   if (Array.isArray(overrides)) {
     return {
-      allowed: overrides as T[], // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
+      allowed: overrides, // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
       denied: []
     }
   }
@@ -56,7 +52,7 @@ export function convertBroadOverridesToStrictSpecificOverrides<T extends Permiss
   // If it has a type, it's a PermissionEntity. Add it to the allowed list of new Overrides
   if ("type" in overrides) {
     return {
-      allowed: [overrides] as T[], // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
+      allowed: [overrides], // overrides could be a subtype of T, so we have to cast it. i'm pretty confident this is safe
       denied: []
     }
   }
@@ -71,92 +67,99 @@ export function convertBroadOverridesToStrictSpecificOverrides<T extends Permiss
 
 //
 
-export type LooseSpecificChannelOverrides = {
-  allowed: ChannelPermissionGroup,
-  denied: ChannelPermissionGroup
-}
-export type LooseSpecificRoleOverrides = {
-  allowed: RolePermissionGroup,
-  denied: RolePermissionGroup
-}
+// export type LooseSpecificChannelOverrides = {
+//   allowed: PermissionGroup<ChannelTypes>,
+//   denied: PermissionGroup<ChannelTypes>
+// }
+// export type LooseSpecificRoleOverrides = {
+//   allowed: PermissionGroup<RoleTypes>,
+//   denied: PermissionGroup<RoleTypes>
+// }
 
 //
 
 export type LoosePermissions = {
-  roles?: BroadOverrides<RolePermissionEntity>,
-  channels?: BroadOverrides<ChannelPermissionEntity>
+  roles?: BroadOverrides<RoleTypes>,
+  channels?: BroadOverrides<ChannelTypes>
 }
 
 export type StrictPermissions = {
-  roles: StrictSpecificOverrides<RolePermissionEntity>,
-  channels: StrictSpecificOverrides<ChannelPermissionEntity>
+  roles: StrictSpecificOverrides<RoleTypes>,
+  channels: StrictSpecificOverrides<ChannelTypes>
 }
 
-export function channel(channelName: string): ChannelPermissionEntity {
+export function channel(channelName: string): PermissionEntity<"channel"> {
   return {
     type: "channel",
     name: channelName
   }
 }
 
-export function category(categoryName: string): ChannelPermissionEntity {
+export function category(categoryName: string): PermissionEntity<"category"> {
   return {
     type: "category",
     name: categoryName
   }
 }
 
-export function role(roleName: string): RolePermissionEntity {
+export function role(roleName: string): PermissionEntity<"role"> {
   return {
     type: "role",
     name: roleName
   }
 }
 
-export function everyone(): RolePermissionEntity {
-  return {
-    type: "role",
-    name: "*"
-  }
+const global: PermissionEntity<"global"> = { type: "global", name: "*" };
+
+export function everyone(): PermissionEntity<"global"> { // this right?
+  return global;
 }
 
-export function allChannels(): ChannelPermissionEntity {
-  return {
-    type: "channel",
-    name: "*"
-  }
+export function allChannels(): PermissionEntity<"global"> {
+  return global;
 }
 
-export function nobody(): RolePermissionEntity[] {
+export function nobody(): PermissionEntity<RoleTypes>[] {
   return [];
 }
 
-export function nowhere(): ChannelPermissionEntity[] {
+export function noone(): PermissionEntity<RoleTypes>[] {
   return [];
 }
 
-export function allChannelsExcept(channels: ChannelPermissionGroup): LooseSpecificChannelOverrides {
+export function nowhere(): PermissionEntity<ChannelTypes>[] {
+  return [];
+}
+
+export function allChannelsExcept(channels: PermissionGroup<ChannelTypes>): LooseSpecificOverrides<ChannelTypes> {
   return {
     allowed: allChannels(),
     denied: channels
   };
 }
 
-export function everyoneExcept(roles: RolePermissionGroup): LooseSpecificRoleOverrides {
+export function everyoneExcept(roles: PermissionGroup<RoleTypes>): LooseSpecificOverrides<RoleTypes> {
   return {
     allowed: everyone(),
     denied: roles
   }
 }
 
-export function onlyTheseChannels(channels: ChannelPermissionGroup): LooseSpecificChannelOverrides {
+export function onlyTheseChannels(channels: PermissionGroup<ChannelTypes>): LooseSpecificOverrides<ChannelTypes> {
   return {
     allowed: channels,
     denied: allChannels()
   }
 }
 
-export function onlyTheseRoles(roles: RolePermissionGroup): LooseSpecificRoleOverrides {
+export function onlyTheseRoles(roles: PermissionGroup<"role" | "global">): LooseSpecificOverrides<"role" | "global"> {
+  return {
+    allowed: roles,
+    denied: everyone()
+  }
+}
+
+export function onlyThesePeople(roles: PermissionGroup<RoleTypes>): LooseSpecificOverrides<RoleTypes> {
   return {
     allowed: roles,
     denied: everyone()
@@ -189,7 +192,7 @@ export type Constraint<T extends Scope> = {
 }
 
 export type LooseConstraintRule<T extends Scope> = {
-  roles: PermissionGroup,
+  roles: PermissionGroup<RoleTypes>,
   enforceInBotsChannel?: boolean
 } & Constraint<T>;
 
@@ -199,7 +202,7 @@ export type LooseConstraints = {
 }
 
 export type StrictConstraintRule<T extends Scope> = {
-  roles: PermissionEntity[],
+  roles: PermissionEntity<RoleTypes>[],
 } & Omit<LooseConstraintRule<T>, 'roles'>; // maybe enforceInBotsChannel should be required
 
 export type StrictConstraints = {

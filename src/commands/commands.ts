@@ -1,5 +1,5 @@
-import { CommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
-import { LoosePermissions, BroadOverrides, StrictSpecificOverrides, StrictPermissions, PermissionType, SlashCommandFileData, CommandData, convertBroadOverridesToStrictSpecificOverrides } from "./Permissions";
+import { CommandInteraction, GuildMember, Role, SlashCommandBuilder } from "discord.js";
+import { LoosePermissions, BroadOverrides, StrictSpecificOverrides, StrictPermissions, PermissionType, SlashCommandFileData, CommandData, convertBroadOverridesToStrictSpecificOverrides, PermissionEntity, ChannelPermissionEntity, RolePermissionEntity, everyone, role } from "./Permissions";
 
 // export type SlashCommand = {
 //   // name: string;
@@ -16,14 +16,16 @@ export function getCommandDataFromFileData(command: SlashCommandFileData): Comma
   const permissions = command.permissions ?? {};
 
   // Convert the loose permissions to strict permissions (making the data uniform)
-  const strictPermissions: StrictPermissions = {
+  let strictPermissions: StrictPermissions = {
     roles: convertBroadOverridesToStrictSpecificOverrides(permissions.roles),
     channels: convertBroadOverridesToStrictSpecificOverrides(permissions.channels)
   }
 
   // Fix the permissions to ensure validity (removing duplicates, enforcing global permissions, etc.)
-  fixStrictSpecificOverrides(strictPermissions.roles, ["role"])
-  fixStrictSpecificOverrides(strictPermissions.channels, ["channel", "category"])
+  strictPermissions = {
+    roles: fixStrictSpecificOverrides(strictPermissions.roles),
+    channels: fixStrictSpecificOverrides(strictPermissions.channels)
+  }
 
   /**
    * SlashCommandFileData
@@ -76,19 +78,27 @@ export function getCommandDataFromFileData(command: SlashCommandFileData): Comma
   }
 }
 
-function fixStrictSpecificOverrides(overrides: StrictSpecificOverrides<any>) {
+function isChannelPermissionEntity(entity: PermissionEntity): entity is ChannelPermissionEntity {
+  return entity.type === "channel" || entity.type === "category";
+}
+
+function isRolePermissionEntity(entity: PermissionEntity): entity is RolePermissionEntity {
+  return entity.type === "role";
+}
+
+function fixStrictSpecificOverrides<T extends PermissionType>(overrides: StrictSpecificOverrides<T | "global">): StrictSpecificOverrides<T | "global"> {
   // no longer necessary due to type checking
   // Remove PermissionsObjects of the incorrect type
   // overrides.allowed = overrides.allowed.filter(perm => allowedTypes.includes(perm.type));
   // overrides.denied = overrides.denied.filter(perm => allowedTypes.includes(perm.type));
 
-  // Remove duplicates
-  overrides.allowed = overrides.allowed.filter((perm, index, self) => {
-    return self.findIndex(p => p.name === perm.name) === index;
-  });
-  overrides.denied = overrides.denied.filter((perm, index, self) => {
-    return self.findIndex(p => p.name === perm.name) === index;
-  });
+  // Remove duplicates (also not really necessary but maybe we should do it anyway?)
+  // overrides.allowed = overrides.allowed.filter((perm, index, self) => {
+  //   return self.findIndex(p => p.name === perm.name) === index;
+  // });
+  // overrides.denied = overrides.denied.filter((perm, index, self) => {
+  //   return self.findIndex(p => p.name === perm.name) === index;
+  // });
 
   // Remove roles from the allowed list if they are in the denied list (Discord prioritizes allow - but to be safe for us, we will prioritize deny)
   overrides.allowed = overrides.allowed.filter(perm => {
@@ -100,17 +110,19 @@ function fixStrictSpecificOverrides(overrides: StrictSpecificOverrides<any>) {
     if (overrides.allowed.length === 0) {
       // Add global to the allowed list if there are no allowed roles
       overrides.allowed.push({
-        type: allowedTypes[0], // seems like a bit of an issue
+        type: "global",
         name: "*"
       });
     } else {
       // Otherwise, add global to the denied list
       overrides.denied.push({
-        type: allowedTypes[0], // seems like a bit of an issue
+        type: "global",
         name: "*"
       });
     }
   }
+
+  return overrides;
 }
 
 function convertToNormalizedConstraints(constraints?: Constraint[]): NormalizedConstraint[] {
