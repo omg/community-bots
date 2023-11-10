@@ -1,6 +1,5 @@
 import { CommandInteraction } from "discord.js";
-import { getCommandDataFromFileData } from "./commands";
-import { CommandData, Constraint, SlashCommandFileData, StrictConstraints, StrictPermissions } from "./Permissions";
+import { getCommandDataFromFileData, CommandData, Constraint, SlashCommandFileData, StrictConstraints, StrictPermissions } from "./Permissions";
 
 export class Command implements CommandData {
   name: string;
