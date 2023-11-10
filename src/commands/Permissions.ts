@@ -13,6 +13,10 @@ export type PermissionEntity<T extends PermissionType> = {
 
 export type PermissionGroup<T extends PermissionType> = PermissionEntity<T> | PermissionEntity<T>[];
 
+export function makePermissionGroupAnArray<T extends PermissionType>(group: PermissionGroup<T>): PermissionEntity<T>[] {
+  return Array.isArray(group) ? group : [group];
+}
+
 //
 
 export type LooseSpecificOverrides<T extends PermissionType> = {
@@ -28,9 +32,7 @@ export type StrictSpecificOverrides<T extends PermissionType> = {
   denied: PermissionEntity<T>[]
 } & Omit<LooseSpecificOverrides<T>, "allowed" | "denied">; // the omit is just in case new properties are added to LooseSpecificOverrides
 
-//
-
-export function convertBroadOverridesToStrictSpecificOverrides<T extends PermissionType>(
+export function makeBroadOverridesSpecific<T extends PermissionType>(
   overrides?: BroadOverrides<T>
 ): StrictSpecificOverrides<T> {
   // If there are no overrides, return empty StrictSpecificOverrides
@@ -60,21 +62,10 @@ export function convertBroadOverridesToStrictSpecificOverrides<T extends Permiss
   // At this point, we've determined they are LooseSpecificOverrides. Convert them to StrictSpecificOverrides
   const { allowed, denied } = overrides;
   return {
-    allowed: Array.isArray(allowed) ? allowed : [allowed],
-    denied: Array.isArray(denied) ? denied : [denied]
+    allowed: makePermissionGroupAnArray(allowed),
+    denied: makePermissionGroupAnArray(denied)
   }
 }
-
-//
-
-// export type LooseSpecificChannelOverrides = {
-//   allowed: PermissionGroup<ChannelTypes>,
-//   denied: PermissionGroup<ChannelTypes>
-// }
-// export type LooseSpecificRoleOverrides = {
-//   allowed: PermissionGroup<RoleTypes>,
-//   denied: PermissionGroup<RoleTypes>
-// }
 
 //
 
@@ -87,6 +78,136 @@ export type StrictPermissions = {
   roles: StrictSpecificOverrides<RoleTypes>,
   channels: StrictSpecificOverrides<ChannelTypes>
 }
+
+const GLOBAL: PermissionEntity<"global"> = { type: "global", name: "*" };
+
+const DEFAULT_PERMISSIONS: StrictPermissions = {
+  roles: {
+    allowed: [GLOBAL],
+    denied: []
+  },
+  channels: {
+    allowed: [GLOBAL],
+    denied: []
+  }
+}
+
+// Convert the permissions to StrictPermissions (makePermissionsStrict will use the default permissions if none are provided)
+// Then normalize the permissions (enforce globals, remove roles from allowed if they are denied, etc.)
+export function normalizePermissions(permissions?: StrictPermissions | LoosePermissions): StrictPermissions {
+  const newPermissions = makePermissionsStrict(permissions);
+  return {
+    roles: normalizeStrictSpecificOverrides(newPermissions.roles),
+    channels: normalizeStrictSpecificOverrides(newPermissions.channels)
+  }
+}
+
+export function normalizeStrictSpecificOverrides<T extends PermissionType>(
+  overrides: StrictSpecificOverrides<T | "global">
+): StrictSpecificOverrides<T | "global"> {
+  // Remove roles from the allowed list if they are in the denied list (Discord prioritizes allow - but to be safe for us, we will prioritize deny)
+  overrides.allowed = overrides.allowed.filter(perm => {
+    const allGood = !overrides.denied.some(denied => denied.name === perm.name);
+    if (!allGood) {
+      // this isn't totally helpful because it doesn't say which command it is - but it's better than nothing atm
+      console.warn(`Role ${perm.name} is in both the allowed and denied list for a command. It will be removed from the allowed list.`);
+    }
+    return allGood;
+  });
+
+  // Check if there is no global role in either list
+  if (!overrides.allowed.some(perm => perm.name === "*") && !overrides.denied.some(perm => perm.name === "*")) {
+    if (overrides.allowed.length === 0) {
+      // Add global to the allowed list if there are no allowed roles
+      overrides.allowed.push({
+        type: "global",
+        name: "*"
+      });
+    } else {
+      // Otherwise, add global to the denied list
+      overrides.denied.push({
+        type: "global",
+        name: "*"
+      });
+    }
+  }
+
+  return overrides;
+}
+
+export function makePermissionsStrict(permissions: LoosePermissions = DEFAULT_PERMISSIONS): StrictPermissions {
+  return {
+    roles: makeBroadOverridesSpecific(permissions.roles),
+    channels: makeBroadOverridesSpecific(permissions.channels)
+  }
+}
+
+//
+
+type Scope = "global" | "local" | "all" | "none";
+
+type ScopeTypes<T extends Scope> = 
+  T extends "all" ? "global" | "local" :
+  T extends "global" ? "global" :
+  T extends "local" ? "local" :
+  never;
+
+export type RateLimit = {
+  window: number,
+  max: number
+}
+
+export type Constraint<T extends Scope> = {
+  rateLimit?: RateLimit | ScopeTypes<T>,
+  cooldown?: number | ScopeTypes<T>,
+  enforceInBotsChannel?: boolean | ScopeTypes<T> // should this be optional for strict? YES - since higher roles shouldn't override from a value that wasn't even specified
+}
+
+export type LooseConstraintRule<T extends Scope> = {
+  roles: PermissionGroup<RoleTypes>,
+  // enforceInBotsChannel?: boolean
+} & Constraint<T>;
+
+export type LooseConstraints = {
+  rules: LooseConstraintRule<"all">[],
+  enforceRulesInBotsChannel: boolean
+}
+
+export type StrictConstraintRule<T extends Scope> = {
+  roles: PermissionEntity<RoleTypes>[],
+} & Omit<LooseConstraintRule<T>, 'roles'>; // just in case new properties are added to LooseConstraintRule
+
+export type StrictConstraints = {
+  rules: StrictConstraintRule<"all">[],
+  enforceRulesInBotsChannel: boolean
+}
+
+const DEFAULT_CONSTRAINTS: StrictConstraints = {
+  rules: [],
+  enforceRulesInBotsChannel: false
+}
+
+export function makeConstraintRuleStrict<T extends Scope>(rule: LooseConstraintRule<T>): StrictConstraintRule<T> {
+  return {
+    ...rule,
+    roles: makePermissionGroupAnArray(rule.roles)
+  }
+}
+
+export function makeConstraintsStrict(constraints: LooseConstraints = DEFAULT_CONSTRAINTS): StrictConstraints {
+  // Use the default constraint values if none are provided (currently not possible because all properties are required)
+  constraints = {
+    ...DEFAULT_CONSTRAINTS,
+    ...constraints
+  }
+
+  return {
+    rules: constraints.rules.map((rule) => makeConstraintRuleStrict(rule)),
+    enforceRulesInBotsChannel: constraints.enforceRulesInBotsChannel
+  }
+}
+
+//
 
 export function channel(channelName: string): PermissionEntity<"channel"> {
   return {
@@ -109,14 +230,12 @@ export function role(roleName: string): PermissionEntity<"role"> {
   }
 }
 
-const global: PermissionEntity<"global"> = { type: "global", name: "*" };
-
 export function everyone(): PermissionEntity<"global"> { // this right?
-  return global;
+  return GLOBAL;
 }
 
 export function allChannels(): PermissionEntity<"global"> {
-  return global;
+  return GLOBAL;
 }
 
 export function nobody(): PermissionEntity<RoleTypes>[] {
@@ -171,45 +290,6 @@ export function onlyThesePeople(roles: PermissionGroup<RoleTypes>): LooseSpecifi
 // everyone: guildID
 // all channels: guildID - 1
 
-//
-
-type Scope = "global" | "local" | "all" | "none";
-
-type ScopeTypes<T extends Scope> = 
-  T extends "all" ? "global" | "local" :
-  T extends "global" ? "global" :
-  T extends "local" ? "local" :
-  never;
-
-export type RateLimit = {
-  window: number,
-  max: number
-}
-
-export type Constraint<T extends Scope> = {
-  rateLimit?: RateLimit | ScopeTypes<T>,
-  cooldown?: number | ScopeTypes<T>,
-}
-
-export type LooseConstraintRule<T extends Scope> = {
-  roles: PermissionGroup<RoleTypes>,
-  enforceInBotsChannel?: boolean
-} & Constraint<T>;
-
-export type LooseConstraints = {
-  rules: LooseConstraintRule<"all">[],
-  enforceRulesInBotsChannel: boolean
-}
-
-export type StrictConstraintRule<T extends Scope> = {
-  roles: PermissionEntity<RoleTypes>[],
-} & Omit<LooseConstraintRule<T>, 'roles'>; // maybe enforceInBotsChannel should be required
-
-export type StrictConstraints = {
-  rules: StrictConstraintRule<"all">[],
-  enforceRulesInBotsChannel: boolean
-}
-
 // commands
 
 // i feel like just put these in the command
@@ -252,4 +332,25 @@ export type SlashCommandFileData = {
   broadcastable?: boolean;
 
   execute(interaction: CommandInteraction, broadcast: boolean): Promise<void>;
+}
+
+export function getCommandDataFromFileData(command: SlashCommandFileData): CommandData {
+  const permissions = normalizePermissions(command.permissions);
+
+  // i think there is nothing to normalize for constraints
+  // just make it strict
+  const constraints = makeConstraintsStrict(command.constraints);
+
+  const limits = command.limits;
+
+  const tags = command.tags ?? [];
+  const broadcastable = command.broadcastable ?? false;
+
+  return {
+    permissions,
+    constraints,
+    limits,
+    tags,
+    broadcastable
+  }
 }
