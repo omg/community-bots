@@ -1,17 +1,24 @@
 import { GuildMember } from "discord.js";
 import { Command } from "./Command";
-import { NormalizedRateLimit, RateLimit } from "./RateLimits";
-import { everyone } from "./Permissions";
+import { RateLimit, everyone } from "./Permissions";
 
 const commandCooldownStart = new Map();
 const commandRequestCount = new Map();
 const commandRateLimitStart = new Map();
 
-// make a None override for certain roles, no window or max
+const DEFAULT_RATE_LIMIT: RateLimit = {
+  window: 180,
+  max: 16
+}
+
 export function getEnforcedRateLimit(command: Command, member: GuildMember) {
-  let enforcedRateLimit: NormalizedRateLimit = {
-    roles: [everyone()],
-    constraints: "none"
+  // probably go in order from top to bottom and check if the member has the role
+  // if they do, then set the enforced rate limit to that one
+  // only override properties that are set
+  // if they don't have that role, then keep going
+  // if some properties havevn't been set, then use the global one
+  let enforcedRateLimit: RateLimit = {
+    // TODO
   }
   for (const rateLimit of command.rateLimits.limits) {
     rateLimit.roles.forEach((role) => {
