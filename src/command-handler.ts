@@ -34,11 +34,12 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     
     const createdCommand = new Command(command);
     const commandJSON = command.builder.toJSON();
+    const commandName = commandJSON.name;
 
-    commands.set(command.builder.name, createdCommand);
+    commands.set(commandName, createdCommand);
     RESTApplicationCommands.push(commandJSON);
 
-    if (createdCommand.details.broadcastable) {
+    if (createdCommand.broadcastable) {
       broadcastCommand.options.push(commandJSONToOptionJSON(commandJSON));
     }
   }
