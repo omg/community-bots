@@ -144,11 +144,11 @@ export function makePermissionsStrict(permissions: LoosePermissions = DEFAULT_PE
 
 //
 
-type Scope = "global" | "local" | "all" | "none";
+type Scope = "default" | "local" | "all" | "none";
 
 type ScopeTypes<T extends Scope> = 
-  T extends "all" ? "global" | "local" :
-  T extends "global" ? "global" :
+  T extends "all" ? "default" | "local" :
+  T extends "default" ? "default" :
   T extends "local" ? "local" :
   never;
 
@@ -308,7 +308,7 @@ export function onlyThesePeople(roles: PermissionGroup<RoleTypes>): LooseSpecifi
 export type CommandData = {
   permissions: StrictPermissions;
   constraints: StrictConstraints;
-  limits: Constraint<"global">;
+  limits: Constraint<"default">;
 
   tags: string[];
   broadcastable: boolean;
@@ -324,7 +324,7 @@ export type SlashCommandFileData = {
 
   permissions?: LoosePermissions;
   constraints?: LooseConstraints;
-  limits?: Constraint<"global">;
+  limits?: Constraint<"default">;
 
   // details?: CommandDetails; // what's the point of details instead of just putting it in the command itself?
 

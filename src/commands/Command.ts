@@ -7,7 +7,7 @@ export class Command implements CommandData {
 
   permissions: StrictPermissions;
   constraints: StrictConstraints;
-  limits: Constraint<"global">;
+  limits: Constraint<"default">;
 
   tags: string[];
   broadcastable: boolean;
