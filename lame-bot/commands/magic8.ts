@@ -1,28 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-
-export const data = new SlashCommandBuilder()
-  .setName("magic8")
-  .setDescription("Shake the magic 8 ball!");
-
-export const cooldown = 8 * 1000;
-export const type = ["fun", "annoying"];
-
-export const limits = [];
-limits[0] = {
-  max: 2,
-  interval: 10 * 60 * 1000,
-  includeBotsChannel: false
-};
-limits[1] = {
-  max: 4,
-  interval: 5 * 60 * 1000,
-  includeBotsChannel: false
-};
-limits[2] = {
-  max: 20,
-  interval: 20 * 60 * 1000,
-  includeBotsChannel: false
-};
+import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
 
 const responses = [
   "It is certain.",
@@ -52,17 +29,58 @@ const responses = [
 
 export const getResponse = () => "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let max = interaction.options.get("max")?.value as number ?? 10;
+export const command: SlashCommandFileData = {
+  builder: new SlashCommandBuilder()
+  .setName("magic8")
+  .setDescription("Shake the magic 8 ball!"),
+  
+  permissions: {
+    channels: allChannelsExcept([
+      category("Dictionary Contributions"),
+      category("Lame Land")
+    ])
+  },
 
-  await interaction.reply({
-    content: "https://omg.games/assets/rolling.gif"
-  });
+  constraints: {
+    rules: [
+      {
+        roles: everyone(),
+        rateLimit: {
+          window: 60 * 10,
+          max: 2
+        }
+      },
+      {
+        roles: role("regular"),
+        rateLimit: {
+          window: 60 * 5,
+          max: 4
+        }
+      },
+      {
+        roles: role("reliable"),
+        rateLimit: "local",
+      }
+    ],
+    enforceRulesInBotsChannel: false
+  },
 
-  setTimeout(async () => {
-    // edit the reply with @user rolls X/max
-    await interaction.editReply({
-      content: "<@" + interaction.user.id + "> **•** " + getResponse()
+  limits: {
+    cooldown: 8
+  },
+
+  tags: ["fun", "annoying"],
+
+  async execute(interaction: CommandInteraction, broadcast: boolean) {
+    await interaction.reply({
+      content: "https://omg.games/assets/rolling.gif"
     });
-  }, 1200);
+  
+    setTimeout(async () => {
+      // edit the reply with @user rolls X/max
+      await interaction.editReply({
+        content: "<@" + interaction.user.id + "> **•** " + getResponse()
+      });
+    }, 1200);
+  }
 }
