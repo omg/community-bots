@@ -41,7 +41,7 @@ export function getEnforcedConstraint(command: Command, member: GuildMember) {
       const name = role.name;
 
       // check if the member has the role by name
-      if (member.roles.cache.some((role) => role.name === name)) {
+      if (name === "*" || member.roles.cache.some((role) => role.name === name)) {
         overwriteConstraint(constraintRule);
       }
     });
