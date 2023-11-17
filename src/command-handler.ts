@@ -3,6 +3,7 @@ import { REST } from "@discordjs/rest";
 import fs from "node:fs";
 import { Command } from "./commands/Command";
 import { SlashCommandFileData } from "./commands/Permissions";
+import { tryUseCommand } from "./commands/cooldowns";
 
 const BROADCAST_COMMAND = {
   name: "shout",
@@ -75,62 +76,67 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     const command = commands.get(commandToExecuteName);
     if (!command) return;
 
-    if (isCommandLimited(member, command, commandName, interaction.channel)) {
-      const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);
-      replyToInteraction(
-        interaction,
-        "Limit",
-        "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".",
-        false
-      );
-      return;
-    }
+    const result = tryUseCommand(member, command);
 
-    if (isOnCooldown(interaction.user.id, commandName)) {
-      // TODO Could personalize this message depending on the bot's personality
-      const timeLeft = Math.ceil(getCooldown(interaction.user.id, commandName) / 1000 + 1);
-      replyToInteraction(
-        interaction,
-        "Cooldown",
-        "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
-        false
-      );
-      return;
-    } else if (isOnCooldown(interaction.user.id)) {
-      if (COOLDOWN_TIME > 2750) {
-        const timeLeft = Math.ceil(getCooldown(interaction.user.id) / 1000 + 1);
-        replyToInteraction(
+    if (result.status === "ratelimited") {
+      // TODO
+    } else if (result.status === "cooldown") {
+      // TODO
+    } else if (result.status === "success") {
+      // TODO
+      try {
+        await command.execute(interaction, broadcast);
+      } catch (error) {
+        console.error(error);
+        await replyToInteraction(
           interaction,
-          "Cooldown",
-          "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
-          false
-        );
-      } else {
-        replyToInteraction(
-          interaction,
-          "Cooldown",
-          "\n• Hold on! You're sending commands too quickly!",
-          false
+          "Error",
+          "\n- Sorry, an error occurred while running that command.",
+          broadcast
         );
       }
-      return;
     }
 
-    
-    setOnCooldown(interaction.user.id, commandName, command.cooldown);
-    addLimits(member, command, commandName, interaction.channel);
+    // if (isCommandLimited(member, command, commandName, interaction.channel)) {
+    //   const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);
+    //   replyToInteraction(
+    //     interaction,
+    //     "Limit",
+    //     "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".",
+    //     false
+    //   );
+    //   return;
+    // }
 
-    try {
-      await command.execute(interaction, broadcast);
-    } catch (error) {
-      console.error(error);
-      await replyToInteraction(
-        interaction,
-        "Error",
-        "\n• Sorry, an error occurred while running that command.",
-        broadcast
-      );
-    }
+    // if (isOnCooldown(interaction.user.id, commandName)) {
+    //   // TODO Could personalize this message depending on the bot's personality
+    //   const timeLeft = Math.ceil(getCooldown(interaction.user.id, commandName) / 1000 + 1);
+    //   replyToInteraction(
+    //     interaction,
+    //     "Cooldown",
+    //     "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
+    //     false
+    //   );
+    //   return;
+    // } else if (isOnCooldown(interaction.user.id)) {
+    //   if (COOLDOWN_TIME > 2750) {
+    //     const timeLeft = Math.ceil(getCooldown(interaction.user.id) / 1000 + 1);
+    //     replyToInteraction(
+    //       interaction,
+    //       "Cooldown",
+    //       "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
+    //       false
+    //     );
+    //   } else {
+    //     replyToInteraction(
+    //       interaction,
+    //       "Cooldown",
+    //       "\n• Hold on! You're sending commands too quickly!",
+    //       false
+    //     );
+    //   }
+    //   return;
+    // }
   });
 
   client.login(token);
