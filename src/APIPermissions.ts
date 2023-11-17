@@ -20,7 +20,7 @@ export function getChannelIDsByChannelName(client: Client, name: string): string
   return channels.map(c => c.id);
 }
 
-export function allChannels(permission: boolean): ApplicationCommandPermissions {
+export function apiAllChannels(permission: boolean): ApplicationCommandPermissions {
   return {
     id: (BigInt(guildID) - BigInt(1)).toString(),
     type: ApplicationCommandPermissionType.Channel,
@@ -28,7 +28,7 @@ export function allChannels(permission: boolean): ApplicationCommandPermissions 
   }
 }
 
-export function everyone(permission: boolean): ApplicationCommandPermissions {
+export function apiEveryone(permission: boolean): ApplicationCommandPermissions {
   return {
     id: guildID,
     type: ApplicationCommandPermissionType.Role,
@@ -36,7 +36,7 @@ export function everyone(permission: boolean): ApplicationCommandPermissions {
   }
 }
 
-export function channel(channelID: string, permission: boolean): ApplicationCommandPermissions {
+export function apiChannel(channelID: string, permission: boolean): ApplicationCommandPermissions {
   return {
     id: channelID,
     type: ApplicationCommandPermissionType.Channel,
@@ -44,7 +44,7 @@ export function channel(channelID: string, permission: boolean): ApplicationComm
   }
 }
 
-export function role(roleID: string, permission: boolean): ApplicationCommandPermissions {
+export function apiRole(roleID: string, permission: boolean): ApplicationCommandPermissions {
   return {
     id: roleID,
     type: ApplicationCommandPermissionType.Role,
@@ -52,7 +52,7 @@ export function role(roleID: string, permission: boolean): ApplicationCommandPer
   }
 }
 
-export function roleFromName(client: Client, roleName: string, permission: boolean): ApplicationCommandPermissions {
+export function apiRoleFromName(client: Client, roleName: string, permission: boolean): ApplicationCommandPermissions {
   let guild = client.guilds.cache.get(process.env.GUILD_ID);
   let role = guild.roles.cache.find(r => r.name === roleName);
   if (!role) return null;
