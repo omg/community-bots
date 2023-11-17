@@ -32,7 +32,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
   for (const file of commandFiles) {
     const command: SlashCommandFileData = require(`${commandFolder}/${file}`)?.command;
-    if (!command.builder || !command.execute) continue;
+    if (!command || !command.builder || !command.execute) continue;
     
     const createdCommand = new Command(command);
     const commandJSON = command.builder.toJSON();
