@@ -65,20 +65,9 @@ export function getEnforcedConstraint(command: Command, member: GuildMember) {
   }
 }
 
-export type OnCooldown = {
-  status: "cooldown",
-  until: number
-}
-
-// ask ai about wanting to make a tryUseCommand function and how i could return something
-export type RateLimited = {
-  status: "ratelimited",
-  until: number
-}
-
-export type Success = {
-  status: "success"
-}
+export type OnCooldown = { status: "cooldown", until: number }
+export type RateLimited = { status: "ratelimited", until: number }
+export type Success = { status: "success" }
 
 export type CommandUsageResult = OnCooldown | RateLimited | Success;
 
