@@ -1,10 +1,12 @@
-import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
+import { ApplicationCommandPermissionType, ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
 import fs from "node:fs";
 import { Command } from "./commands/Command";
-import { SlashCommandFileData } from "./commands/Permissions";
+import { ChannelTypes, PermissionEntity, RoleTypes, SlashCommandFileData } from "./commands/Permissions";
 import { tryUseCommand } from "./commands/cooldowns";
 import { escapeDiscordMarkdown } from "./utils";
+import { apiAllChannels, apiChannel, apiEveryone, apiRoleFromName, getChannelIDsByChannelName, getChannelIDsInCategoryName } from "./APIPermissions";
+import { create } from "node:domain";
 
 const BROADCAST_COMMAND = {
   name: "shout",
@@ -58,17 +60,77 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   //   }
   // }
 
+  // TODO needs to be error handled
   const rest = new REST({ version: "10" }).setToken(token);
   (async () => {
-    try {
-      await rest.put(
-        Routes.applicationGuildCommands(clientID, process.env.GUILD_ID),
-        { body: RESTApplicationCommands }
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    await rest.put(
+      Routes.applicationGuildCommands(clientID, process.env.GUILD_ID),
+      { body: RESTApplicationCommands }
+    );
   })();
+
+  client.once("ready", async () => {
+    const guildID = process.env.GUILD_ID;
+    const guild = client.guilds.cache.get(guildID);
+    const guildCommands = await guild.commands.fetch();
+  
+    // iterate through all commands in the commands map
+    for (const [_, command] of commands) {
+      // get the command ID from the command map
+      const name = command.name;
+  
+      // get the command from the API
+      const applicationCommandID = guildCommands.find(cmd => cmd.name === name)?.id;
+  
+      const permissions = [];
+
+      // at some point the "*" name should be replaced with a "global" type instead of a name
+      function createRolePermissions(roles: PermissionEntity<RoleTypes>[], permission: boolean) {
+        for (const role of roles) {
+          if (role.name === "*") {
+            permissions.push(apiEveryone(permission));
+          } else {
+            permissions.push(apiRoleFromName(client, role.name, permission));
+          }
+        }
+      }
+
+      function createChannelPermissions(channels: PermissionEntity<ChannelTypes>[], permission: boolean) {
+        for (const channel of channels) {
+          if (channel.name === "*") {
+            permissions.push(apiAllChannels(permission));
+          } else {
+            if (channel.type === "category") {
+              getChannelIDsInCategoryName(client, channel.name).forEach(channelID => {
+                permissions.push(apiChannel(channelID, permission));
+              });
+            } else {
+              getChannelIDsByChannelName(client, channel.name).forEach(channelID => {
+                permissions.push(apiChannel(channelID, permission));
+              });
+            }
+          }
+        }
+      }
+
+      createRolePermissions(command.permissions.roles.allowed, true);
+      createRolePermissions(command.permissions.roles.denied, false);
+      createChannelPermissions(command.permissions.channels.allowed, true);
+      createChannelPermissions(command.permissions.channels.denied, false);
+
+      if (!applicationCommandID) console.error("Command ID not found for " + name);
+
+      console.log(permissions);
+
+      await guild.commands.permissions.set({
+        command: applicationCommandID,
+        permissions,
+        token
+      });
+    
+      console.log("Permissions set for " + name);
+    }
+  });
 
   // old mention command handling
 
