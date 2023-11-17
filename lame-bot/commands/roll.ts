@@ -2,7 +2,7 @@ import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { formatNumber } from "../../src/utils";
 import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
 
-const command: SlashCommandFileData = {
+export const command: SlashCommandFileData = {
   builder: new SlashCommandBuilder()
   .setName("roll")
   .setDescription("Roll a number!")
