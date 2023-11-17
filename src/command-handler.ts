@@ -1,9 +1,10 @@
-import { Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Routes } from "discord.js";
+import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
 import fs from "node:fs";
 import { Command } from "./commands/Command";
 import { SlashCommandFileData } from "./commands/Permissions";
 import { tryUseCommand } from "./commands/cooldowns";
+import { escapeDiscordMarkdown } from "./utils";
 
 const BROADCAST_COMMAND = {
   name: "shout",
@@ -48,6 +49,15 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   // Only push the broadcast command if there are options to broadcast
   if (broadcastCommand.options.length > 0) RESTApplicationCommands.push(broadcastCommand);
 
+  // TODO: mention commands - replace with "action" commands
+  // for (const file of mentionCommandFiles) {
+  //   const command = require(`${commandFolder}/mentions/${file}`);
+  //   // check if matches and execute are defined in command
+  //   if (command.matches && command.execute) {
+  //     mentionCommands.set(command.NAME_DUMB, command);
+  //   }
+  // }
+
   const rest = new REST({ version: "10" }).setToken(token);
   (async () => {
     try {
@@ -59,6 +69,45 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       console.error(error);
     }
   })();
+
+  // old mention command handling
+
+  // client.on(Events.MessageCreate, async (message) => {
+  //   if (!message.member) return;
+  //   if (message.author.bot) return;
+  //   if (!message.guild) return;
+  //   if (message.channel.type !== ChannelType.GuildText) return;
+    
+  //   // check if it mentions the bot
+  //   if (!message.mentions.has(client.user.id)) return;
+
+  //   let member = message.member as GuildMember;
+  //   let channel = message.channel as GuildTextBasedChannel;
+
+  //   // replace the mention with nothing and trim the message, removing double spaces too
+  //   let text = escapeDiscordMarkdown(message.content.replace("<@" + client.user.id + ">", "").replace(/ +/g, " ").trim());
+  //   console.log(text);
+    
+  //   for (const [, command] of mentionCommands) {
+  //     console.log(command.NAME_DUMB);
+  //     if (command.matches(text)) {
+  //       console.log(command.NAME_DUMB);
+  //       if (isCommandLimited(member, command, command.NAME_DUMB, channel)) return;
+  //       if (isOnCooldown(member.id, command.NAME_DUMB)) return;
+  //       if (isOnCooldown(member.id)) return;
+        
+  //       setOnCooldown(message.member.id, command.NAME_DUMB, command.cooldown);
+  //       addLimits(message.member, command, command.NAME_DUMB, message.channel);
+
+  //       try {
+  //         await command.execute(message, text);
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //       return;
+  //     }
+  //   }
+  // });
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -78,12 +127,60 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     const result = tryUseCommand(member, command);
 
-    if (result.status === "ratelimited") {
-      // TODO
-    } else if (result.status === "cooldown") {
-      // TODO
-    } else if (result.status === "success") {
-      // TODO
+    // rate limit and cooldown handling
+
+    if (result.status === "ratelimited" || result.status === "cooldown") {
+      const timeRemaining = result.until - Date.now();
+      const header = result.status === "ratelimited" ? "Limit" : "Cooldown";
+
+      // don't send an auto-updating message if the time remaining is less than 2 seconds
+      if (timeRemaining < 2000) {
+        replyToInteraction(
+          interaction,
+          header,
+          "\n• You've used this command too much! Wait just a moment and try again.",
+          false
+        );
+        return;
+      }
+
+      // don't send an auto-updating message if the command has a short cooldown
+      if (result.status === "cooldown" && result.constraint.cooldown < 2750) {
+        replyToInteraction(
+          interaction,
+          header,
+          "\n• Hold on! You're sending commands too quickly!",
+          false
+        );
+        return;
+      }
+
+      try {
+        replyToInteraction(
+          interaction,
+          header,
+          "\n• You've used this command too much! You can use it again <t:" + Math.ceil(result.until / 1000) + ":R>.",
+          false
+        );
+
+        if (timeRemaining < 20 * 1000) {
+          setTimeout(() => {
+            editInteractionReply(
+              interaction,
+              header,
+              "\n• You can now use the command.",
+              false
+            )
+          }, timeRemaining);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
+      return;
+    }
+    
+    if (result.status === "success") {
       try {
         await command.execute(interaction, broadcast);
       } catch (error) {
@@ -96,47 +193,6 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
         );
       }
     }
-
-    // if (isCommandLimited(member, command, commandName, interaction.channel)) {
-    //   const timeLeft = Math.ceil(getLimitTime(member, commandName) / 1000 + 1);
-    //   replyToInteraction(
-    //     interaction,
-    //     "Limit",
-    //     "\n• You've used this command too much! You can use it again in " + secondsToEnglish(timeLeft) + ".",
-    //     false
-    //   );
-    //   return;
-    // }
-
-    // if (isOnCooldown(interaction.user.id, commandName)) {
-    //   // TODO Could personalize this message depending on the bot's personality
-    //   const timeLeft = Math.ceil(getCooldown(interaction.user.id, commandName) / 1000 + 1);
-    //   replyToInteraction(
-    //     interaction,
-    //     "Cooldown",
-    //     "\n• Hold on! You can use this command again in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
-    //     false
-    //   );
-    //   return;
-    // } else if (isOnCooldown(interaction.user.id)) {
-    //   if (COOLDOWN_TIME > 2750) {
-    //     const timeLeft = Math.ceil(getCooldown(interaction.user.id) / 1000 + 1);
-    //     replyToInteraction(
-    //       interaction,
-    //       "Cooldown",
-    //       "\n• Hold on! You can use another command in " + timeLeft + (timeLeft === 1 ? " second." : " seconds."),
-    //       false
-    //     );
-    //   } else {
-    //     replyToInteraction(
-    //       interaction,
-    //       "Cooldown",
-    //       "\n• Hold on! You're sending commands too quickly!",
-    //       false
-    //     );
-    //   }
-    //   return;
-    // }
   });
 
   client.login(token);
@@ -146,12 +202,21 @@ function isBroadcastChannel(channel: GuildTextBasedChannel) {
   return channel.name == "lame-bots";
 }
 
+function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+  return "**" + header + " *｡✲ﾟ ——**" +
+  (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
+  "\n" + response;
+}
+
 export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   await interaction.reply({
-    content:
-      "**" + header + " *｡✲ﾟ ——**" +
-      (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
-      "\n" + response,
+    content: getInteractionContent(interaction, header, response, broadcast),
     ephemeral: !broadcast,
+  });
+}
+
+export async function editInteractionReply(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+  await interaction.editReply({
+    content: getInteractionContent(interaction, header, response, broadcast),
   });
 }

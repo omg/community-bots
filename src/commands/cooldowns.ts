@@ -65,9 +65,9 @@ export function getEnforcedConstraint(command: Command, member: GuildMember) {
   }
 }
 
-export type OnCooldown = { status: "cooldown", until: number }
-export type RateLimited = { status: "ratelimited", until: number }
-export type Success = { status: "success" }
+export type OnCooldown = { status: "cooldown", until: number, constraint: StrictConstraint }
+export type RateLimited = { status: "ratelimited", until: number, constraint: StrictConstraint }
+export type Success = { status: "success", constraint: StrictConstraint }
 
 export type CommandUsageResult = OnCooldown | RateLimited | Success;
 
@@ -96,7 +96,8 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
   if (requestCount >= enforcedConstraint.rateLimit.max) {
     return {
       status: "ratelimited",
-      until: rateLimitStart + enforcedConstraint.rateLimit.window * 1000
+      until: rateLimitStart + enforcedConstraint.rateLimit.window * 1000,
+      constraint: enforcedConstraint
     }
   }
 
@@ -110,7 +111,8 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
   if (now - cooldownStart < enforcedConstraint.cooldown * 1000) {
     return {
       status: "cooldown",
-      until: cooldownStart + enforcedConstraint.cooldown * 1000
+      until: cooldownStart + enforcedConstraint.cooldown * 1000,
+      constraint: enforcedConstraint
     }
   }
 
@@ -124,5 +126,5 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
   commandCooldownStart.set(key, now);
   // commandCooldownStart.set(userID, now);
 
-  return { status: "success" }
+  return { status: "success", constraint: enforcedConstraint }
 }
