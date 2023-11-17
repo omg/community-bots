@@ -102,6 +102,8 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
 
   // TODO: gloal command rate limit
 
+  // check cooldown
+
   const cooldownStart = commandCooldownStart.get(userID) || 0;
 
   // if it's on cooldown, then return on cooldown
