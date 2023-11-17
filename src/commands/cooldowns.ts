@@ -50,12 +50,26 @@ export function getEnforcedConstraint(command: Command, member: GuildMember) {
   // create the StrictConstraint
   
   function getDefinedValue<K extends keyof Constraint<"all">>(key: K): Exclude<Constraint<"all">[K], "default" | "local"> {
-    const value: Constraint<"all">[K] = userConstraint[key];
+    let value: Constraint<"all">[K] = userConstraint[key];
     type excludedType = Exclude<Constraint<"all">[K], "default" | "local">;
-    return (value === "default" ? DEFAULT_CONSTRAINTS[key] // default - use the default constraint
-      : value === "local" ? command.limits[key] // local - use the command's constraint
-      : value === undefined ? DEFAULT_CONSTRAINTS[key] // undefined - use the default constraint
-      : value) as excludedType; // defined - use the provided value
+
+    if (value === "local") {
+      // local - use the command's constraint
+      const localValue = command.limits[key];
+      if (localValue === undefined) {
+        // if the command doesn't have a constraint, then use the default constraint
+        value = "default";
+      } else {
+        return localValue as excludedType;
+      }
+    }
+
+    if (value === "default" || value === undefined) {
+      // default/undefined - use the default constraint
+      return DEFAULT_CONSTRAINTS[key] as excludedType;
+    }
+
+    return value as excludedType;
   }
 
   return {
