@@ -95,7 +95,7 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
   const enforcedConstraint = getEnforcedConstraint(command, member);
 
   const rateLimitStart = commandRateLimitStart.get(key) || now;
-  let requestCount = commandRequestCount.get(userID) || 0;
+  let requestCount = commandRequestCount.get(key) || 0;
 
   // check rate limit
 
@@ -119,7 +119,7 @@ export function tryUseCommand(member: GuildMember, command: Command): CommandUsa
 
   // check cooldown
 
-  const cooldownStart = commandCooldownStart.get(userID) || 0;
+  const cooldownStart = commandCooldownStart.get(key) || 0;
 
   // if it's on cooldown, then return on cooldown
   if (now - cooldownStart < enforcedConstraint.cooldown * 1000) {
