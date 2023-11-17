@@ -87,7 +87,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       // at some point the "*" name should be replaced with a "global" type instead of a name
       function createRolePermissions(roles: PermissionEntity<RoleTypes>[], permission: boolean) {
         for (const role of roles) {
-          if (role.name === "*") {
+          if (role.type === "global") {
             permissions.push(apiEveryone(permission));
           } else {
             permissions.push(apiRoleFromName(client, role.name, permission));
@@ -97,18 +97,16 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
       function createChannelPermissions(channels: PermissionEntity<ChannelTypes>[], permission: boolean) {
         for (const channel of channels) {
-          if (channel.name === "*") {
+          if (channel.type === "global") {
             permissions.push(apiAllChannels(permission));
+          } else if (channel.type === "category") {
+            getChannelIDsInCategoryName(client, channel.name).forEach(channelID => {
+              permissions.push(apiChannel(channelID, permission));
+            });
           } else {
-            if (channel.type === "category") {
-              getChannelIDsInCategoryName(client, channel.name).forEach(channelID => {
-                permissions.push(apiChannel(channelID, permission));
-              });
-            } else {
-              getChannelIDsByChannelName(client, channel.name).forEach(channelID => {
-                permissions.push(apiChannel(channelID, permission));
-              });
-            }
+            getChannelIDsByChannelName(client, channel.name).forEach(channelID => {
+              permissions.push(apiChannel(channelID, permission));
+            });
           }
         }
       }
