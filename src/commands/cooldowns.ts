@@ -71,36 +71,56 @@ export type Success = { status: "success" }
 
 export type CommandUsageResult = OnCooldown | RateLimited | Success;
 
-export function tryUseCommand(userID: string, command: Command): CommandUsageResult {
+export function tryUseCommand(member: GuildMember, command: Command): CommandUsageResult {
+  const userID = member.id; // TODO would be better if this command was called with a user ID instead of a member - for the future
+  const now = Date.now();
+  
   const commandName = command.name;
   const key = userID + commandName;
 
-  const requestCount = commandRequestCount.get(userID) || 0;
+  const enforcedConstraint = getEnforcedConstraint(command, member);
+
+  const rateLimitStart = commandRateLimitStart.get(key) || now;
+  let requestCount = commandRequestCount.get(userID) || 0;
+
+  // check rate limit
+
+  // if the rate limit window has passed, then reset the rate limit
+  if (now - rateLimitStart > enforcedConstraint.rateLimit.window * 1000) {
+    commandRateLimitStart.set(key, now);
+    commandRequestCount.set(key, 0);
+    requestCount = 0;
+  }
+
+  // if the request count has reached the maximum, then return rate limited
+  if (requestCount >= enforcedConstraint.rateLimit.max) {
+    return {
+      status: "ratelimited",
+      until: rateLimitStart + enforcedConstraint.rateLimit.window * 1000
+    }
+  }
+
+  // TODO: gloal command rate limit
+
+  const cooldownStart = commandCooldownStart.get(userID) || 0;
+
+  // if it's on cooldown, then return on cooldown
+  if (now - cooldownStart < enforcedConstraint.cooldown * 1000) {
+    return {
+      status: "cooldown",
+      until: cooldownStart + enforcedConstraint.cooldown * 1000
+    }
+  }
+
+  // TODO: global command cooldowns
+
+  // add to the request count
   commandRequestCount.set(key, requestCount + 1);
+  // commandRequestCount.set(userID, requestCount + 1);
 
-  // TODO
+  // set the cooldown
+  commandCooldownStart.set(key, now);
+  // commandCooldownStart.set(userID, now);
 
-  const enforcedRateLimit = getEnforcedRateLimit(command, member);
-
-  // commandCooldownStart.set(key, Date.now());
-
-  // if (commandRateLimitStart + )
-  // const rateLimit = command.rateLimits.global;
-  // if (rateLimit) setRateLimit(userID, commandName, rateLimit);
+  return { status: "success" }
 }
-
-export function getCooldownStart(userID: string, key = "") {
-  return Math.max(
-    (commandCooldownStart.get(userID + key) || 0),
-    (commandCooldownStart.get(userID) || 0)
-  );
-}
-
-export function setCooldown(userID: string, key: string, cooldown: number) {
-  commandCooldownStart.set(userID, Date.now() + cooldown);
-  if (key && cooldown) commandCooldownStart.set(userID + key, Date.now() + cooldown);
-}
-
-// export function isOnCooldown(userID: string, key = "") {
-//   return getCooldown(userID, key) > 0;
-// }
