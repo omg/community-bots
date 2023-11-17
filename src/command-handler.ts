@@ -133,23 +133,23 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       const timeRemaining = result.until - Date.now();
       const header = result.status === "ratelimited" ? "Limit" : "Cooldown";
 
+      // don't send an auto-updating message if the command has a short cooldown
+      if (result.status === "cooldown" && result.constraint.cooldown < 2.75) {
+        replyToInteraction(
+          interaction,
+          header,
+          "\n• Hold on! You're sending commands too quickly!",
+          false
+        );
+        return;
+      }
+      
       // don't send an auto-updating message if the time remaining is less than 2 seconds
       if (timeRemaining < 2000) {
         replyToInteraction(
           interaction,
           header,
-          "\n• You've used this command too much! Wait just a moment and try again.",
-          false
-        );
-        return;
-      }
-
-      // don't send an auto-updating message if the command has a short cooldown
-      if (result.status === "cooldown" && result.constraint.cooldown < 2750) {
-        replyToInteraction(
-          interaction,
-          header,
-          "\n• Hold on! You're sending commands too quickly!",
+          "\n• Wait just a moment and try again!",
           false
         );
         return;
