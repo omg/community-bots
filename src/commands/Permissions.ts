@@ -163,6 +163,12 @@ export type Constraint<T extends Scope> = {
   enforceInBotsChannel?: boolean | ScopeTypes<T> // should this be optional for strict? YES - since higher roles shouldn't override from a value that wasn't even specified
 }
 
+export type StrictConstraint = {
+  rateLimit: RateLimit,
+  cooldown: number,
+  enforceInBotsChannel: boolean
+}
+
 export type LooseConstraintRule<T extends Scope> = {
   roles: PermissionGroup<RoleTypes>,
   // enforceInBotsChannel?: boolean

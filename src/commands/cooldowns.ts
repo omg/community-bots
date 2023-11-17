@@ -1,36 +1,68 @@
 import { GuildMember } from "discord.js";
 import { Command } from "./Command";
-import { RateLimit, everyone } from "./Permissions";
+import { Constraint, RateLimit, StrictConstraint } from "./Permissions";
 
 const commandCooldownStart = new Map();
 const commandRequestCount = new Map();
 const commandRateLimitStart = new Map();
 
-const DEFAULT_RATE_LIMIT: RateLimit = {
-  window: 180,
-  max: 16
+const DEFAULT_CONSTRAINTS: StrictConstraint = {
+  cooldown: 0.75,
+  rateLimit: {
+    window: 180,
+    max: 16
+  },
+  enforceInBotsChannel: false
 }
 
-export function getEnforcedRateLimit(command: Command, member: GuildMember) {
-  // probably go in order from top to bottom and check if the member has the role
+export function getEnforcedConstraint(command: Command, member: GuildMember) {
+  // go in order from top to bottom and check if the member has the role
   // if they do, then set the enforced rate limit to that one
   // only override properties that are set
   // if they don't have that role, then keep going
   // if some properties havevn't been set, then use the global one
-  let enforcedRateLimit: RateLimit = {
-    // TODO
+
+  let userConstraint: Constraint<"all"> = {};
+
+  function overwriteConstraint(constraint: Constraint<any>) {
+    if (constraint.cooldown) userConstraint.cooldown = constraint.cooldown;
+    if (constraint.rateLimit) userConstraint.rateLimit = constraint.rateLimit;
+    if (constraint.enforceInBotsChannel) userConstraint.enforceInBotsChannel = constraint.enforceInBotsChannel;
   }
-  for (const rateLimit of command.rateLimits.limits) {
-    rateLimit.roles.forEach((role) => {
+
+  // overwrite with the command's constraints
+
+  overwriteConstraint(command.limits);
+
+  // a cooldown and a rate limit is an enforced --> Constraint <--
+
+  for (const constraintRule of command.constraints.rules) {
+    constraintRule.roles.forEach((role) => {
       const name = role.name;
 
       // check if the member has the role by name
       if (member.roles.cache.some((role) => role.name === name)) {
-        enforcedRateLimit = rateLimit;
+        overwriteConstraint(constraintRule);
       }
     });
   }
-  return enforcedRateLimit;
+
+  // create the StrictConstraint
+  
+  function getDefinedValue<K extends keyof Constraint<"all">>(key: K): Exclude<Constraint<"all">[K], "default" | "local"> {
+    const value: Constraint<"all">[K] = userConstraint[key];
+    type excludedType = Exclude<Constraint<"all">[K], "default" | "local">;
+    return (value === "default" ? DEFAULT_CONSTRAINTS[key] // default - use the default constraint
+      : value === "local" ? command.limits[key] // local - use the command's constraint
+      : value === undefined ? DEFAULT_CONSTRAINTS[key] // undefined - use the default constraint
+      : value) as excludedType; // defined - use the provided value
+  }
+
+  return {
+    cooldown: getDefinedValue("cooldown"),
+    rateLimit: getDefinedValue("rateLimit"),
+    enforceInBotsChannel: getDefinedValue("enforceInBotsChannel")
+  }
 }
 
 export type OnCooldown = {
