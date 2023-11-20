@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { replyToInteraction } from "../../src/command-handler";
-import { escapeDiscordMarkdown, formatNumber } from "../../src/utils";
+import { replyToInteraction } from "../../../src/command-handler";
+import { escapeDiscordMarkdown, formatNumber } from "../../../src/utils";
 
 export const data = new SlashCommandBuilder()
   .setName("characters")
