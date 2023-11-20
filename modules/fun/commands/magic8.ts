@@ -1,5 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
+import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../../src/commands/Permissions";
 
 const responses = [
   "It is certain.",

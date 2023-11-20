@@ -1,6 +1,6 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { formatNumber } from "../../src/utils";
-import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../src/commands/Permissions";
+import { formatNumber } from "../../../src/utils";
+import { SlashCommandFileData, allChannelsExcept, category, everyone, role } from "../../../src/commands/Permissions";
 
 export const command: SlashCommandFileData = {
   builder: new SlashCommandBuilder()
