@@ -482,11 +482,10 @@ async function endRound() {
 
     if (solutionCount === 1) {
       uniqueSolutions++;
-      // Uncomment this when there are enough unique solutions
-      // addRemark({
-      //   index: REMARK.uniqueSolve,
-      //   remark: getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"
-      // });
+      addRemark({
+        index: REMARK.uniqueSolve,
+        remark: getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"
+      });
     }
 
     // Keep track of unique solutions in the console
