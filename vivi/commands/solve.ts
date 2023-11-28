@@ -1,4 +1,4 @@
-import { replyToInteraction } from '../../src/command-handler';
+import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
 import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber, shuffle } from '../../src/utils';
