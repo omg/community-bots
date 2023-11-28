@@ -4,6 +4,7 @@ import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber, shuffle } from '../../src/utils';
 
 import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { PagedResponse } from "../../src/pageview";
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -32,8 +33,12 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     // cleanWord is called twice here on prompt
     let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
+    let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
+
+    // solutions.sort((a, b) => b.length - a.length || a.localeCompare(b));
+    // sort alphabetically
+    solutions.sort((a, b) => a.localeCompare(b));
 
     if (solveCount === 0) {
       await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
@@ -42,26 +47,27 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
         + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
         + '\n';
 
-      shuffle(solutions);
+      // i think this becomes useless/pointless when the response is paged
+      // it seems more annoying to have page 5 different every time
+      // shuffle(solutions);
 
-      let solutionStrings = [];
-      let solutionsLength = 0;
+      let solutionsTextLength = 0;
+      let pages = [];
 
-      for (let i = 0; i < Math.min(solutions.length, 4); i++) {
-        let solution = solutions[i];
-        
-        let solutionString = '\n• ' + getSolveLetters(solution, regex);
-        if (solutionsLength + solutionString.length > 1910) break;
-        solutionStrings.push(solutionString);
-        solutionsLength += solutionString.length;
+      for (let i = 3; i < solutions.length; i += 4) {
+        let solutionString = solutions.slice(i - 3, Math.min(i+1, solutions.length - 4, solutions.length)).map((solution) => {
+          return `\n• ${getSolveLetters(solution, regex)}`;
+        }).join('');
+
+        // i dont think these matter with pages anymore
+        // if (solutionsTextLength + solutionString.length > 1910) break;
+        // solutionsTextLength += solutionString.length;
+
+        pages.push(solverString + getInteractionContent(interaction, "Solver", solutionString, preferBroadcast));
       }
-
+      
       // TODO: Add a "show more" button if there are more solutions than can be displayed
-
-      solutionStrings.sort((a, b) => b.length - a.length || a.localeCompare(b));
-      for (let solutionString of solutionStrings) solverString += solutionString;
-
-      await replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
+      await PagedResponse(interaction, pages)
     }
   } catch (error) {
     if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
