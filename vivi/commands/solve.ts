@@ -1,7 +1,7 @@
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
 import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { formatNumber, shuffle } from '../../src/utils';
+import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
 
 import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 import { PagedResponse } from "../../src/pageview";
@@ -20,7 +20,25 @@ export const data = new SlashCommandBuilder()
       .addChoices({
         name: 'English',
         value: 'English'
+      }))
+  .addStringOption(option => 
+    option.setName('sorting')
+      .setDescription("How to sort solutions")
+      .setRequired(false)
+      .addChoices({
+        name: 'Length (Descending)',
+        value: 'lengthDescending'
+      }, {
+        name: 'Length (Ascending)',
+        value: 'lengthAscending'
+      }, {
+        name: 'Alphabetical',
+        value: 'alphabetical'
+      }, {
+        name: 'Length (Descending), Alphabetical',
+        value: 'lengthThenAlphabetical'
       }));
+  
 
 
 export const broadcastable = true;
@@ -28,6 +46,8 @@ export const broadcastable = true;
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let prompt = cleanWord(interaction.options.get("prompt").value);
+  // @ts-ignore
+  let sorting: string = interaction.options.get("sorting")?.value ?? "lengthDescending";
 
   try {
     // cleanWord is called twice here on prompt
@@ -36,9 +56,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
 
-    // solutions.sort((a, b) => b.length - a.length || a.localeCompare(b));
-    // sort alphabetically
-    solutions.sort((a, b) => a.localeCompare(b));
+    solutions.sort(SortingFunctions[sorting]);
 
     if (solveCount === 0) {
       await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
