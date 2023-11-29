@@ -81,6 +81,16 @@ export const PagedResponse = async (
     await i.update({
       content: pages[page_index],
       components: [row],
+    }).catch((err) => {
+      // this is the error code for the message being too long to post
+      if (err.code === 50035) {
+        // i.update({
+        //   content: "This page is too long to display, please use the buttons to navigate.",
+        //   components: [],
+        // }).catch(() => {}); // if this errors just give up tbh
+
+        collector.stop();
+      }
     })
   });
 
