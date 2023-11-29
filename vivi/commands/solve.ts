@@ -87,7 +87,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
         pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
       }
       
-      await PagedResponse(interaction, pages)
+      await PagedResponse(interaction, pages, undefined, undefined, preferBroadcast)
     }
   } catch (error) {
     if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
