@@ -46,24 +46,27 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
       let solverString = '\nI found '
         + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
         + '\n';
-
-      // i think this becomes useless/pointless when the response is paged
-      // it seems more annoying to have page 5 different every time
-      // shuffle(solutions);
-
-      let solutionsTextLength = 0;
+      
       let pages = [];
+      let solutionText = solverString;
+      let wordsAdded = 0;
 
-      for (let i = 3; i < solutions.length; i += 4) {
-        let solutionString = solutions.slice(i - 3, Math.min(i+1, solutions.length - 4, solutions.length)).map((solution) => {
-          return `\n• ${getSolveLetters(solution, regex)}`;
-        }).join('');
+      for (let i = 0; i < solutions.length; i += 1) {
+        let solution = solutions[i];
+        let word = `\n• ${getSolveLetters(solution, regex)}`;
+        
+        if ((solutionText.length + word.length) > 1910 || wordsAdded === 4) {
+          pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
+          solutionText = solverString;
+          wordsAdded = 0;
+        }
 
-        // i dont think these matter with pages anymore
-        // if (solutionsTextLength + solutionString.length > 1910) break;
-        // solutionsTextLength += solutionString.length;
-
-        pages.push(solverString + getInteractionContent(interaction, "Solver", solutionString, preferBroadcast));
+        solutionText += word;
+        wordsAdded += 1;
+      }
+      
+      if (wordsAdded > 0) {
+        pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
       }
       
       // TODO: Add a "show more" button if there are more solutions than can be displayed
