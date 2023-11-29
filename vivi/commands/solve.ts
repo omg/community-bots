@@ -69,7 +69,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
         pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
       }
       
-      // TODO: Add a "show more" button if there are more solutions than can be displayed
       await PagedResponse(interaction, pages)
     }
   } catch (error) {
