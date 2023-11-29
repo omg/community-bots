@@ -19,6 +19,7 @@ export const PagedResponse = async (
   pages: string[], 
   buttons: ButtonBuilder[] = Object.values(DefaultButtons),
   timeout: number = 15000, // milliseconds? timeout after 15 seconds
+  preferBroadcast: boolean = false
 ) => {
   let page_index = 0;
   let page_length = pages.length;
@@ -31,7 +32,7 @@ export const PagedResponse = async (
 
   // this can fail if we are using messages (non-slash commands) instead of interactions
   // noting this down just incase
-  await interaction.deferReply().catch(() => {});
+  await interaction.deferReply({ephemeral: !preferBroadcast}).catch(() => {});
   let initialmessage = await interaction.editReply({
     content: pages[page_index],
     components: [row],
