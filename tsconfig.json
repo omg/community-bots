@@ -15,7 +15,7 @@
       "vivi/**/*.ts",
       "vivi/**/*.js",
       "sleuth/**/*.ts",
-      "sleuth/**/*.js",
+      "sleuth/**/*.js", "modules/moderation/client.ts", "modules/moderation/index.ts", "modules/dictionary/client.ts", "modules/dictionary/index.ts",
   ],
   "exclude": [
       "node_modules"
