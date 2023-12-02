@@ -4,7 +4,6 @@ import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'disc
 import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
 
 import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
-import { PagedResponse } from "../../src/pageview";
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -23,7 +22,7 @@ export const data = new SlashCommandBuilder()
       }))
   .addStringOption(option => 
     option.setName('sorting')
-      .setDescription("How to sort solutions")
+      .setDescription("How to sort solutions (forces text file output)")
       .setRequired(false)
       .addChoices({
         name: 'Length (Descending)',
@@ -37,18 +36,7 @@ export const data = new SlashCommandBuilder()
       }, {
         name: 'Length (Descending), Alphabetical',
         value: 'lengthThenAlphabetical'
-      }))
-  .addStringOption(option => 
-    option.setName('file')
-      .setDescription("dumps the solutions to a file")
-      .setRequired(false)
-      .addChoices({
-        name: "Text",
-        value: "text"
-      }, /* { // Maybe later?
-        name: "JSON",
-        value: "json"
-      } */));
+      }));
 
 export const broadcastable = true;
 
@@ -56,9 +44,7 @@ export const broadcastable = true;
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let prompt = cleanWord(interaction.options.get("prompt").value);
   // @ts-ignore
-  let sorting: string = interaction.options.get("sorting")?.value ?? "lengthDescending";
-  // @ts-ignore // :HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA:
-  let data_structure: string = interaction.options.get("file")?.value ?? "text";
+  let sorting: string = interaction.options.get("sorting")?.value ?? "None";
 
   try {
     // cleanWord is called twice here on prompt
@@ -67,13 +53,13 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
 
-    solutions.sort(SortingFunctions[sorting]);
-
     let solverString = '\nI found '
     + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
     + '\n';
 
-    if (data_structure === "text") {
+    if (sorting !== "None") {
+      solutions.sort(SortingFunctions[sorting]);
+
       // let fHeader = solveCount === 1 ? "1 solution" : `${formatNumber(solveCount)} solutions` + ` for \`${prompt}\` ` + `sorted by ${sorting_formatted}!`;
       let fileData = Buffer.from(solutions.join("\n"), "utf-8");
       let attachment = new AttachmentBuilder(fileData, { name: `vivi-result.txt` });
@@ -81,7 +67,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
       return await interaction.reply({
         content: getInteractionContent(interaction, "Solver", solverString, preferBroadcast),
         files: [attachment],
-        ephemeral: preferBroadcast
+        ephemeral: !preferBroadcast
       })
     }
 
