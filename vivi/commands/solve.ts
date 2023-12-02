@@ -94,8 +94,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
 
       for (let i = 0; i < solutions.length; i += 1) {
         let solution = solutions[i];
-        let word = `\n• ${solution}`;
-        // let word = `\n• ${getSolveLetters(solution, regex)}`;
+        let word = `\n• ${getSolveLetters(solution, regex)}`;
         
         if ((solutionText.length + word.length) > 1910 || wordsAdded === 4) {
           pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
