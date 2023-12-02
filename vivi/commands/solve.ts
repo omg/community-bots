@@ -88,31 +88,24 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     if (solveCount === 0) {
       await replyToInteraction(interaction, "Solver", "\n• That prompt is impossible.", preferBroadcast);
     } else {
-      let pages = [];
-      let solutionText = solverString;
-      let wordsAdded = 0;
+      shuffle(solutions);
 
-      for (let i = 0; i < solutions.length; i += 1) {
+      let solutionStrings = [];
+      let solutionsLength = 0;
+
+      for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
-        let word = `\n• ${getSolveLetters(solution, regex)}`;
         
-        if ((solutionText.length + word.length) > 1910 || wordsAdded === 4) {
-          pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
-          solutionText = solverString;
-          wordsAdded = 0;
-        }
+        let solutionString = '\n• ' + getSolveLetters(solution, regex);
+        if (solutionsLength + solutionString.length > 1910) break;
+        solutionStrings.push(solutionString);
+        solutionsLength += solutionString.length;
+      }
 
-        solutionText += word;
-        wordsAdded += 1;
-      }
-      
-      if (wordsAdded > 0) {
-        pages.push(getInteractionContent(interaction, "Solver", solutionText, preferBroadcast))
-      }
-      
-      let random_page = pages[Math.floor(Math.random() * pages.length | 0)]; // just a quick solution since no pagination
-      await replyToInteraction(interaction, "Solver", random_page, preferBroadcast)
-      // await PagedResponse(interaction, pages, undefined, undefined, preferBroadcast)
+      solutionStrings.sort((a, b) => b.length - a.length || a.localeCompare(b));
+      for (let solutionString of solutionStrings) solverString += solutionString;
+
+      await replyToInteraction(interaction, "Solver", solverString, preferBroadcast);
     }
   } catch (error) {
     if (error.name === 'PromptException' || error.name === 'SolveWorkerException') {
