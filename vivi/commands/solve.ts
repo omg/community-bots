@@ -57,7 +57,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     + (solutions.length === 1 ? '**1** solution!' : '**' + formatNumber(solutions.length) + '** solutions!')
     + '\n';
 
-    if (sorting !== "None") {
+    if (sorting !== "None" && solveCount > 0) {
       solutions.sort(SortingFunctions[sorting]);
 
       // let fHeader = solveCount === 1 ? "1 solution" : `${formatNumber(solveCount)} solutions` + ` for \`${prompt}\` ` + `sorted by ${sorting_formatted}!`;
