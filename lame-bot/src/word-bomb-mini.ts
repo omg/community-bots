@@ -655,6 +655,9 @@ lameBotClient.on("messageCreate", (message) => {
   // stop if this user has already solved
   if (solves.some((s) => s.user === message.author.id)) return;
 
+  // stop if the message content has new lines
+  if (message.content.includes("\n")) return;
+
   // check if the guess is a solve and if it contains the prompt
   let guess = cleanWord(message.content);
   if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
