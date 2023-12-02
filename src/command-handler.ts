@@ -353,7 +353,7 @@ function isBroadcastChannel(channel: GuildTextBasedChannel) {
   return channel.name == "lame-bots";
 }
 
-function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+export function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   return "**" + header + " *｡✲ﾟ ——**" +
   (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
   "\n" + response;
