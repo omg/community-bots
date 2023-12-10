@@ -5,7 +5,7 @@ import sharp from 'sharp';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
-  .setDescription("Set a booster badge for yourself")
+  .setDescription("Set a booster badge for yourself!")
   .addAttachmentOption(option => 
     option.setName("icon")
       .setDescription("The icon to use")
@@ -26,9 +26,7 @@ const validateUserName = (name: string, _id?: string) => {
   // and the likelyhood we'll have a name collision is low enough that we can get away with this
   validated = name.replace(/[\.\_]/g, "");
   
-  if (name.endsWith("s")) {
-    validated += "'";
-  }
+  validated += name.endsWith("s") ? "'" : "'s";
 
   return validated
 }
