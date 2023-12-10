@@ -65,7 +65,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
     // TRY CATCH :HAHAHAHA:
     try {
       userBoosterRole = await interaction.guild.roles.create({
-        name: validateUserName(interaction.user.username) + " booster icon 2",
+        name: validateUserName(interaction.user.username) + " booster icon",
         position: rolePos + 1,
         icon: iconResized,
       });
@@ -79,7 +79,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
     userBoosterRole = roles.cache.get(profile.boosterRole);
     await userBoosterRole.edit({
       icon: iconResized
-    })
+    });
   }
 
   if (!userRoles.cache.has(userBoosterRole.id)) {
