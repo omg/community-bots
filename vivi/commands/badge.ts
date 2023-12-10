@@ -61,7 +61,24 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   let rolePos = roles.cache.get(boosterPositionRole).position;
 
   let userBoosterRole: Role;
-  if (!profile.boosterRole) {
+  let roleUpdated = false;
+
+  if (profile.boosterRole) {
+    userBoosterRole = roles.cache.get(profile.boosterRole);
+
+    if (userBoosterRole) {
+      // tbh if this edit fails we can just cope and move on
+      await userBoosterRole.edit({
+        icon: iconResized
+      });
+
+      roleUpdated = true;
+    }
+
+    // if the role is missing, we'll need to create a new one
+  }
+
+  if (!roleUpdated) {
     // TRY CATCH :HAHAHAHA:
     try {
       userBoosterRole = await interaction.guild.roles.create({
@@ -75,12 +92,6 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to create your role :(\nTry again later.`, false);
     }
-  } else {
-    // tbh if this edit fails we can just cope and move on
-    userBoosterRole = roles.cache.get(profile.boosterRole);
-    await userBoosterRole.edit({
-      icon: iconResized
-    });
   }
 
   if (!userRoles.cache.has(userBoosterRole.id)) {
