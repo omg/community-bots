@@ -1,7 +1,7 @@
 import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMemberRoleManager, Role } from 'discord.js';
-import sharp from 'sharp';
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
 import { getProfile, setBoosterRole } from '../../src/database/db';
+import sharp from 'sharp';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
@@ -72,7 +72,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
         position: rolePos + 1,
         icon: iconResized,
       });
-      
+
       await setBoosterRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       replyToInteraction(interaction, "Error", `Failed to create role: ${e}`, false);
