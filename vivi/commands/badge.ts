@@ -42,12 +42,12 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   if (interaction.guild.premiumTier < 2) {
     // this is mainly to prevent people from using this while the server doesnt have
     // the correct boost level and casuing a ton of errors
-    replyToInteraction(interaction, "Error", "You must be in a server with level 2 or higher boost level to use this command", false);
+    replyToInteraction(interaction, "Error", "You can't use booster roles yet, the server must be at least level 2!", false);
     return;
   }
 
   if (!isBooster(userRoles)) {
-    replyToInteraction(interaction, "Error", "You must be a booster to use this command", false);
+    replyToInteraction(interaction, "Error", "You must be a booster to use this command.", false);
     return;
   }
 
@@ -72,7 +72,8 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
 
       await setBoosterRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
-      replyToInteraction(interaction, "Error", `Failed to create role: ${e}`, false);
+      console.error(e);
+      replyToInteraction(interaction, "Error", `Failed to create your role :(\nTry again later.`, false);
     }
   } else {
     // tbh if this edit fails we can just cope and move on
@@ -86,9 +87,10 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
     try {
       await userRoles.add(userBoosterRole);
     } catch (e) {
-      replyToInteraction(interaction, "Error", `Failed to add role: ${e}`, false);
+      console.error(e);
+      replyToInteraction(interaction, "Error", `Failed to add you to the role :(\nTry again later.`, false);
     }
   }
 
-  replyToInteraction(interaction, "Success", "Updated role!", false);
+  replyToInteraction(interaction, "Booster Badge", "Successfully set your booster badge!", false);
 }
