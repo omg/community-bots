@@ -83,6 +83,13 @@ export async function spendCash(user, amount) {
     .updateOne({ user }, { $set: { cash: profile.cash - amount } });
 }
 
+export async function setBoosterRole(user, role) {
+  await client
+    .db(dbName)
+    .collection("profiles")
+    .updateOne({ user }, { $set: { boosterRole: role } });
+}
+
 export async function getUserSolveCount(user) {
   let allTimeLeaderboardID = await getAllTimeLeaderboardID();
   let userStats = await client

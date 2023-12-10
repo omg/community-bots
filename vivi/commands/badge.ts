@@ -1,7 +1,7 @@
 import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMemberRoleManager, Role } from 'discord.js';
 import sharp from 'sharp';
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { getProfile } from '../../src/database/db';
+import { getProfile, setBoosterRole } from '../../src/database/db';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
