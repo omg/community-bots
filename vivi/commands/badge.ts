@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder()
 
 export const broadcastable = false;
 
-const boosterPositionRole = "1183524878855458926";
+const boosterPositionRole = "";
 const boosterRole = "638907551215255553";
 
 const validateUserName = (name: string, _id?: string) => {
