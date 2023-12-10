@@ -70,9 +70,9 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
         name: validateUserName(interaction.user.username) + " booster icon 2",
         position: rolePos + 1,
         icon: iconResized,
-      })
-
-      await userRoles.add(userBoosterRole);
+      });
+      
+      await setBoosterRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       replyToInteraction(interaction, "Error", `Failed to create role: ${e}`, false);
     }
