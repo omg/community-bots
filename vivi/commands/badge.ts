@@ -55,6 +55,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   }
 
   let profile = await getProfile(interaction.user.id);
+  profile.boosterRole = profile.boosterRole || "";
 
   let iconBuf = await (await fetch(icon.proxyURL).then(res => res.blob())).arrayBuffer();
   let iconResized = await sharp(iconBuf).resize({ width: 64, height: 64, fit: "outside" }).png().toBuffer();
