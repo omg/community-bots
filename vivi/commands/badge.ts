@@ -18,7 +18,6 @@ export const data = new SlashCommandBuilder()
 export const broadcastable = false;
 
 const boosterPositionRole = "1183517686232268904";
-const boosterRole = "638907551215255553";
 
 const validateUserName = (name: string, _id?: string) => {
   let validated = "";
@@ -32,7 +31,7 @@ const validateUserName = (name: string, _id?: string) => {
 }
 
 const isBooster = (rolelist: GuildMemberRoleManager): boolean => {
-  return rolelist.premiumSubscriberRole?.id === boosterRole;
+  return !!rolelist.premiumSubscriberRole;
 }
 
 export async function execute(interaction: CommandInteraction, _preferBroadcast: boolean) {
