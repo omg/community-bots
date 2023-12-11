@@ -50,3 +50,7 @@ sleuthClient.on('ready', () => {
   console.log(`Logged in as ${sleuthClient.user.tag}!`);
   updatePresence();
 });
+
+// log in
+
+sleuthClient.login(process.env.SLEUTH_TOKEN);
