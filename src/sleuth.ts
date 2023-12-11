@@ -3,7 +3,10 @@ import path from 'node:path';
 
 export const sleuthClient = new Client({
   intents: [
-    GatewayIntentBits.Guilds
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildPresences
   ],
   allowedMentions: { parse: ['users'] }
 });
