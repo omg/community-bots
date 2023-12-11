@@ -97,10 +97,11 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
         rolePos + 1,
         iconResized,
         interaction.user.id
-      )
+      );
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to create your role :(\nTry again later.`, false);
+      return;
     }
   }
 
@@ -110,6 +111,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to add you to the role :(\nTry again later.`, false);
+      return;
     }
   }
 
