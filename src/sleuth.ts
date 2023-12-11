@@ -46,6 +46,10 @@ export async function assignRole(userID: string, roleID: string): Promise<void> 
   await sleuthClient.guilds.cache.get(process.env.GUILD_ID).members.cache.get(userID).roles.add(roleID);
 }
 
+export async function setRoleIcon(roleID: string, icon: Buffer) {
+  await sleuthClient.guilds.cache.get(process.env.GUILD_ID).roles.cache.get(roleID).setIcon(icon);
+}
+
 sleuthClient.on('ready', () => {
   console.log(`Logged in as ${sleuthClient.user.tag}!`);
   updatePresence();

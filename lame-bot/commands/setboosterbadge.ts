@@ -2,7 +2,7 @@ import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMember
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
 import { getProfile, setBoosterRole } from '../../src/database/db';
 import sharp from 'sharp';
-import { assignRole, createBoosterIcon } from '../../src/sleuth';
+import { assignRole, createBoosterIcon, setRoleIcon } from '../../src/sleuth';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
@@ -69,9 +69,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
 
     if (userBoosterRole) {
       // tbh if this edit fails we can just cope and move on
-      await userBoosterRole.edit({
-        icon: iconResized
-      });
+      setRoleIcon(userBoosterRole.id, iconResized);
 
       roleUpdated = true;
     }
