@@ -43,7 +43,12 @@ export async function createBoosterIcon(name: string, rolePos: number, iconResiz
 }
 
 export async function assignRole(userID: string, roleID: string): Promise<void> {
-  await sleuthClient.guilds.cache.get(process.env.GUILD_ID).members.cache.get(userID).roles.add(roleID);
+  let guild = sleuthClient.guilds.cache.get(process.env.GUILD_ID);
+
+  let role = guild.roles.cache.get(roleID);
+  let member = guild.members.cache.get(userID);
+
+  await member.roles.add(role);
 }
 
 export async function setRoleIcon(roleID: string, icon: Buffer) {
