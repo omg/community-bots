@@ -107,7 +107,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
 
   if (!userRoles.cache.has(userBoosterRole.id)) {
     try {
-      assignRole(interaction.user.id, userBoosterRole.id);
+      await assignRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to add you to the role :(\nTry again later.`, false);
