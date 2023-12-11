@@ -98,6 +98,8 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
         iconResized,
         interaction.user.id
       );
+
+      setBoosterRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to create your role :(\nTry again later.`, false);
