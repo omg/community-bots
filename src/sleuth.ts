@@ -3,7 +3,10 @@ import path from 'node:path';
 
 export const sleuthClient = new Client({
   intents: [
-    GatewayIntentBits.Guilds
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildPresences
   ],
   allowedMentions: { parse: ['users'] }
 });
@@ -44,11 +47,7 @@ export async function createBoosterIcon(name: string, rolePos: number, iconResiz
 
 export async function assignRole(userID: string, roleID: string): Promise<void> {
   let guild = sleuthClient.guilds.cache.get(process.env.GUILD_ID);
-
   let member = guild.members.cache.get(userID);
-
-  console.log(userID, roleID);
-  console.log(member);
 
   await member.roles.add(roleID);
 }
