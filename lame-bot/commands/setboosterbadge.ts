@@ -2,6 +2,7 @@ import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMember
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
 import { getProfile, setBoosterRole } from '../../src/database/db';
 import sharp from 'sharp';
+import { assignRole, createBoosterIcon } from '../../src/sleuth';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
@@ -81,13 +82,12 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   if (!roleUpdated) {
     // TRY CATCH :HAHAHAHA:
     try {
-      userBoosterRole = await interaction.guild.roles.create({
-        name: validateUserName(interaction.user.username) + " booster icon",
-        position: rolePos + 1,
-        icon: iconResized,
-      });
-
-      await setBoosterRole(interaction.user.id, userBoosterRole.id);
+      userBoosterRole = await createBoosterIcon(
+        validateUserName(interaction.user.username) + " booster icon",
+        rolePos + 1,
+        iconResized,
+        interaction.user.id
+      )
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to create your role :(\nTry again later.`, false);
@@ -96,7 +96,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
 
   if (!userRoles.cache.has(userBoosterRole.id)) {
     try {
-      await userRoles.add(userBoosterRole);
+      assignRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       console.error(e);
       replyToInteraction(interaction, "Error", `Failed to add you to the role :(\nTry again later.`, false);
