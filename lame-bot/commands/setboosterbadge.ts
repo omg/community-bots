@@ -18,7 +18,7 @@ export const data = new SlashCommandBuilder()
 
 export const broadcastable = false;
 
-export const cooldown = 60 * 1000;
+export const cooldown = 90 * 1000;
 
 const boosterPositionRole = "1183517686232268904";
 
