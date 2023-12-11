@@ -337,12 +337,17 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       await command.execute(interaction, preferBroadcast);
     } catch (error) {
       console.error(error);
-      await replyToInteraction(
-        interaction,
-        "Error",
-        "\n• Sorry, an error occurred while running that command.",
-        preferBroadcast
-      );
+      try {
+        await replyToInteraction(
+          interaction,
+          "Error",
+          "\n• Sorry, an error occurred while running that command.",
+          preferBroadcast
+        );
+      } catch (error) {
+        // we're really in deep now
+        console.error(error);
+      }
     }
   });
 
