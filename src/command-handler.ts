@@ -79,6 +79,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   
       // get the command from the API
       const applicationCommandID = guildCommands.find(cmd => cmd.name === name)?.id;
+      if (!applicationCommandID) console.error("Command ID not found for " + name);
   
       const permissions = [];
 
@@ -114,17 +115,15 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       createChannelPermissions(command.permissions.channels.allowed, true);
       createChannelPermissions(command.permissions.channels.denied, false);
 
-      if (!applicationCommandID) console.error("Command ID not found for " + name);
-
       console.log(permissions);
 
       await guild.commands.permissions.set({
+        token,
         command: applicationCommandID,
-        permissions,
-        token
+        permissions: permissions
       });
     
-      console.log("Permissions set for " + name);
+      console.log("Permissions created for " + name);
     }
   });
 
