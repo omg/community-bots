@@ -1,12 +1,10 @@
-import { ApplicationCommandPermissionType, ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
+import { Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Routes } from "discord.js";
 import fs from "node:fs";
+import { apiAllChannels, apiChannel, apiEveryone, apiRoleFromName, getChannelIDsByChannelName, getChannelIDsInCategoryName } from "./APIPermissions";
 import { Command } from "./commands/Command";
 import { ChannelTypes, PermissionEntity, RoleTypes, SlashCommandFileData } from "./commands/Permissions";
 import { tryUseCommand } from "./commands/cooldowns";
-import { escapeDiscordMarkdown } from "./utils";
-import { apiAllChannels, apiChannel, apiEveryone, apiRoleFromName, getChannelIDsByChannelName, getChannelIDsInCategoryName } from "./APIPermissions";
-import { create } from "node:domain";
 
 const BROADCAST_COMMAND = {
   name: "shout",
