@@ -8,7 +8,8 @@ export const lameBotClient: Client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildIntegrations
   ],
   partials: [Partials.Channel],
   allowedMentions: { parse: ["users"] }
