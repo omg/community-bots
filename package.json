@@ -24,6 +24,7 @@
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
     "app-root-path": "^3.1.0",
+    "crypto": "^1.0.1",
     "discord.js": "^14.8.0",
     "dotenv": "^16.0.2",
     "mongodb": "^4.9.1",
