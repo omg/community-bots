@@ -46,7 +46,9 @@ export function shuffle(array) {
 }
 
 export function escapeDiscordMarkdown(string: string) {
-  return string.replace(/[\\`_~\*\|:#@><-]/g, "\\$&");
+  return string
+    .replace(/`/g, "'")
+    .replace(/[\\_~\*\|:#@><-]/g, "\\$&");
 }
 
 export const SortingFunctions = {
