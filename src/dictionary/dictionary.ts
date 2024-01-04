@@ -49,7 +49,7 @@ export function standardizeWord(word) {
     .replace(/[‘’]/g, "'")
     .replace(/\-/g, "-")
     .replace(/…/g, "...")
-    .trim(); // TODO: trimming might ruin some searches
+    .trim();
 }
 
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
