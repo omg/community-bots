@@ -68,10 +68,6 @@ export function getPromptRegexFromPromptSearch(promptQuery) {
   if (regexResult) {
     // This has regex
 
-    if (/[`]/.test(cleanQuery)) {
-      throw new PromptException("The regex you've entered is invalid.");
-    }
-
     let regexInput = regexResult[1];
 
     if (regexInput === "") {
