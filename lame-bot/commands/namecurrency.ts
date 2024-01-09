@@ -135,7 +135,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
   replyToInteraction(
     interaction,
     "Name Currency",
-    "\n• Set your currency name!"
+    "\nSet your currency name!"
     + "\nYou have " + escapeDiscordMarkdown(example) + ".",
     false
   );
