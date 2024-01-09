@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { formatNumber } from "../utils";
 
 // Connection URL
 const url = process.env.MONGO_URL;
@@ -68,9 +69,37 @@ export async function getProfile(user) {
   return profile[0];
 }
 
-export async function getCash(user) {
+type Cash = {
+  cash: number;
+  name: string;
+  appearsBeforeAmount: boolean;
+  display: string;
+};
+
+export async function getCash(user): Promise<Cash> {
   let profile = await getProfile(user);
-  return profile.cash || 0;
+
+  // set up some defaults
+  let cash = {
+    cash: 0,
+    name: " Cash",
+    appearsBeforeAmount: false,
+    display: ""
+  };
+
+  // fill in the cash object
+  if (profile.cash) {
+    cash.cash = profile.cash;
+  }
+  if (profile.cashName) {
+    cash.name = profile.cashName.name;
+    cash.appearsBeforeAmount = profile.cashName.appearsBeforeAmount;
+  }
+
+  // set the display
+  cash.display = (cash.appearsBeforeAmount ? cash.name : "") + formatNumber(cash.cash) + (cash.appearsBeforeAmount ? "" : cash.name);
+
+  return cash;
 }
 
 export async function spendCash(user, amount) {

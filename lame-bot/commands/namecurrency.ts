@@ -127,16 +127,14 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
 
   // set the currency name
   await setCashName(interaction.user.id, text, appearsBeforeAmount);
-
-  // generate an example
+  // get the currency
   let currency = await getCash(interaction.user.id);
-  let example = (appearsBeforeAmount ? text : "") + formatNumber(currency) + (appearsBeforeAmount ? "" : text);
 
   replyToInteraction(
     interaction,
     "Name Currency",
     "\nSet your currency name!"
-    + "\nYou have " + escapeDiscordMarkdown(example) + ".",
+    + "\nYou have " + escapeDiscordMarkdown(currency.display) + ".",
     false
   );
 }
