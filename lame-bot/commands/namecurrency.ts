@@ -58,6 +58,8 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     let word = words[i];
     let hasUppercase = false;
     for (let j = 0; j < word.length; j++) {
+      // ignore if it's not a letter
+      if (!word[j].match(/[a-z]/i)) continue;
       if (word[j] === word[j].toUpperCase()) {
         hasUppercase = true;
         break;
