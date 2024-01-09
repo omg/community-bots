@@ -1,12 +1,10 @@
-import { ApplicationCommandPermissionType, ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
+import { Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Routes } from "discord.js";
 import fs from "node:fs";
+import { apiAllChannels, apiChannel, apiEveryone, apiRoleFromName, getChannelIDsByChannelName, getChannelIDsInCategoryName } from "./APIPermissions";
 import { Command } from "./commands/Command";
 import { ChannelTypes, PermissionEntity, RoleTypes, SlashCommandFileData } from "./commands/Permissions";
 import { tryUseCommand } from "./commands/cooldowns";
-import { escapeDiscordMarkdown } from "./utils";
-import { apiAllChannels, apiChannel, apiEveryone, apiRoleFromName, getChannelIDsByChannelName, getChannelIDsInCategoryName } from "./APIPermissions";
-import { create } from "node:domain";
 
 const BROADCAST_COMMAND = {
   name: "shout",
@@ -81,6 +79,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   
       // get the command from the API
       const applicationCommandID = guildCommands.find(cmd => cmd.name === name)?.id;
+      if (!applicationCommandID) console.error("Command ID not found for " + name);
   
       const permissions = [];
 
@@ -116,17 +115,15 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       createChannelPermissions(command.permissions.channels.allowed, true);
       createChannelPermissions(command.permissions.channels.denied, false);
 
-      if (!applicationCommandID) console.error("Command ID not found for " + name);
-
       console.log(permissions);
 
       await guild.commands.permissions.set({
+        token,
         command: applicationCommandID,
-        permissions,
-        token
+        permissions: permissions
       });
     
-      console.log("Permissions set for " + name);
+      console.log("Permissions created for " + name);
     }
   });
 

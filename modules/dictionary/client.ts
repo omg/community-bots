@@ -4,7 +4,8 @@ import path from 'node:path';
 
 export const viviClient = new Client({
   intents: [
-    GatewayIntentBits.Guilds
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildIntegrations
   ],
   allowedMentions: { parse: ['users'] }
 });
