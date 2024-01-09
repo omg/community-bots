@@ -83,6 +83,13 @@ export async function spendCash(user, amount) {
     .updateOne({ user }, { $set: { cash: profile.cash - amount } });
 }
 
+export async function setCashName(user: string, cashName: string, appearsBeforeAmount: boolean) {
+  await client
+    .db(dbName)
+    .collection("profiles")
+    .updateOne({ user }, { $set: { cashName: { name: cashName, appearsBeforeAmount } } });
+}
+
 export async function setBoosterRole(user, role) {
   await client
     .db(dbName)
