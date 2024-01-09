@@ -5,30 +5,31 @@ import { setCashName } from "../../src/database/db";
 
 export const data = new SlashCommandBuilder()
   .setName("namecurrency")
+  .setDescription("Set your currency name!")
   .addSubcommand((subcommand) =>
     subcommand
       .setName("before")
-      .setDescription("Add text before the number")
+      .setDescription("Set your currency name, appearing before the amount!")
       .addStringOption((option) =>
         option
           .setName("text")
           .setDescription("The text to add - no spaces, must end with a symbol like $")
           .setRequired(true)
           .setMinLength(2)
-          .setMaxLength(6)
+          .setMaxLength(7)
       )
   )
   .addSubcommand((subcommand) =>
     subcommand
       .setName("after")
-      .setDescription("Add text after the number")
+      .setDescription("Set your currency name, appearing after the amount!")
       .addStringOption((option) =>
         option
           .setName("text")
           .setDescription("The text to add - two words max")
           .setRequired(true)
       )
-  );
+  )
 
 export const cooldown = 8 * 1000;
 export const type = ["fun"];
