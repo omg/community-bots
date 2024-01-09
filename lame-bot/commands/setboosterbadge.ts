@@ -1,7 +1,7 @@
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMemberRoleManager, Role } from 'discord.js';
-import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { getProfile, setBoosterRole } from '../../src/database/db';
+import { ChatInputCommandInteraction, GuildMemberRoleManager, Role, SlashCommandBuilder } from 'discord.js';
 import sharp from 'sharp';
+import { replyToInteraction } from '../../src/command-handler';
+import { getProfile, setBoosterRole } from '../../src/database/db';
 import { assignRole, createBoosterIcon, setRoleIcon } from '../../src/sleuth';
 
 export const data = new SlashCommandBuilder()
@@ -37,7 +37,7 @@ const isBooster = (rolelist: GuildMemberRoleManager): boolean => {
   return !!rolelist.premiumSubscriberRole;
 }
 
-export async function execute(interaction: CommandInteraction, _preferBroadcast: boolean) {
+export async function execute(interaction: ChatInputCommandInteraction, _preferBroadcast: boolean) {
   let icon = interaction.options.get("icon", true).attachment;
   let userRoles = interaction.member.roles as GuildMemberRoleManager;
   

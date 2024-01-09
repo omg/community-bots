@@ -1,6 +1,6 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { getInteractionContent, replyToInteraction } from "../../src/command-handler";
 import crypto from "crypto";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { getInteractionContent } from "../../src/command-handler";
 
 export const data = new SlashCommandBuilder()
   .setName("createserver")
@@ -43,7 +43,7 @@ export function getLink() {
   return "<https://www.roblox.com/games/start?placeId=2653064683&launchData=" + uuid + ">";
 }
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(interaction: ChatInputCommandInteraction, preferBroadcast: boolean) {
   let gameName = interaction.options.get("game")?.name ?? "Word Bomb";
 
   let content = getInteractionContent(interaction, "Reserved Server",

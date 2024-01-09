@@ -1,7 +1,7 @@
-import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
+import { AttachmentBuilder, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { getInteractionContent, replyToInteraction } from '../../src/command-handler';
 import { getSolveLetters } from '../../src/emoji-renderer';
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
-import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
+import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
 import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 
@@ -41,7 +41,7 @@ export const data = new SlashCommandBuilder()
 export const broadcastable = true;
 
 // create function to handle the command
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(interaction: ChatInputCommandInteraction, preferBroadcast: boolean) {
   let prompt = cleanWord(interaction.options.get("prompt").value);
   // @ts-ignore
   let sorting: string = interaction.options.get("sorting")?.value ?? "None";

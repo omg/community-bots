@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
   .setName("magic8")
@@ -66,7 +66,7 @@ export function getResponse() {
   return "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
 }
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(interaction: ChatInputCommandInteraction, preferBroadcast: boolean) {
   let max = interaction.options.get("max")?.value as number ?? 10;
 
   await interaction.reply({
