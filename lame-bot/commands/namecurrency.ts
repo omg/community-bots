@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { escapeDiscordMarkdown, formatNumber } from "../../src/utils";
 import { replyToInteraction } from "../../src/command-handler";
-import { setCashName } from "../../src/database/db";
+import { getCash, setCashName } from "../../src/database/db";
 
 export const data = new SlashCommandBuilder()
   .setName("namecurrency")
@@ -129,12 +129,14 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
   await setCashName(interaction.user.id, text, appearsBeforeAmount);
 
   // generate an example
-  let example = (appearsBeforeAmount ? text : "") + formatNumber(5) + (appearsBeforeAmount ? "" : text);
+  let currency = await getCash(interaction.user.id);
+  let example = (appearsBeforeAmount ? text : "") + formatNumber(currency) + (appearsBeforeAmount ? "" : text);
 
   replyToInteraction(
     interaction,
     "Name Currency",
-    "\n• Set your currency name: " + escapeDiscordMarkdown(example),
+    "\n• Set your currency name!"
+    + "\nYou have " + escapeDiscordMarkdown(example) + ".",
     false
   );
 }
