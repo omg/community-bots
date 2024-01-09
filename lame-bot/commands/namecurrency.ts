@@ -35,6 +35,7 @@ export const cooldown = 8 * 1000;
 export const type = ["fun"];
 
 const CURRENCY_SYMBOLS = "$£€¥₩₽₴₹₱₿¢#";
+const NO_SPACE_SYMBOLS = "$£¢";
 
 const FAILING_REGEX = new RegExp(`[^A-Z ${CURRENCY_SYMBOLS}\-\?]`, "gi");
 
@@ -83,13 +84,41 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
   }
 
   if (appearsBeforeAmount) {
-    // add a space at the end if it doesn't end with a symbol
+    // no spaces allowed
+    if (text.includes(" ")) {
+      await replyToInteraction(
+        interaction,
+        "Name Currency",
+        "\n• You cannot have spaces in text that appears before the amount!",
+        false
+      );
+      return;
+    }
+
+    // if it doesn't end with a symbol, error
     if (!CURRENCY_SYMBOLS.includes(text.slice(-1))) {
-      text += " ";
+      await replyToInteraction(
+        interaction,
+        "Name Currency",
+        "\n• You must end the text with a symbol like $!",
+        false
+      );
+      return;
     }
   } else {
-    // add a space at the beginning if it doesn't start with a symbol
-    if (!CURRENCY_SYMBOLS.includes(text[0])) {
+    // two words max
+    if (text.split(" ").length > 2) {
+      await replyToInteraction(
+        interaction,
+        "Name Currency",
+        "\n• You can only enter two words maximum!",
+        false
+      );
+      return;
+    }
+
+    // add a space at the beginning if it doesn't start with a "no space symbol"
+    if (!NO_SPACE_SYMBOLS.includes(text[0])) {
       text = " " + text;
     }
   }
