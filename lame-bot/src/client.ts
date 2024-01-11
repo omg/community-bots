@@ -33,6 +33,9 @@ lameBotClient.on("ready", () => {
   updatePresence();
 });
 
+/**
+ * Waits for the `lameBotClient` to become ready.
+ */
 export async function waitForReady(): Promise<void> {
   if (lameBotClient.readyAt) return;
   await new Promise((resolve) => {
@@ -40,11 +43,23 @@ export async function waitForReady(): Promise<void> {
   });
 }
 
+/**
+ * Asynchronously retrieves the guild with the specified guild ID using Lame Bot.
+ * 
+ * @param guildID The ID of the guild
+ * @returns A Promise that resolves to a Guild object if found, otherwise it resolves to undefined
+ */
 export async function getGuild(guildID: string): Promise<Guild | undefined> {
   await waitForReady();
   return lameBotClient.guilds.cache.get(guildID);
 }
 
+/**
+ * Asynchronously retrieves the channel with the specified channel ID using Lame Bot.
+ *
+ * @param channelID The ID of the channel
+ * @returns A Promise that resolves to a Channel object if found, otherwise it resolves to undefined
+ */
 export async function getChannel(channelID: string): Promise<Channel | undefined> {
   await waitForReady();
   return lameBotClient.channels.cache.get(channelID);
@@ -52,6 +67,13 @@ export async function getChannel(channelID: string): Promise<Channel | undefined
 
 // async function to send a message to a channel and wait for it to be sent, retrying with backoff with a maximum length of 5 seconds
 // yo this is VILE please god remove this
+/**
+ * This function sends a message to a given channel using Lame Bot. It will retry sending the message until it is successfully sent. If an error occurs while sending the message, the function will log the error and retry sending after a delay.
+ * 
+ * @param channel The channel to which we want to send a message
+ * @param message The content of the message
+ * @returns A promise that resolves to the sent message
+ */
 export async function sendMessage(channel: GuildTextBasedChannel | string, message: string): Promise<Message> {
   await waitForReady();
 
@@ -86,6 +108,14 @@ export async function sendMessage(channel: GuildTextBasedChannel | string, messa
 }
 
 // There must be a better way of making it known that this will retry sending the message until it is sent - it is not immediately obvious (same as the function above)
+
+/**
+ * This function sends a message as a reply to a given message using Lame Bot. It will retry sending the message until it is successfully sent. If an error occurs while sending the message, the function will log the error and retry sending after a delay.
+ *
+ * @param replyMessage The message to which we want to send a reply
+ * @param message The content of the reply
+ * @returns A promise that resolves to the sent message
+ */
 export async function sendMessageAsReply(replyMessage: Message, message: string): Promise<Message> {
   await waitForReady();
 
