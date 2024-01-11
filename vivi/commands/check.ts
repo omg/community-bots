@@ -27,7 +27,7 @@ const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let word = cleanWord(interaction.options.get("word").value);
+  let word = cleanWord(interaction.options.get("word").value as string);
   
   // check if the word only has valid characters
   if (invalidWordRegex.test(word)) {
