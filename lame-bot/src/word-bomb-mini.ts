@@ -1,10 +1,32 @@
-import { getCurrentRoundInfo, getAllTimeLeaderboardID, getUserRanking, getSolutionCount, getUserSolveCount, getDefaultGameChannel, finishRound, getUserExactSolves,
-  getUserSolveCountForPrompt, getFirstSolutionToPrompt, getDefaultGameGuild, getReplyMessage, setReplyMessage } from "../../src/database/db";
-import { isWord, generatePrompt, solverCache, cleanWord, escapeRegExp, getPromptRepeatableText, is1Related, is1000Related, is10000Related, is100Related,
-  isDoomRelated } from "../../src/dictionary/dictionary";
-import { getRemarkEmoji, getPromptRegexDisplayText, getPromptRegexText, getPromptRegexInlineText, getStreakNumbers, getSolveLetters } from "../../src/emoji-renderer";
-import { formatNumber, formatPlacement, escapeDiscordMarkdown, createEnglishList, formatPercentage } from "../../src/utils";
-import { lameBotClient, getChannel, sendMessage, getGuild, sendMessageAsReply } from "./client";
+import {
+  finishRound,
+  getCurrentRoundInfo,
+  getDefaultGameChannel,
+  getDefaultGameGuild,
+  getFirstSolutionToPrompt,
+  getReplyMessage,
+  getSolutionCount,
+  getUserExactSolves,
+  getUserRanking,
+  getUserSolveCount,
+  getUserSolveCountForPrompt,
+  setReplyMessage
+} from "../../src/database/db";
+import {
+  cleanWord, escapeRegExp,
+  generatePrompt,
+  getPromptRepeatableText,
+  is10000Related,
+  is1000Related,
+  is100Related,
+  is1Related,
+  isDoomRelated,
+  isWord,
+  solverCache
+} from "../../src/dictionary/dictionary";
+import { getPromptRegexDisplayText, getPromptRegexInlineText, getPromptRegexText, getRemarkEmoji, getSolveLetters, getStreakNumbers } from "../../src/emoji-renderer";
+import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
+import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
 let guild;
 let wordBombMiniChannel;

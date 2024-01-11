@@ -1,5 +1,4 @@
-import { CommandInteraction, ButtonComponent, ActionRowBuilder, ButtonBuilder, ButtonStyle, BaseGuildTextChannel, ButtonInteraction, Message, InteractionCollector } from 'discord.js';
-import { getInteractionContent } from "./command-handler";
+import { ActionRowBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction } from 'discord.js';
 
 // shitty default buttons, also debating whether to force customid to be set as first, previous, etc
 // or just leave them and assume you put them in the correct order, i think this is more clear and
@@ -41,7 +40,7 @@ export const PagedResponse = async (
   const collector = initialmessage.createMessageComponentCollector({
     // i cant tell if this is the correct way to filter out other users inputs
     // but its probably fine? i guess? maybe?
-    filter: (i) => i.user.id === interaction.user.id,
+    filter: (i: BaseInteraction) => i.user.id === interaction.user.id,
     time: timeout
   });
 
