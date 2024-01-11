@@ -1,6 +1,6 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { getInteractionContent, replyToInteraction } from "../../src/command-handler";
 import crypto from "crypto";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { getInteractionContent } from "../../src/command-handler";
 
 export const data = new SlashCommandBuilder()
   .setName("createserver")

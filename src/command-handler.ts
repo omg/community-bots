@@ -1,5 +1,5 @@
-import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
+import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import fs from "node:fs";
 import { escapeDiscordMarkdown } from "./utils";
 

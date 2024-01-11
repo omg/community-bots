@@ -1,5 +1,4 @@
-import { CommandInteraction, ButtonComponent, ActionRowBuilder, ButtonBuilder, ButtonStyle, BaseGuildTextChannel, ButtonInteraction, Message, InteractionCollector } from 'discord.js';
-import { getInteractionContent } from "./command-handler";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction } from 'discord.js';
 
 // shitty default buttons, also debating whether to force customid to be set as first, previous, etc
 // or just leave them and assume you put them in the correct order, i think this is more clear and

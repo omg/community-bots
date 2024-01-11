@@ -1,10 +1,8 @@
-import { escapeDiscordMarkdown } from "./utils";
-
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
-import remarkEmojiMap from "../assets/emoji-maps/remarkEmojis";
 import goldLettersMap from "../assets/emoji-maps/goldLetters";
-import whiteLettersMap from "../assets/emoji-maps/whiteLetters";
+import remarkEmojiMap from "../assets/emoji-maps/remarkEmojis";
 import streakNumbersMap from "../assets/emoji-maps/streakNumbers";
+import whiteLettersMap from "../assets/emoji-maps/whiteLetters";
 
 const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 

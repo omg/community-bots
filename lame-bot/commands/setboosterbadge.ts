@@ -1,7 +1,7 @@
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder, GuildMemberRoleManager, Role } from 'discord.js';
-import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { getProfile, setBoosterRole } from '../../src/database/db';
+import { CommandInteraction, GuildMemberRoleManager, Role, SlashCommandBuilder } from 'discord.js';
 import sharp from 'sharp';
+import { replyToInteraction } from '../../src/command-handler';
+import { getProfile, setBoosterRole } from '../../src/database/db';
 import { assignRole, createBoosterIcon, setRoleIcon } from '../../src/sleuth';
 
 export const data = new SlashCommandBuilder()

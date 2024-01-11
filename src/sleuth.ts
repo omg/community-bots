@@ -1,5 +1,4 @@
-import { Client, GatewayIntentBits, ActivityType, Role, RoleResolvable } from 'discord.js';
-import path from 'node:path';
+import { ActivityType, Client, GatewayIntentBits, Role } from 'discord.js';
 
 export const sleuthClient = new Client({
   intents: [
