@@ -34,7 +34,7 @@ function updatePresence() {
   setTimeout(updatePresence, 1000 * 60 * 20); // 20 MINUTES
 }
 
-export async function createBoosterIcon(name: string, rolePos: number, iconResized: Buffer, userID: string): Promise<Role> {
+export async function createBoosterRole(name: string, rolePos: number, iconResized: Buffer, userID: string): Promise<Role> {
   let userBoosterRole = await sleuthClient.guilds.cache.get(process.env.GUILD_ID).roles.create({
     name: name,
     position: rolePos,

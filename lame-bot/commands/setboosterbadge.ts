@@ -2,7 +2,7 @@ import { CommandInteraction, GuildMemberRoleManager, Role, SlashCommandBuilder }
 import sharp from 'sharp';
 import { replyToInteraction } from '../../src/command-handler';
 import { getProfile, setBoosterRole } from '../../src/database/db';
-import { assignRole, createBoosterIcon, setRoleIcon } from '../../src/sleuth';
+import { assignRole, createBoosterRole, setRoleIcon } from '../../src/sleuth';
 
 export const data = new SlashCommandBuilder()
   .setName("setboosterbadge")
@@ -92,7 +92,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   if (!roleUpdated) {
     // TRY CATCH :HAHAHAHA:
     try {
-      userBoosterRole = await createBoosterIcon(
+      userBoosterRole = await createBoosterRole(
         validateUserName(interaction.user.username) + " booster icon",
         rolePos + 1,
         iconResized,
