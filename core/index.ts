@@ -1,0 +1,2 @@
+import availableModules from './availableModules';
+
