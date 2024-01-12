@@ -11,30 +11,30 @@ let clientId: string;
 let clientSecret: string;
 
 app.get('/callback', async (req, res) => {
-    try {
-      const code = req.query.code as string;
-      const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: `http://localhost:${port}/callback`
-        })
-      });
+  try {
+    const code = req.query.code as string;
+    const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: `http://localhost:${port}/callback`
+      })
+    });
 
-      const data = await tokenResponse.json();
-      console.log('Access Token Response:', data);
-      res.send('You can now close this page.');
-      process.exit();
-    } catch (error) {
-      console.error('Error exchanging code for token', error);
-      res.status(500).send('An error occurred');
-    }
+    const data = await tokenResponse.json();
+    console.log('Access Token Response:', data);
+    res.send('You can now close this page.');
+    process.exit();
+  } catch (error) {
+    console.error('Error exchanging code for token', error);
+    res.status(500).send('An error occurred');
+  }
 });
 
 inquirer.prompt([
