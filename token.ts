@@ -29,7 +29,12 @@ app.get('/callback', async (req, res) => {
     });
 
     const data = await tokenResponse.json();
+    if (data.error) throw new Error(data.error);
+
     console.log('Access Token Response:', data);
+
+    // something 1% fancier could be cool for no reason.
+    // shouldn't be very hard to beat plain text
     res.send('You can now close this page.');
     process.exit();
   } catch (error) {
