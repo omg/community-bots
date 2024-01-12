@@ -268,50 +268,5 @@ export function getPromptRepeatableText(regex) {
   }
 }
 
-export function incrementBackreference(regex: string): string {
-  // extract the backslash and number from the string and increment the digit by 1
-  // and then
-  // count the number of opening parantheses, then check the backreferences and see
-  // if any of them are greater than the number of opening parantheses
-  let backreferences = regex.match(/(?:\\)\d+/);
-  let numOfParen = regex.match(/\(.*\)/).length;
-
-  for (let i = 0; i < backreferences.length; i++) {
-    let num = parseInt(backreferences[i]);
-    if ((numOfParen < num) && (!Number.isNaN(num))) {
-      regex.replace(`/\\${num}/`, `\\${num + 1}`)
-    }
-  }
-
-  return regex
-}
-
-export function validateBackreference(regex: string): string {
-  // count the number of opening parantheses, then check the backreferences and see
-  // if any of them are greater than the number of opening parantheses
-
-  return ""
-}
-
-export function stripInvalidBackslashes(regex: RegExp, skip?: boolean) {
-  let regexString = regex.source;
-  regex.
-  
-  // quick way to get more use out of this in the future
-  if (!skip) {
-    regexString = incrementBackreference(regexString);
-  }
-
-  // this regex removes all backslashes that dont have one of the whitelisted characters following it
-  // s is for whitespace
-  // w is for alphanum and underscores
-  // d is for digits
-  // b is for word boundary, does NOT select new lines, so shouldnt cause any issues(?)
-  // capital letters are just inverted versions
-  // "|\d{2,3}" is to remove backreferences with more than 1 character,
-  // as they will cause issues if interpreted as character codes
-  return regexString.replace(/\\(?=[^\dsSwWdDbB])/g, "")
-}
-
 // maybe just change the function name tbh
 export const cleanWord = standardizeWord;
