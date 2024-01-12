@@ -1,23 +1,21 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "outDir": "./dist",
-      "rootDir": "./",
-      "allowJs": true,
-      "esModuleInterop": true
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "allowJs": true,
+    "esModuleInterop": true
   },
   "include": [
-      "src/**/*.ts",
-      "src/**/*.js",
-      "lame-bot/**/*.ts",
-      "lame-bot/**/*.js",
-      "vivi/**/*.ts",
-      "vivi/**/*.js",
-      "sleuth/**/*.ts",
-      "sleuth/**/*.js", "modules/moderation/client.ts", "modules/moderation/index.ts", "modules/dictionary/client.ts", "modules/dictionary/index.ts",
+    "src/**/*.ts",
+    "src/**/*.js",
+    "modules/**/*.ts",
+    "modules/**/*.js",
+    "core/**/*.ts",
+    "core/**/*.js"
   ],
   "exclude": [
-      "node_modules"
+    "node_modules"
   ]
 }
