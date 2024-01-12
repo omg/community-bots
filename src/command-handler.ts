@@ -1,5 +1,5 @@
-import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
+import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
 import fs from "node:fs";
 import { escapeDiscordMarkdown } from "./utils";
 
@@ -358,12 +358,33 @@ function isBroadcastChannel(channel: GuildTextBasedChannel) {
   return channel.name == "lame-bots";
 }
 
+/**
+ * Gets the content string that should be displayed as a response when executing a command. The content includes a header, the response, and may mention the user who executed the interaction, depending on if this particular interaction is being broadcasted.
+ *
+ * @param interaction The command interaction object.
+ * @param header The header text.
+ * @param response The response text.
+ * @param broadcast Whether or not this interaction is being broadcasted.
+ * @returns The content to be displayed as a response.
+ */
 export function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   return "**" + header + " *｡✲ﾟ ——**" +
   (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
   "\n" + response;
 }
 
+
+/**
+ * Replies to an interaction with the given header and response.
+ * This function is a shorthand which calls getInteractionContent to get the content string that should be displayed as a response, and replies to the interaction.
+ * 
+ * **NOTE:** This function will not work if the interaction was already replied to, if the interaction was deferred (use {@link editInteractionReply} instead), or if the time to reply to the interaction has passed.
+ * 
+ * @param interaction The command interaction object.
+ * @param header The header text.
+ * @param response The response text.
+ * @param broadcast Whether or not this interaction is being broadcasted.
+ */
 export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   await interaction.reply({
     content: getInteractionContent(interaction, header, response, broadcast),
@@ -371,6 +392,17 @@ export async function replyToInteraction(interaction: CommandInteraction, header
   });
 }
 
+/**
+ * Edits an interaction that was already replied to with the given header and response.
+ * This function is a shorthand which calls getInteractionContent to get the content string that should be displayed as a response, and edits the interaction.
+ * 
+ * **NOTE:** This function will not work if the interaction was not previously replied to, if the interaction was replied to with an ephemeral message, if the interaction was replied to with a message that wasn't sent by this bot, or if the message was deleted.
+ * 
+ * @param interaction The command interaction object.
+ * @param header The header text.
+ * @param response The response text.
+ * @param broadcast Whether or not this interaction is being broadcasted.
+ */
 export async function editInteractionReply(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
   await interaction.editReply({
     content: getInteractionContent(interaction, header, response, broadcast),

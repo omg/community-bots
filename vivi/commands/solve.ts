@@ -42,7 +42,7 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = cleanWord(interaction.options.get("prompt").value);
+  let prompt = cleanWord(interaction.options.get("prompt").value as string);
   // @ts-ignore
   let sorting: string = interaction.options.get("sorting")?.value ?? "None";
 

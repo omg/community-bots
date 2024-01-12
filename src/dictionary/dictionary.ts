@@ -17,33 +17,61 @@ try {
 
 // TODO holy copy-paste batman
 
-export function is1Related(word) {
+/**
+ * Checks if a word is "related to firstness". This checks if the specified word is found in the 'related1String' variable. The word is cleaned and standardized before performing the check.
+ */
+export function is1Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related1String);
 }
 
-export function is100Related(word) {
+/**
+ * Checks if a word is related to 100. This checks if the specified word is found in the 'related100String' variable. The word is cleaned and standardized before performing the check.
+ */
+export function is100Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related100String);
 }
 
-export function is1000Related(word) {
+/**
+ * Checks if a word is related to 1000. This checks if the specified word is found in the 'related1000String' variable. The word is cleaned and standardized before performing the check.
+ */
+export function is1000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related1000String);
 }
 
-export function is10000Related(word) {
+/**
+ * Checks if a word is related to 10000. This checks if the specified word is found in the 'related10000String' variable. The word is cleaned and standardized before performing the check.
+ */
+export function is10000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(related10000String);
 }
 
-export function isDoomRelated(word) {
+/**
+ * Checks if a word is doomy. This checks if the specified word is found in the 'relatedDoomString' variable. The word is cleaned and standardized before performing the check.
+ */
+export function isDoomRelated(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(relatedDoomString);
 }
 
 // is standardize the best name for this?
-export function standardizeWord(word) {
+/**
+ * Standardizes a word by performing the following operations:
+ * 1. Converts the word to uppercase.
+ * 2. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
+ * 3. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
+ * 4. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
+ * 5. Trims any leading or trailing whitespace from the word.
+ * 
+ * **NOTE:** Trimming might ruin some searches.
+ *
+ * @param word The word to be standardized
+ * @returns The standardized string
+ */
+export function standardizeWord(word: string): string {
   return word
     .toUpperCase()
     .replace(/[‘’]/g, "'")
@@ -52,14 +80,36 @@ export function standardizeWord(word) {
     .trim();
 }
 
+/**
+ * A regular expression used to determine if a search is regex or not.
+ */
 const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 
-export function PromptException(message) {
+/**
+ * Creates a new PromptException.
+ *
+ * @param message The error message
+ */
+export function PromptException(message: string) {
   this.message = message;
   this.name = "PromptException";
 }
 
-export function getPromptRegexFromPromptSearch(promptQuery) {
+/**
+ * Returns a prompt regex used for searching based on a query.
+ * The query may be in a prompt format (AB) or regex format (/AB/).
+ * In either format, a capturing group is placed around the query for use in rendering.
+ *
+ * @param promptQuery A query string to convert to regex
+ * @returns A regular expression pattern based on the query. If the query contains a valid regular expression, the function constructs and returns the regex pattern. If the query does not contain a valid regular expression, the function constructs and returns a regex pattern that matches the query as a literal string.
+ * 
+ * @example
+ * ```typescript
+ * getPromptRegexFromPromptSearch("AB") // new RegExp("^.*(AB).*$", "m")
+ * getPromptRegexFromPromptSearch("/A.B$/") // new RegExp("^.*(A.B)$", "m")
+ * ```
+ */
+export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
   let cleanQuery = standardizeWord(promptQuery);
   let regexResult = regexTest.exec(cleanQuery);
 
@@ -112,16 +162,31 @@ export function getPromptRegexFromPromptSearch(promptQuery) {
   }
 }
 
-export function escapeRegExp(string) {
+/**
+ * Escapes all RegExp special characters.
+ *
+ * @param string The input string to be escaped.
+ */
+export function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
-export function isWord(word) {
+/**
+ * Checks if the given word is in the English dictionary.
+ *
+ * @param word The word to be checked
+ */
+export function isWord(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
   return new RegExp("^" + cleanInput + "$", "m").test(dictionaryString);
 }
 
-export function solvePrompt(promptRegex) {
+/**
+ * Finds all solutions in the English dictionary to a prompt regular expression with no timeout.
+ *
+ * @param promptRegex The regular expression pattern to match words to
+ */
+export function solvePrompt(promptRegex: RegExp): string[] {
   // recreate the regex with the global flag
   if (!promptRegex.flags.includes("g")) {
     promptRegex = new RegExp(promptRegex.source, promptRegex.flags + "g");
@@ -139,14 +204,30 @@ export function solvePrompt(promptRegex) {
   return solutions;
 }
 
-export function SolveWorkerException(message) {
+/**
+ * Creates a new SolveWorkerException.
+ *
+ * @param message The error message
+ */
+export function SolveWorkerException(message: string) {
   this.message = message;
   this.name = "SolveWorkerException";
 }
 
+/**
+ * A Set instance used to store who has used the solver recently.
+ * It is used in Word Bomb Mini to determine if the winner of a round has used the solver.
+ */
 export let solverCache = new Set();
 
-export function solvePromptWithTimeout(promptRegex, timeout, user): Promise<any> {
+/**
+ * Finds all solutions in the English dictionary to a prompt regular expression with a timeout. The user is stored so that Word Bomb Mini can know who has used the solver recently.
+ *
+ * @param promptRegex The regular expression pattern to match words to
+ * @param timeout The timeout in milliseconds
+ * @param user The user who is using the solver
+ */
+export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<any> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
@@ -181,11 +262,20 @@ export function solvePromptWithTimeout(promptRegex, timeout, user): Promise<any>
 }
 
 // TODO move this to utils
-export function randInt(min, max): number {
+/**
+ * Generates a random integer between the specified minimum and maximum values.
+ *
+ * @param min The minimum value for the random integer.
+ * @param max The maximum value for the random integer.
+ */
+export function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 // TODO: remake this because it's inefficient
+/**
+ * Generates a prompt. It is guaranteed that the prompt will have at least 23 solutions.
+ */
 export function generatePrompt() {
   let promptLength = randInt(3, 5);
   let requiredCharacters = promptLength + 2;
@@ -242,10 +332,25 @@ export function generatePrompt() {
   }
 }
 
+/**
+ * Regular expression used to match any characters that are not uppercase letters, numbers, apostrophes, hyphens, at symbols, or spaces.
+ */
 const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
 
 // TODO: i'm going to lose my mind within the next 5 minutes
-export function getPromptRepeatableText(regex) {
+/**
+ * Finds the repeatable portion of a prompt regular expression. This is used to determine if a player has repeated the prompt in Word Bomb Mini.
+ *
+ * @param regex The regular expression used to extract the repeatable text
+ * @returns The repeatable portion of the regex, or undefined if the regex is not repeatable
+ * 
+ * @example
+ * ```typescript
+ * getPromptRepeatableText(new RegExp("^.*(AB).*$")); // "AB"
+ * getPromptRepeatableText(/^(.*)(\1)$/); // undefined
+ * ```
+ */
+export function getPromptRepeatableText(regex: RegExp): string | undefined {
   // get the string of the regex
   let regexString = regex.source;
   // remove the anchors from the start and end of the regex
@@ -268,5 +373,7 @@ export function getPromptRepeatableText(regex) {
   }
 }
 
-// maybe just change the function name tbh
+/**
+ * @deprecated Use {@link standardizeWord} instead.
+ */
 export const cleanWord = standardizeWord;
