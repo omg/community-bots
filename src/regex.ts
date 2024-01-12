@@ -151,6 +151,8 @@ export function nukeUserRegex(regex: RegExp) {
   return new RegExp(regexString, regex.flags);
 }
 
+// nukeUserRegex(/(.*)(?<a>AB)\k<a>\1\1\2/)
+
 // // didn't get to this yet
 // export function getSolveLetters(solution: string, promptRegex: RegExp) {
 //   let match = promptRegex.exec(solution);
