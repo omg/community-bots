@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "npm i && nodemon src/index.ts",
     "server": "node dist/src/index.js",
-    "token": "ts-node token.ts"
+    "token": "ts-node token.ts",
+    "core": "ts-node core/index.ts",
+    "test": "ts-node modules/dictionary/intents.ts"
   },
   "repository": {
     "type": "git",
