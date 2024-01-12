@@ -1,5 +1,9 @@
 // import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
 
+// its probably fine right ?
+// add a number at the end for each one created,
+const CUSTOM_REGEX_CAPTURE_NAME = "__CUSTOM_LARD_CAPTURE";
+
 /*
   Parts of the regex
 
