@@ -6,7 +6,9 @@ import clipboardy from 'clipboardy';
 const app = express();
 const port = 3000;
 
-// Replace with your Discord bot's client ID and client secret
+// this would likely be defined beforehand
+let currentModule: string = "moderation";
+// probably move these into the flow below
 let clientId: string;
 let clientToken: string;
 let clientSecret: string;
@@ -36,6 +38,10 @@ app.get('/callback', async (req, res) => {
     // something 1% fancier could be cool for no reason.
     // shouldn't be very hard to beat plain text
     res.send('You can now close this page.');
+
+    const config = await import("./core/config");
+    config.addBot(currentModule, clientId, clientToken, clientSecret, data);
+    
     process.exit();
   } catch (error) {
     console.error('Error exchanging code for token', error);
