@@ -8,6 +8,7 @@ const port = 3000;
 
 // Replace with your Discord bot's client ID and client secret
 let clientId: string;
+let clientToken: string;
 let clientSecret: string;
 
 app.get('/callback', async (req, res) => {
@@ -38,6 +39,7 @@ app.get('/callback', async (req, res) => {
 });
 
 inquirer.prompt([
+  // from the OAuth2 section of the Discord Developer Portal
   {
     type: 'input',
     name: 'clientId',
@@ -47,9 +49,16 @@ inquirer.prompt([
     type: 'input',
     name: 'clientSecret',
     message: 'Enter your Discord bot\'s client secret:'
+  },
+  // from the Bot section of the Discord Developer Portal
+  {
+    type: 'input',
+    name: 'clientToken',
+    message: 'Enter your Discord bot\'s token:'
   }
 ]).then(answers => {
   clientId = answers.clientId;
+  clientToken = answers.clientToken;
   clientSecret = answers.clientSecret;
 
   const redirectURI = `http://localhost:${port}/callback`;
