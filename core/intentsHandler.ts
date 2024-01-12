@@ -31,3 +31,4 @@ function mergePermissions(modulePermissions: bigint[][]) {
 
 // we also should check if the bot has the correct permissions after it's been added to a guild
 // in case some dickhead removes the permissions from the bot like a fucking idiot
+// https://discordjs.guide/popular-topics/permissions.html#checking-member-permissions
