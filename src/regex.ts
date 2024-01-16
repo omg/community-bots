@@ -1,9 +1,5 @@
 // import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
 
-// its probably fine right ?
-// add a number at the end for each one created,
-const CUSTOM_REGEX_CAPTURE_NAME = "__CUSTOM_LARD_CAPTURE";
-
 /*
   Parts of the regex
 
@@ -73,6 +69,10 @@ export function applyCapturingGroupsToPuzzleRegex(puzzleRegex: RegExp) {
   // const
 }
 
+/**
+ * Constant name for renaming capture groups in user regexes
+ */
+const CUSTOM_REGEX_CAPTURE_NAME = "_cc";
 function getUniqueCapturingNames(index: number) {
   return CUSTOM_REGEX_CAPTURE_NAME + index;
 }
