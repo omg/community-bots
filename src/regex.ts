@@ -176,6 +176,21 @@ export function nukeUserRegex(regex: RegExp): RegExp {
 
 // nukeUserRegex(/(.*)(?<a>AB)\k<a>\1\1\2/)
 
+/**
+ * Small const to rename groups that should be highlighted for bots response later
+ */
+const HIGHLIGHT_GROUP = "HIGHLIGHT";
+
+export function setHighlightGroups(regex: RegExp): RegExp {
+  let regexString = regex.source;
+  let idx = 0;
+
+  let newRegex = regexString.split(".*").map((string) => {
+    string = `(?<${HIGHLIGHT_GROUP + idx.toString()}>${string})`;
+  }).join(".*");
+
+  return new RegExp(newRegex, regex.flags);
+}
 // // didn't get to this yet
 // export function getSolveLetters(solution: string, promptRegex: RegExp) {
 //   let match = promptRegex.exec(solution);
