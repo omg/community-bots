@@ -186,7 +186,7 @@ export function setHighlightGroups(regex: RegExp): RegExp {
   let idx = 0;
 
   let newRegex = regexString.split(".*").map((string) => {
-    string = `(?<${HIGHLIGHT_GROUP + idx.toString()}>${string})`;
+    return `(?<${HIGHLIGHT_GROUP + idx.toString()}>${string})`;
   }).join(".*");
 
   return new RegExp(newRegex, regex.flags);
