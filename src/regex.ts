@@ -73,11 +73,26 @@ export function applyCapturingGroupsToPuzzleRegex(puzzleRegex: RegExp) {
  * Constant name for renaming capture groups in user regexes
  */
 const CUSTOM_REGEX_CAPTURE_NAME = "_cc";
+
+/**
+ * Returns a unique name for a capture group
+ * 
+ * @param index number
+ * @returns string
+ */
 function getUniqueCapturingNames(index: number) {
   return CUSTOM_REGEX_CAPTURE_NAME + index;
 }
 
-function replaceAt(string: string, index: number, replacement: string) {
+/**
+ * Replaces a character at a given index in the string with a different string
+ * 
+ * @param string string
+ * @param index number
+ * @param replacement string
+ * @returns string
+ */
+function replaceAt(string: string, index: number, replacement: string): string {
   return string.substring(0, index) + replacement + string.substring(index + 1);
 }
 
@@ -104,7 +119,15 @@ function replaceAt(string: string, index: number, replacement: string) {
     (ex: remove anything with \u as we have no reason to let them use unicode character codes)
     - after further thought this might be impossible to do (reliably) without a full regex parser, so its not worth it right now
 */
-export function nukeUserRegex(regex: RegExp) {
+
+/**
+ * Renames all capturing groups (named and unnamed) and transforms all backreferences into named backreferences  
+ * for when we add capturing groups to the regex after
+ * 
+ * @param regex RegExp
+ * @returns RegExp
+ */
+export function nukeUserRegex(regex: RegExp): RegExp {
   let regexString = regex.source;
 
   let orderedNamedGroups = [];
