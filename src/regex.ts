@@ -191,6 +191,7 @@ export function setHighlightGroups(regex: RegExp): RegExp {
 
   return new RegExp(newRegex, regex.flags);
 }
+
 // // didn't get to this yet
 // export function getSolveLetters(solution: string, promptRegex: RegExp) {
 //   let match = promptRegex.exec(solution);
