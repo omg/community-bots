@@ -77,7 +77,7 @@ export function standardizeWord(word: string): string {
     .replace(/[‘’]/g, "'")
     .replace(/\-/g, "-")
     .replace(/…/g, "...")
-    .trim(); // TODO: trimming might ruin some searches
+    .trim();
 }
 
 /**
@@ -117,11 +117,6 @@ export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
 
   if (regexResult) {
     // This has regex
-
-    if (/[`\\]/.test(cleanQuery)) {
-      // i think removing the backslash sometime would be useful
-      throw new PromptException("The regex you've entered is invalid.");
-    }
 
     let regexInput = regexResult[1];
 

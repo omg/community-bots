@@ -4,20 +4,27 @@ type SolveData = {
 };
 
 process.on("message", (data: SolveData) => {
+  const start = Date.now();
   const { dictionaryString, regexSource } = data;
-  const promptRegex = new RegExp(regexSource, "gm");
 
-  // /^.*(\R).*$/gm
+  const promptRegex = new RegExp(regexSource, "g");
 
-  // console.log("Solving prompt with regex: " + promptRegex);
-  // console.log("Source: " + promptRegex.source);
+  // split the dictionary by newlines
+  let words = dictionaryString.split(/\r\n/);
 
   let solutions = [];
 
-  let match: RegExpExecArray;
-  while (match = promptRegex.exec(dictionaryString)) {
-    solutions.push(match[0]);
+  let word;
+  for (let i = 0; i < words.length; i++) {
+    word = words[i];
+    if (promptRegex.test(word)) {
+      solutions.push(word);
+    }
   }
+
+  const end = Date.now();
+
+  console.log("Took " + (end - start) + "ms to solve prompt.");
 
   process.send(solutions);
 });
