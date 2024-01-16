@@ -49,24 +49,24 @@ export function addRegexFlags(regex: RegExp, flags: string) {
   When rendered later, each capturing group should be rendered with gold letters
 */
 export function applyCapturingGroupsToPuzzleRegex(puzzleRegex: RegExp) {
-  let puzzleSource = puzzleRegex.source;
+  // let puzzleSource = puzzleRegex.source;
 
-  // ignore ^ and $ anchors (which may or may not be present in this regex),
-  // then split the rest by .* (the flexible wildcards)
+  // // ignore ^ and $ anchors (which may or may not be present in this regex),
+  // // then split the rest by .* (the flexible wildcards)
 
-  const anchoredToStart = puzzleSource.startsWith("^");
-  const anchoredToEnd = puzzleSource.endsWith("$");
+  // const anchoredToStart = puzzleSource.startsWith("^");
+  // const anchoredToEnd = puzzleSource.endsWith("$");
 
-  // remove the anchors from the start and end of the regex
-  const strippedPuzzle = puzzleSource.slice(
-    anchoredToStart ? 1 : 0,
-    anchoredToEnd ? puzzleSource.length - 1 : puzzleSource.length
-  );
+  // // remove the anchors from the start and end of the regex
+  // const strippedPuzzle = puzzleSource.slice(
+  //   anchoredToStart ? 1 : 0,
+  //   anchoredToEnd ? puzzleSource.length - 1 : puzzleSource.length
+  // );
 
-  // stopped here due to capturing group issues with user inputted regexes
-  // (i.e. the user may have already applied capturing groups to the regex)
-  // meaning that their \1 may be replaced with a different capturing group by this function
-  // const
+  // // stopped here due to capturing group issues with user inputted regexes
+  // // (i.e. the user may have already applied capturing groups to the regex)
+  // // meaning that their \1 may be replaced with a different capturing group by this function
+  // // const
 }
 
 /**
