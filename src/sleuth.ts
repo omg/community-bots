@@ -1,4 +1,5 @@
 import { ActivityType, Client, GatewayIntentBits, Role } from 'discord.js';
+import { formatNumberShorthand } from './utils';
 
 export const sleuthClient = new Client({
   intents: [
@@ -10,35 +11,9 @@ export const sleuthClient = new Client({
   allowedMentions: { parse: ['users'] }
 });
 
-/**
- * Formats a number with abbreviation for thousands.
- * If the number is less than 1,000, it returns the number.
- * If the number is between 1,000 and 10,000, it returns the number divided by 1,000 with precision to one decimal point.
- * If the number is greater than 10,000, it returns the number divided by 1,000 with no decimal point.
- *
- * @param count The number to be formatted.
- * @returns The formatted number as a string, with a K abbreviation if necessary.
- * 
- * @example
- * ```typescript
- * formatNumber(1000) // "1,000"
- * formatNumber(1234) // "1.2K"
- * formatNumber(12345) // "12K"
- * ```
- */
-function formatNumber(count: number): string {
-  if (count < 1000) {
-      return count.toString();
-  } else if (count < 10000) {
-      return (Math.floor(count / 100) / 10).toFixed(1) + 'K';
-  } else {
-      return Math.floor(count / 1000) + 'K';
-  }
-}
-
 function updatePresence() {
   let memberCount = sleuthClient.guilds.cache.get(process.env.GUILD_ID).memberCount;
-  let displayCount = formatNumber(memberCount);
+  let displayCount = formatNumberShorthand(memberCount);
 
   sleuthClient.user.setPresence({
     activities: [{

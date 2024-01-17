@@ -1,5 +1,7 @@
 import { Client, GatewayIntentBits, ActivityType } from 'discord.js';
 import { registerClientAsCommandHandler } from '../../src/command-handler';
+import { getWordsInDictionary } from '../../src/dictionary/dictionary';
+import { formatNumberShorthand } from '../../src/utils';
 import path from 'node:path';
 
 export const viviClient = new Client({
@@ -12,7 +14,7 @@ export const viviClient = new Client({
 function updatePresence() {
   viviClient.user.setPresence({
     activities: [{
-      name: '286.6K words',
+      name: formatNumberShorthand(getWordsInDictionary()) + ' words',
       type: ActivityType.Watching
     }],
     status: 'online'

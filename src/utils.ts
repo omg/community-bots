@@ -120,3 +120,29 @@ export const SortingFunctions = {
   alphabetical: (a: string, b: string) => a.localeCompare(b),
   lengthThenAlphabetical: (a: string, b: string) => b.length - a.length || a.localeCompare(b),
 }
+
+/**
+ * Formats a number with abbreviation for thousands.
+ * If the number is less than 1,000, it returns the number.
+ * If the number is between 1,000 and 10,000, it returns the number divided by 1,000 with precision to one decimal point.
+ * If the number is greater than 10,000, it returns the number divided by 1,000 with no decimal point.
+ *
+ * @param count The number to be formatted.
+ * @returns The formatted number as a string, with a K abbreviation if necessary.
+ * 
+ * @example
+ * ```typescript
+ * formatNumberShorthand(1000) // "1,000"
+ * formatNumberShorthand(1234) // "1.2K"
+ * formatNumberShorthand(12345) // "12K"
+ * ```
+ */
+export function formatNumberShorthand(count: number): string {
+  if (count < 1000) {
+      return count.toString();
+  } else if (count < 10000) {
+      return (Math.floor(count / 100) / 10).toFixed(1) + 'K';
+  } else {
+      return Math.floor(count / 1000) + 'K';
+  }
+}
