@@ -381,7 +381,7 @@ export function getPromptRepeatableText(regex: RegExp): string | undefined {
 /**
  * Gets the amount of words in the dictionary.
  * 
- * @returns number of words in the dictionary
+ * @returns Number of words in the dictionary
  */
 export function getWordsInDictionary(): number {
   return dictionaryString.split("\r\n").length;
