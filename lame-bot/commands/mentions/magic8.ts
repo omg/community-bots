@@ -29,6 +29,7 @@ const questions = [
   /^mig?htn?'?t? /i,
   /^mu?stn?'?t? /i,
   /^sha?ll?n?'?t? /i,
+  /\?$/i
 ];
 
 export function matches(text: string) {
