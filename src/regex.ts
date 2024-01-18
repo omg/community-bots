@@ -75,6 +75,21 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
+/**
+ * Helper function to make sure a regex is valid and renames the groups in it
+ * 
+ * @param regex Regex to validate
+ * @returns Regex if it is valid else throws a PromptException
+ */
+export function validateRegex(regex: string): RegExp {
+  try {
+    let r = new RegExp(regex);
+    r = renameRegexGroups(r);
+    return r;
+  } catch {
+    throw new PromptException("Invalid regex");
+  }
+}
 
 /**
  * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences
@@ -157,9 +172,9 @@ export function renameRegexGroups(regex: RegExp): RegExp {
 }
 
 /**
- * Small const to rename groups that should be highlighted for bots response later
+ * Small const to rename groups that shouldnt be highlighted for bots response later
  */
-const HIGHLIGHT_GROUP = "HIGHLIGHT";
+const HIGHLIGHT_GROUP = "NOHIGHLIGHT";
 
 export function setHighlightGroups(regex: RegExp): RegExp {
   let regexString = regex.source;
@@ -172,3 +187,31 @@ export function setHighlightGroups(regex: RegExp): RegExp {
   return new RegExp(newRegex, regex.flags);
 }
 
+/**
+ * Conversion function to turn a Letters Array into a string with the letters converted to text
+ * 
+ * @param letters A Letters array to convert
+ * @returns A string with the letters converted to text
+ */
+export function convertLettersToText(letters: Letters[]): string {
+  let textString = "";
+  for (let text of letters) {
+    textString += text.highlighted ? `**${text.text}**` : text.text;
+  }
+
+  return textString;
+}
+
+/**
+ * Converts a string to a string with the letters converted to emojis or text based on the highlight parameter
+ * 
+ * @param text A string to convert
+ * @param regex A regex to use to highlight the string
+ * @param highlight If the string should be emojis or text (default: true), (tiny bit misleading :D)
+ * @returns A string with the letters converted for highlighting
+ */
+export function convertTextToHighlights(text: string, regex: RegExp, highlight: boolean = true): string {
+  regex = setHighlightGroups(regex);
+  let letters = getHighlightedLetters(text, regex);
+  return highlight ? convertLettersToEmojiLetters(letters) : convertLettersToText(letters);
+}
