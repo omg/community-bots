@@ -3,7 +3,8 @@ import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
 
-import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { solvePromptWithTimeout, standardizeWord, regexTest, PromptException } from '../../src/dictionary/dictionary';
+import { convertTextToHighlights, validateRegex } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -42,13 +43,12 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = cleanWord(interaction.options.get("prompt").value as string);
+  let prompt = standardizeWord(interaction.options.get("prompt").value as string);
   // @ts-ignore
   let sorting: string = interaction.options.get("sorting")?.value ?? "None";
 
   try {
-    // cleanWord is called twice here on prompt
-    let regex = getPromptRegexFromPromptSearch(prompt);
+    let regex = validateRegex(prompt);
 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
@@ -81,8 +81,9 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
 
       for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
-        
-        let solutionString = '\n• ' + getSolveLetters(solution, regex);
+
+        // let solutionString = '\n• ' + convertTextToHighlights(solution, regex, true);
+        let solutionString = '\n• ' + convertTextToHighlights(solution, regex, false);
         if (solutionsLength + solutionString.length > 1910) break;
         solutionStrings.push(solutionString);
         solutionsLength += solutionString.length;
