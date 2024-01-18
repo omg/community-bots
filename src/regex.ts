@@ -1,4 +1,5 @@
-// import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
+import { PromptException } from "./dictionary/dictionary";
+import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
 
 /*
   Parts of the regex
