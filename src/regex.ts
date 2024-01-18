@@ -143,7 +143,7 @@ export function nukeUserRegex(regex: RegExp): RegExp {
       orderedNamedGroups.push(uniqueName);
 
       // replace the group
-      regexString = regexString.replace(match[2], "<" + uniqueName + ">");
+      regexString = regexString.replace(match[2], `<${uniqueName}>`);
 
       // replace any named backreferences
       for (let match2 of regexString.matchAll(/(?<=\\k)<(.*?)>/gmi)) {
