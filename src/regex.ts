@@ -71,15 +71,16 @@ export function applyCapturingGroupsToPuzzleRegex(puzzleRegex: RegExp) {
 
 /**
  * Constant name for renaming capture groups in user regexes
- */
-const CUSTOM_REGEX_CAPTURE_NAME = "_cc";
 
 /**
  * Returns a unique name for a capture group
  * 
  * @param index number
  * @returns string
+ * im trying to keep this as short as possible to avoid any potential issues with renaming regex groups
  */
+const CUSTOM_REGEX_CAPTURE_NAME = "c";
+
 function getUniqueCapturingNames(index: number) {
   return CUSTOM_REGEX_CAPTURE_NAME + index;
 }
