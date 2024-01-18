@@ -107,29 +107,6 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
-/*
-  TODO: Test the regex string BEFORE sending it here, we make assumptions that its a valid regex string to nuke it
-
-  We need to know where all of the backreferences and groups(+named groups) are,
-  named groups should be changed to follow our own system
-    - but this also means that references to the previous group name needs to be changed with it
-  numerical backreferences should be replaced with named backreferences to the CORRECT group
-
-  solution:
-  - iterate over all the groups in the regex
-    
-    - replace "/(?<!\\)\(/" and "/(?<.*?>/" with "(?<__CUSTOM_LARD_CAPTURE{index}>"
-      - when replacing named groups, take the <.*?> part and find any NAMED backreferences to it, and replace them with the new name
-    
-    - replace numeric backreferences with named ones
-      - this part becomes Easy because we keep the order of groups when renaming them, so we can just replace the number with the index of the orderedNamedGroups array
-        - (ex: replace \1 with orderedNamedGroups[0])
-
-  - at the end replace any backslashes that aren't escaped IF they dont adhere to a whitelist of allowed backslash sequences
-    
-    (ex: remove anything with \u as we have no reason to let them use unicode character codes)
-    - after further thought this might be impossible to do (reliably) without a full regex parser, so its not worth it right now
-*/
 
 /**
  * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences
