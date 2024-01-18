@@ -71,16 +71,17 @@ export function applyCapturingGroupsToPuzzleRegex(puzzleRegex: RegExp) {
 
 /**
  * Constant name for renaming capture groups in user regexes
-
-/**
- * Returns a unique name for a capture group
  * 
- * @param index number
- * @returns string
  * im trying to keep this as short as possible to avoid any potential issues with renaming regex groups
  */
 const CUSTOM_REGEX_CAPTURE_NAME = "c";
 
+/**
+ * Helper function to get a unique name for a capture group
+ * 
+ * @param index Any number to make the name "unique"
+ * @returns CUSTOM_REGEX_CAPTURE_NAME + index
+ */
 function getUniqueCapturingNames(index: number) {
   return CUSTOM_REGEX_CAPTURE_NAME + index;
 }
@@ -88,10 +89,9 @@ function getUniqueCapturingNames(index: number) {
 /**
  * Replaces a character at a given index in the string with a different string
  * 
- * @param string string
- * @param index number
- * @param replacement string
- * @returns string
+ * @param string String to replace text in
+ * @param index Where to replace the text
+ * @param replacement What to replace the text with
  */
 function replaceAt(string: string, index: number, replacement: string): string {
   return string.substring(0, index) + replacement + string.substring(index + 1);
