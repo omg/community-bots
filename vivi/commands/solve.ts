@@ -3,7 +3,7 @@ import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
 
-import { solvePromptWithTimeout, standardizeWord, regexTest, PromptException } from '../../src/dictionary/dictionary';
+import { solvePromptWithTimeout, standardizeWord, PromptException } from '../../src/dictionary/dictionary';
 import { convertTextToHighlights, validateRegex } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
