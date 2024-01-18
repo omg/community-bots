@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean on Release
+name: Push master to release branch after a new GitHub release
 
 on:
   release:
@@ -20,7 +20,7 @@ jobs:
 
       - name: Merge and Push
         run: |
-          git fetch origin deploy:deploy || echo "No deploy branch yet"
-          git checkout deploy || git checkout -b deploy
+          git fetch origin release:release || echo "No release branch yet"
+          git checkout release || git checkout -b release
           git merge --no-edit origin/master
-          git push origin deploy
+          git push origin release
