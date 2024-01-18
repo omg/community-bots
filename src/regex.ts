@@ -111,6 +111,8 @@ function trimArrows(string: string): string {
 /**
  * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences
  * 
+ * It is **REQUIRED** that the regex is valid before passing it to this function, this function works under the assumption that it is valid
+ * 
  * @param regex Regex to rename all of the groups in, (named and unnamed)
  * @returns A regex with all of the groups renamed to unique names, and all backreferences transformed into named backreferences, pointing to the correct groups
  */
