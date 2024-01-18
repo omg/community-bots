@@ -176,15 +176,109 @@ export function renameRegexGroups(regex: RegExp): RegExp {
  */
 const HIGHLIGHT_GROUP = "NOHIGHLIGHT";
 
+/**
+ * This function takes a regex and replaces all instances of .* with (?<NOHIGHLIGHT_>.*)
+ * 
+ * @param regex Regex to replace all instances of .*
+ * @returns A regex with all instances of .* replaced with (?<NOHIGHLIGHT_>.*)
+ */
 export function setHighlightGroups(regex: RegExp): RegExp {
   let regexString = regex.source;
-  let idx = 0;
+  let lastIndex = 0;
+  let gIndex = 0;
 
-  let newRegex = regexString.split(".*").map((string) => {
-    return `(?<${HIGHLIGHT_GROUP + idx.toString()}>${string})`;
-  }).join(".*");
+  // find all .* in the regex, and replace them with (?<NOHIGHLIGHT_>.*)
+  // unless they have a group around them, in which case we ignore them, because the user wanted them highlighted for whatever reason, technically
+  let text = regexString.indexOf(".*");
+  // i Autofilled this with chatgpt and modified it a bit so i hope it works without any issues :D
+  while (text !== -1) {
+    // check if there is a group around the .*, > is for named groups :D
+    let groupAround = (regexString[text - 1] === "(" || regexString[text - 1] === ">") && regexString[text + 2] === ")";
+    // if there is no group around the .*, then replace it with (?<NOHIGHLIGHT_>.*)
+    if (!groupAround) {
+      let groupText = `(?<${HIGHLIGHT_GROUP}${gIndex}>.*)`;
+      gIndex++;
+      regexString = regexString.slice(0, text) + groupText + regexString.slice(text + 2);
+      lastIndex = text + groupText.length;
+    }
+    lastIndex = text + 2;
 
-  return new RegExp(newRegex, regex.flags);
+    // find the next .*
+    text = regexString.indexOf(".*", lastIndex);
+  }
+
+  return new RegExp(regexString, regex.flags);
+}
+
+/**
+ * A type to represent letters in a string, and if they should be highlighted or not
+ */
+type Letters = {
+  text: string,
+  highlighted: boolean
+}
+
+/**
+ * Pulls some black magic to get the highlighted letters from a regex match
+ * 
+ * @param solution Text to get the highlighted letters from
+ * @param regex Regex to use to get the highlighted letters
+ * @returns A Letters array with the letters marked for highlighting
+ */
+export function getHighlightedLetters(solution: string, regex: RegExp): Letters[] {
+  let match = regex.exec(solution);
+  if (!match) return [{text: solution, highlighted: false}];
+
+  let nonHighlightGroups = Object.keys(match.groups || {}).filter((x) => x.startsWith(HIGHLIGHT_GROUP));
+
+  let lastReplacedIndex = 0;
+  let lastMatchedIndex = match[0].length;
+  let cutString: Letters[] = [];
+
+  // if the match starts 3 letters in, we know the first 3 letters are included in the match
+  if (match.index > 0) {
+    cutString.push({text: solution.slice(0, match.index), highlighted: false});
+    lastReplacedIndex = match.index;
+  }
+
+  for (let group of nonHighlightGroups) {
+    // we know this string is highlighted because its been matched, but isnt part of the group
+    // (its the text between the match.index/lastReplacedIndex and the start of the nonHighlightGroup)
+    let ourString = solution.slice(lastReplacedIndex, solution.indexOf(match.groups[group], lastReplacedIndex));
+    cutString.push({text: ourString, highlighted: true});
+    
+    // we know this string isnt highlighted because its the exact match of the nonHighlightGroup
+    cutString.push({text: match.groups[group], highlighted: false})
+
+    lastReplacedIndex += ourString.length + match.groups[group].length;
+  }
+  // if the .* doesnt end at the end of the string, and theres another character to match (/x.*e/) for explosive
+  // we have to add that to the cutString as highlighted
+  if (lastReplacedIndex < match[0].length + match.index) {
+    cutString.push({text: solution.slice(lastReplacedIndex, match[0].length + match.index), highlighted: true});
+    lastReplacedIndex = match[0].length + match.index;
+  }
+  cutString.push({text: solution.slice(lastReplacedIndex), highlighted: false});
+
+  // TODO: fix this
+  // theres a small issue if the .* is at the start or end it will push a empty string to those spots, and i cba to fix it rn
+  // it also doesnt make sense for someone to do that :D but alas, this filter works for now
+  return cutString.filter((x) => x.text.length > 0);
+}
+
+/**
+ * Conversion function to turn a Letters Array into a string with the letters converted to emoji letters
+ * 
+ * @param letters A Letters array to convert
+ * @returns A string with the letters converted to emoji letters
+ */
+export function convertLettersToEmojiLetters(letters: Letters[]): string {
+  let emojiString = "";
+  for (let text of letters) {
+    emojiString += text.highlighted ? getPromptLetters(text.text) : getNormalLetters(text.text);
+  }
+
+  return emojiString;
 }
 
 /**
