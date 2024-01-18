@@ -132,56 +132,80 @@ function trimArrows(string: string): string {
 */
 
 /**
- * Renames all capturing groups (named and unnamed) and transforms all backreferences into named backreferences  
- * for when we add capturing groups to the regex after
+ * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences
  * 
- * @param regex RegExp
- * @returns RegExp
+ * @param regex Regex to rename all of the groups in, (named and unnamed)
+ * @returns A regex with all of the groups renamed to unique names, and all backreferences transformed into named backreferences, pointing to the correct groups
  */
-export function nukeUserRegex(regex: RegExp): RegExp {
+export function renameRegexGroups(regex: RegExp): RegExp {
   let regexString = regex.source;
 
-  let orderedNamedGroups = [];
+  // this is the map of all the named groups and their new names
+  // so if a users group is called <asd> and we rename it to <c0>, then this map will have { asd: c0 }
+  let orderedNamedGroups: string[] = [];
+  let namedGroupsMap: { [key: string]: string } = {};
   let groupIndex = 0;
-  let tempRegexString = regexString;
-  // iterate over all groups
-  for (let match of tempRegexString.matchAll(/(?<!\\)(\(\?(<.*?>)|\((?!\?))/gmi)) {
-    let matchString = match[0];
-    if (matchString.startsWith("(?<")) {
-      // im pretty sure the third match from this is always gonna be the NAME of the group (if applicable)
+
+  // i realized that since we are modifying the string multiple times we need to keep track of where the correct indexes are supposed to be
+  // because we cant just .replace the string since we might hit a named group '(' by accident
+  // this means we need to keep track of how the string is being offset by our past replacements
+  // we do this by taking the difference between the length of the string we are replacing and the length of the string we are replacing it with
+  // and then adding that to the index of the next replacement
+  let runningIndexDifferance = 0;
+
+  // :D, this is super ugly but essentially it turns the returned IterableIterator<RegExpMatchArray> into a RegExpMatchArray[] instead, which is much easier to work with
+  let matches: RegExpMatchArray[] = [...regexString.matchAll(/(?<!\\)(\(\?(<.*?>)|\((?!\?))/gi)];
+  // if its a named group the matches are as follows: ['(?<name>', '(?<name>', <name>]
+  // if its a normal group the matches are as follows: ['(', '(']
+  // the first match is always the same as the second because of the capture groups, so we can just use the second match onwards for all cases
+  for (let match of matches) {
+    // '(?<name>' or '('
+    let matchString = match[1];
+    
+    // if its a named group we want to replace Every instance of the <name> with a new name
+    if (matchString.startsWith('(?<')) {
+      // when getting a unique name we need to remember to increase the groupIndex so we dont have duplicates
       let uniqueName = getUniqueCapturingNames(groupIndex);
       groupIndex++;
+      // add the groups to ordered list for fixing numeric backreferences later
       orderedNamedGroups.push(uniqueName);
+      // and add to the map for fixing named backreferences later (only if its a named group)
+      namedGroupsMap[trimArrows(match[2])] = uniqueName;
 
-      // replace the group
-      regexString = regexString.replace(match[2], `<${uniqueName}>`);
-
-      // replace any named backreferences
-      for (let match2 of regexString.matchAll(/(?<=\\k)<(.*?)>/gmi)) {
-        // match2[0] is the name with the <> wrapped around it
-        // match2[1] is the name of the group
-        regexString = regexString.replace(match2[0], `<${uniqueName}>`)
-      }
-
+      regexString = regexString.replace(matchString, `(?<${uniqueName}>`);
+      
+      // here we subtract the difference between the length of the match and the length of the replacement, to correct our next replacement index
+      runningIndexDifferance -= matchString.length - (uniqueName.length + 4);
     } else {
       let uniqueName = getUniqueCapturingNames(groupIndex);
       groupIndex++;
       orderedNamedGroups.push(uniqueName);
 
-      regexString = replaceAt(regexString, match.index, `(?<${uniqueName}>`);
+      // we use replaceAt here because we want to make sure we are replacing the correct '('
+      regexString = replaceAt(regexString, match.index + runningIndexDifferance, `(?<${uniqueName}>`);
+      runningIndexDifferance += uniqueName.length + 3; // +3 because we are replacing '(' with '(?<uniqueName>'
     }
   }
 
-  // replace numeric backreferences
-  // i thought about checking for \\1 instead of \1 but i dont think its a Real issue?
-  for (let match of regexString.matchAll(/\\([1-9])/gmi)) {
-    // match[0] is \\1
-    // match[1] is 1
-    regexString = regexString.replace(match[0], `\\k<${orderedNamedGroups[parseInt(match[1]) - 1]}>`);
+  // replace any named backreferences
+  for (let backref of regexString.matchAll(/(?<=\\k)<(.+?)>/gi)) {
+    // backref[0] is the name with the <> wrapped around it
+    // backref[1] is the name of the group
+    let backrefName= backref[1];
+    let match = new RegExp(`\<${backrefName}\>`, "g");
+
+    regexString = regexString.replace(match, `<${namedGroupsMap[backrefName]}>`)
   }
-  
-  // console.log(new RegExp(regexString, regex.flags).exec("asdfABABasdasdasdasdABABasdasdABABABAB"))
-  // pass the original flags back with it
+
+  // replace numeric backreferences
+  for (let backref of regexString.matchAll(/\\([1-9])/gi)) {
+    // backref[0] is \\1
+    // backref[1] is 1
+    // when parsing the backref as a int, we have to -1 because arrays are 0 indexed 👍
+
+    regexString = regexString.replace(backref[0], `\\k<${orderedNamedGroups[parseInt(backref[1]) - 1]}>`)
+  }
+
   return new RegExp(regexString, regex.flags);
 }
 
