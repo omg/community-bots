@@ -97,6 +97,16 @@ function replaceAt(string: string, index: number, replacement: string): string {
   return string.substring(0, index) + replacement + string.substring(index + 1);
 }
 
+/**
+ * Helper function to trim the <> from a named group so we can get just the name
+ * 
+ * @param string String to trim the arrows from
+ * @returns String without the arrows
+ */
+function trimArrows(string: string): string {
+  return string.replace(/^<|>$/g, "");
+}
+
 /*
   TODO: Test the regex string BEFORE sending it here, we make assumptions that its a valid regex string to nuke it
 
