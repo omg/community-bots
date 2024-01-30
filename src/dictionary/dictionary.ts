@@ -227,6 +227,15 @@ export async function generatePrompt() {
 }
 
 /**
+ * Gets the amount of words in the dictionary.
+ * 
+ * @returns Number of words in the dictionary
+ */
+export function getWordsInDictionary(): number {
+  return dictionaryString.split("\n").length;
+}
+
+/**
  * @deprecated Use {@link standardizeWord} instead.
  */
 export const cleanWord = standardizeWord;
