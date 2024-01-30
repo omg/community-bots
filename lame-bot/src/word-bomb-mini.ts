@@ -24,7 +24,8 @@ import {
   isWord,
   solverCache
 } from "../../src/dictionary/dictionary";
-import { getPromptRegexDisplayText, getPromptRegexInlineText, getPromptRegexText, getRemarkEmoji, getSolveLetters, getStreakNumbers } from "../../src/emoji-renderer";
+import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
+import { convertTextToHighlights, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
 import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
@@ -655,7 +656,7 @@ async function endRound() {
     )} <@${winnerUser}> solved it! ${getRemarkEmoji("solvedIt")}**\n\n` +
       getRemarkEmoji("roundEnded") +
       " **Round ended!**\n" +
-      getSolveLetters(winnerSolution, prompt) +
+      convertTextToHighlights(winnerSolution, prompt) +
       "\n" +
       getRemarkText()
   );

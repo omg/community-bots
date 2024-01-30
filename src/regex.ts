@@ -353,3 +353,28 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
 
   return fancy ? "`/" + regexString + "/`" : "/" + regexString + "/";
 }
+
+/**
+ * Finds the repeatable portion of a prompt regular expression. This is used to determine if a player has repeated the prompt in Word Bomb Mini.
+ *
+ * @param regex The regular expression used to extract the repeatable text
+ * @returns The repeatable portion of the regex, or undefined if the regex is not repeatable
+ * 
+ * @example
+ * ```typescript
+ * getPromptRepeatableText(new RegExp("AB")); // "AB"
+ * getPromptRepeatableText(/(.*)(\1)/); // undefined
+ * ```
+ */
+export function getPromptRepeatableText(regex: RegExp): string | undefined {
+  // get the string of the regex
+  let regexString = regex.source;
+
+  // check if the regex string has only displayable charaacters.
+  // this is not a perfect check, but it should totally be good enough for our purposes
+  if (!invalidPromptDisplayRegex.test(regexString)) {
+    return regexString;
+  }
+
+  return undefined;
+}
