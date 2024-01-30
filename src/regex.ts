@@ -314,3 +314,42 @@ export function convertTextToHighlights(text: string, regex: RegExp, highlight: 
   let letters = getHighlightedLetters(text, regex);
   return highlight ? convertLettersToEmojiLetters(letters) : convertLettersToText(letters);
 }
+
+/**
+ * Regular expression used to check if the prompt display contains any invalid characters. Only uppercase letters, numbers, apostrophes, hyphens, at symbols, and spaces are considered valid.
+ */
+const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
+
+/**
+ * This function will take a regex as input and return either a prompt-like display string or a regex encapsulated in backticks.
+ * 
+ * If fancy is true, it is expected for use in a place such as a Discord text channel.
+ * The prompt display string will use white letters emojis, and the regex will be encapsulated in backticks (`).
+ * 
+ * If fancy is false, it is expected for use in a place such as a Discord presence.
+ * The prompt display string will use normal letters, and the regex will be returned without encapsulation.
+ *
+ * @param regex The regular expression
+ * @returns The display string
+ * 
+ * @example
+ * ```typescript
+ * getPromptRegexDisplayText(new RegExp("[A-Z]{3}")); // returns "`/[A-Z]{3}/`"
+ * getPromptRegexDisplayText(new RegExp("AB")); // returns AB in white emoji letters
+ * 
+ * getPromptRegexDisplayText(new RegExp("[A-Z]{3}"), false); // returns "/[A-Z]{3}/"
+ * getPromptRegexDisplayText(new RegExp("AB"), false); // returns "AB"
+ * ```
+ */
+export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true): string {
+  // get the string of the regex
+  let regexString = regex.source;
+
+  // check if the regex string has only displayable charaacters.
+  // this is not a perfect check, but it should totally be good enough for our purposes
+  if (!invalidPromptDisplayRegex.test(regexString)) {
+    return fancy ? getNormalLetters(regexString) : regexString;
+  }
+
+  return fancy ? "`/" + regexString + "/`" : "/" + regexString + "/";
+}
