@@ -10,7 +10,6 @@ export const sleuthClient = new Client({
   allowedMentions: { parse: ['users'] }
 });
 
-
 /**
  * Formats a number with abbreviation for thousands.
  * If the number is less than 1,000, it returns the number.
