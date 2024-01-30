@@ -13,7 +13,7 @@ import {
   setReplyMessage
 } from "../../src/database/db";
 import {
-  cleanWord, escapeRegExp,
+  cleanWord,
   generatePrompt,
   is10000Related,
   is1000Related,
@@ -24,7 +24,7 @@ import {
   solverCache
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
-import { convertTextToHighlights, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
+import { convertTextToHighlights, escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
 import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 

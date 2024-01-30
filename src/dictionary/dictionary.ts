@@ -2,6 +2,7 @@ import { fork } from "child_process";
 import fs from "node:fs";
 import path from "path";
 import appRoot from "app-root-path";
+import { escapeRegExp } from "../regex";
 
 // TODO: pull dictionaries from Vivi API
 try {
@@ -81,11 +82,6 @@ export function standardizeWord(word: string): string {
 }
 
 /**
- * A regular expression used to determine if a search is regex or not.
- */
-const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
-
-/**
  * Creates a new PromptException.
  *
  * @param message The error message
@@ -93,68 +89,6 @@ const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 export function PromptException(message: string) {
   this.message = message;
   this.name = "PromptException";
-}
-
-/**
- * Returns a regex used for searching based on a query.
- * The query may be in a prompt format (AB) or regex format (/AB/).
- * 
- * The function will interpret either format and return a regex pattern.
- *
- * @param promptQuery A query string to convert to regex
- * @returns A regular expression pattern based on the query. If the query contains a valid regular expression, the function constructs and returns the regex pattern. If the query does not contain a valid regular expression, the function constructs and returns a regex pattern that matches the query as a literal string.
- * 
- * @example
- * ```typescript
- * getPromptRegexFromPromptSearch("AB") // new RegExp("AB")
- * getPromptRegexFromPromptSearch("/A.B$/") // new RegExp("A.B$")
- * ```
- */
-export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
-  let cleanQuery = standardizeWord(promptQuery);
-  let regexResult = regexTest.exec(cleanQuery);
-
-  // TODO find args in the query
-
-  // let's just be safe with backticks
-  if (cleanQuery.includes("`")) {
-    throw new PromptException("The prompt you've entered is invalid.");
-  }
-
-  if (regexResult) {
-    // This has regex
-
-    let regexInput = regexResult[1];
-
-    if (regexInput === "") {
-      // This regex is empty
-      throw new PromptException("The regex you've entered is empty.");
-    }
-
-    // check if the regex is valid
-    let regex;
-    try {
-      regex = new RegExp(regexInput);
-    } catch (e) {
-      throw new PromptException("The regex you've entered is invalid.");
-    }
-
-    return regex;
-  } else {
-    // This isn't regex
-
-    // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp(escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, "."));
-  }
-}
-
-/**
- * Escapes all RegExp special characters.
- *
- * @param string The input string to be escaped.
- */
-export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
 /**
