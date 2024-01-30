@@ -1,5 +1,4 @@
 import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { getSolveLetters } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
 
@@ -82,8 +81,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
       for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
 
-        // let solutionString = '\n• ' + convertTextToHighlights(solution, regex, true);
-        let solutionString = '\n• ' + convertTextToHighlights(solution, regex, false);
+        let solutionString = '\n• ' + convertTextToHighlights(solution, regex);
         if (solutionsLength + solutionString.length > 1910) break;
         solutionStrings.push(solutionString);
         solutionsLength += solutionString.length;
