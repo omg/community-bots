@@ -7,10 +7,10 @@ process.on("message", (data: SolveData) => {
   const start = Date.now();
   const { dictionaryString, regexSource } = data;
 
-  const promptRegex = new RegExp(regexSource, "g");
+  const promptRegex = new RegExp(regexSource); // why recreate the regex ..?
 
   // split the dictionary by newlines
-  let words = dictionaryString.split(/\r\n/);
+  let words = dictionaryString.split("\n");
 
   let solutions = [];
 
