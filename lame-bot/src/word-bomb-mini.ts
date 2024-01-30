@@ -15,7 +15,6 @@ import {
 import {
   cleanWord, escapeRegExp,
   generatePrompt,
-  getPromptRepeatableText,
   is10000Related,
   is1000Related,
   is100Related,
@@ -84,14 +83,7 @@ function isNumberVowelSound(x) {
 
 function getCurrentPromptName() {
   return (
-    getPromptRegexText(prompt) +
-    (lengthRequired ? " - " + promptWord.length : "")
-  );
-}
-
-function getCurrentPromptNameForMessage() {
-  return (
-    getPromptRegexInlineText(prompt) +
+    getPromptRegexDisplayText(prompt, false) +
     (lengthRequired ? " - " + promptWord.length : "")
   );
 }
@@ -125,7 +117,7 @@ async function startRound() {
   startedAt = Date.now();
 
   // make prompt
-  ({ prompt, promptWord, solutions, lengthRequired } = generatePrompt());
+  ({ prompt, promptWord, solutions, lengthRequired } = await generatePrompt());
 
   // send prompt to the channel
   console.log(wordBombMiniChannel.id);
@@ -540,7 +532,7 @@ async function endRound() {
           getRemarkEmoji("promptiversary") +
           ` It's your **${formatPlacementWithEnglishWords(
             promptiversary
-          )} promptiversary** with "${getCurrentPromptNameForMessage()}"!`,
+          )} promptiversary** with "${getCurrentPromptName()}"!`,
       });
 
       if (promptiversary === 5) {
