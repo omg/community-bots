@@ -22,6 +22,7 @@ import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
 */
 
 // regex modifiers
+// these aren't currently used anywhere it seems..
 
 export function changeRegexFlags(regex: RegExp, flags: string = "") {
   return new RegExp(regex.source, flags);
@@ -55,11 +56,11 @@ function getUniqueCapturingNames(index: number) {
 }
 
 /**
- * Replaces a character at a given index in the string with a different string
+ * Replaces a character at a given index in the string with another string
  * 
- * @param string String to replace text in
- * @param index Where to replace the text
- * @param replacement What to replace the text with
+ * @param string The string to replace a character in
+ * @param index Where to replace the character
+ * @param replacement The string to replace the character with
  */
 function replaceAt(string: string, index: number, replacement: string): string {
   return string.substring(0, index) + replacement + string.substring(index + 1);
@@ -76,10 +77,13 @@ function trimArrows(string: string): string {
 }
 
 /**
- * Helper function to make sure a regex is valid and renames the groups in it
+ * Helper function to make sure a regex is valid and renames the groups in it.
+ * 
+ * This will call {@link renameRegexGroups} after validating that the regex is valid.
  * 
  * @param regex Regex to validate
- * @returns Regex if it is valid else throws a PromptException
+ * @returns The validated regex
+ * @throws PromptException if the regex is invalid
  */
 export function validateRegex(regex: string): RegExp {
   try {
@@ -92,9 +96,10 @@ export function validateRegex(regex: string): RegExp {
 }
 
 /**
- * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences
+ * This function renames all of the groups in a regex to unique names, and transforms all backreferences into named backreferences.
  * 
- * It is **REQUIRED** that the regex is valid before passing it to this function, this function works under the assumption that it is valid
+ * It is **REQUIRED** that the regex is valid before passing it to this function, this function works under the assumption that it is valid.
+ * Use {@link validateRegex} if you need to validate the regex first.
  * 
  * @param regex Regex to rename all of the groups in, (named and unnamed)
  * @returns A regex with all of the groups renamed to unique names, and all backreferences transformed into named backreferences, pointing to the correct groups
@@ -219,7 +224,7 @@ type Letters = {
 }
 
 /**
- * Pulls some black magic to get the highlighted letters from a regex match
+ * Pulls some black magic to get the highlighted letters from a regex match.
  * 
  * @param solution Text to get the highlighted letters from
  * @param regex Regex to use to get the highlighted letters
