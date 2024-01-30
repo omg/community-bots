@@ -76,6 +76,7 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
+const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/;
 
 /**
  * A regular expression used to determine if a search is regex or not.
@@ -123,7 +124,17 @@ export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
   } else {
     // This isn't regex
 
-    // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
+    // If the query has characters that are invalid for prompt search, we can assume it might be a regex.
+    if (invalidPromptSearchRegex.test(cleanQuery)) {
+      try {
+        return validateRegex(cleanQuery);
+      } catch {
+        // The regex was invalid, return that the prompt was invalid
+        throw new PromptException("The prompt you've entered is invalid.");
+      }
+    }
+
+    // this changes all question marks and periods to actual regexp wildcards and escapes all other special characters
     return new RegExp(escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, "."));
   }
 }
