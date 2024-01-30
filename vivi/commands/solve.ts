@@ -1,9 +1,9 @@
-import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
-import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
+import { AttachmentBuilder, CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { getInteractionContent, replyToInteraction } from '../../src/command-handler';
+import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
-import { solvePromptWithTimeout, standardizeWord, PromptException } from '../../src/dictionary/dictionary';
-import { convertTextToHighlights, validateRegex } from '../../src/regex';
+import { solvePromptWithTimeout, standardizeWord } from '../../src/dictionary/dictionary';
+import { convertTextToHighlights, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -43,11 +43,14 @@ export const broadcastable = true;
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let prompt = standardizeWord(interaction.options.get("prompt").value as string);
-  // @ts-ignore
-  let sorting: string = interaction.options.get("sorting")?.value ?? "None";
+  let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
+
+  console.log("Solving prompt: " + prompt + " with sorting: " + sorting + " for " + interaction.user.id + " ...")
 
   try {
-    let regex = validateRegex(prompt);
+    let regex = getPromptRegexFromPromptSearch(prompt);
+
+    console.log("Solving prompt with regex: " + regex + " ...");
 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
