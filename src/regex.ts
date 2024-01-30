@@ -128,7 +128,7 @@ export function renameRegexGroups(regex: RegExp): RegExp {
   for (let match of matches) {
     // '(?<name>' or '('
     let matchString = match[1];
-    
+
     // if its a named group we want to replace Every instance of the <name> with a new name
     if (matchString.startsWith('(?<')) {
       // when getting a unique name we need to remember to increase the groupIndex so we dont have duplicates
@@ -140,7 +140,7 @@ export function renameRegexGroups(regex: RegExp): RegExp {
       namedGroupsMap[trimArrows(match[2])] = uniqueName;
 
       regexString = regexString.replace(matchString, `(?<${uniqueName}>`);
-      
+
       // here we subtract the difference between the length of the match and the length of the replacement, to correct our next replacement index
       runningIndexDifferance -= matchString.length - (uniqueName.length + 4);
     } else {
@@ -158,7 +158,7 @@ export function renameRegexGroups(regex: RegExp): RegExp {
   for (let backref of regexString.matchAll(/(?<=\\k)<(.+?)>/gi)) {
     // backref[0] is the name with the <> wrapped around it
     // backref[1] is the name of the group
-    let backrefName= backref[1];
+    let backrefName = backref[1];
     let match = new RegExp(`\<${backrefName}\>`, "g");
 
     regexString = regexString.replace(match, `<${namedGroupsMap[backrefName]}>`)
@@ -232,7 +232,7 @@ type Letters = {
  */
 export function getHighlightedLetters(solution: string, regex: RegExp): Letters[] {
   let match = regex.exec(solution);
-  if (!match) return [{text: solution, highlighted: false}];
+  if (!match) return [{ text: solution, highlighted: false }];
 
   let nonHighlightGroups = Object.keys(match.groups || {}).filter((x) => x.startsWith(HIGHLIGHT_GROUP));
 
@@ -242,7 +242,7 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
 
   // if the match starts 3 letters in, we know the first 3 letters are included in the match
   if (match.index > 0) {
-    cutString.push({text: solution.slice(0, match.index), highlighted: false});
+    cutString.push({ text: solution.slice(0, match.index), highlighted: false });
     lastReplacedIndex = match.index;
   }
 
@@ -250,20 +250,20 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
     // we know this string is highlighted because its been matched, but isnt part of the group
     // (its the text between the match.index/lastReplacedIndex and the start of the nonHighlightGroup)
     let ourString = solution.slice(lastReplacedIndex, solution.indexOf(match.groups[group], lastReplacedIndex));
-    cutString.push({text: ourString, highlighted: true});
-    
+    cutString.push({ text: ourString, highlighted: true });
+
     // we know this string isnt highlighted because its the exact match of the nonHighlightGroup
-    cutString.push({text: match.groups[group], highlighted: false})
+    cutString.push({ text: match.groups[group], highlighted: false })
 
     lastReplacedIndex += ourString.length + match.groups[group].length;
   }
   // if the .* doesnt end at the end of the string, and theres another character to match (/x.*e/) for explosive
   // we have to add that to the cutString as highlighted
   if (lastReplacedIndex < match[0].length + match.index) {
-    cutString.push({text: solution.slice(lastReplacedIndex, match[0].length + match.index), highlighted: true});
+    cutString.push({ text: solution.slice(lastReplacedIndex, match[0].length + match.index), highlighted: true });
     lastReplacedIndex = match[0].length + match.index;
   }
-  cutString.push({text: solution.slice(lastReplacedIndex), highlighted: false});
+  cutString.push({ text: solution.slice(lastReplacedIndex), highlighted: false });
 
   // TODO: fix this
   // theres a small issue if the .* is at the start or end it will push a empty string to those spots, and i cba to fix it rn
@@ -345,10 +345,13 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
   // get the string of the regex
   let regexString = regex.source;
 
+  // replace all periods that aren't escaped with a space for prompt rendering
+  let displayString = regexString.replace(/(?<!\\)(?:(?:\\\\)*)\./g, " ");
+
   // check if the regex string has only displayable charaacters.
   // this is not a perfect check, but it should totally be good enough for our purposes
-  if (!invalidPromptDisplayRegex.test(regexString)) {
-    return fancy ? getNormalLetters(regexString) : regexString;
+  if (!invalidPromptDisplayRegex.test(displayString)) {
+    return fancy ? getNormalLetters(displayString) : regexString;
   }
 
   return fancy ? "`/" + regexString + "/`" : "/" + regexString + "/";
