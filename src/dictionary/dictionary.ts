@@ -274,7 +274,7 @@ export async function generatePrompt() {
     console.log(prompt);
 
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
-    let solutions = await solvePromptWithTimeout(prompt, 99999999999, null);
+    let solutions = await solvePromptWithTimeout(prompt, 999999999, null);
     if (lengthRequired) {
       solutions = solutions.filter((word) => {
         return word.length == promptWord.length;
