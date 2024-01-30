@@ -190,7 +190,7 @@ export let solverCache = new Set();
  * @param timeout The timeout in milliseconds
  * @param user The user who is using the solver
  */
-export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<any> {
+export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<string[]> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
@@ -201,7 +201,7 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
       reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
     }, timeout);
 
-    worker.on("message", (solutions) => {
+    worker.on("message", (solutions: string[]) => {
       clearTimeout(timeoutId);
       worker.kill();
       resolve(solutions);
