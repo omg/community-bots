@@ -306,7 +306,7 @@ export function convertLettersToText(letters: Letters[]): string {
  * 
  * @param text A string to convert
  * @param regex A regex to use to highlight the string
- * @param highlight If the string should be emojis or text (default: true), (tiny bit misleading :D)
+ * @param highlight If the string should be emojis (default: true)
  * @returns A string with the letters converted for highlighting
  */
 export function convertTextToHighlights(text: string, regex: RegExp, highlight: boolean = true): string {
