@@ -205,7 +205,6 @@ export async function generatePrompt() {
         promptWord.slice(promptSubStart, promptSubStart + promptLength)
       ).replace(/`/g, "."), "i"
     );
-    console.log(prompt);
 
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
     let solutions = await solvePromptWithTimeout(prompt, 999999999, null);

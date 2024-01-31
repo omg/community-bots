@@ -120,9 +120,7 @@ async function startRound() {
   ({ prompt, promptWord, solutions, lengthRequired } = await generatePrompt());
 
   // send prompt to the channel
-  console.log(wordBombMiniChannel.id);
-  console.log(prompt);
-  console.log(promptWord);
+  console.log(prompt, promptWord, solutions);
 
   await sendMessageAsReply(
     replyMessage,
@@ -160,7 +158,7 @@ async function startRound() {
   }
 
   // start a new round
-  console.log("Starting a new round..");
+  console.log("Starting the round..");
   await startRound();
 })();
 
@@ -246,23 +244,23 @@ async function endRound() {
       lengthRequired ? promptWord.length : null,
       solutions
     );
-    console.log("Part 1 took " + (Date.now() - start) + "ms");
+    // console.log("Part 1 took " + (Date.now() - start) + "ms");
 
     let _a = await promptiversaryRemarks();
-    console.log("Part 2 took " + (Date.now() - start) + "ms");
+    // console.log("Part 2 took " + (Date.now() - start) + "ms");
 
     let _b = await uniqueSolutionRemarks();
-    console.log("Part 3 took " + (Date.now() - start) + "ms");
+    // console.log("Part 3 took " + (Date.now() - start) + "ms");
 
     let solveCount = await getUserSolveCount(winnerUser);
-    console.log("Part 4 took " + (Date.now() - start) + "ms");
+    // console.log("Part 4 took " + (Date.now() - start) + "ms");
 
     let exactSolves = await getUserExactSolves(winnerUser);
-    console.log("Part 5 took " + (Date.now() - start) + "ms");
+    // console.log("Part 5 took " + (Date.now() - start) + "ms");
 
     let rankingAfter;
     if (rankingBefore) rankingAfter = await getUserRanking(winnerUser);
-    console.log("Part 6 took " + (Date.now() - start) + "ms");
+    // console.log("Part 6 took " + (Date.now() - start) + "ms");
 
     // a bit of an odd place to put uniqueSolutionRemarks, but it seems like the most optimal...
     // let promises = [, , , getUserExactSolves(winnerUser)]
@@ -629,14 +627,14 @@ async function endRound() {
       ({ rankingBefore, rankingAfter, solveCount, exactSolves }) => {
         rankRemarks(rankingBefore, rankingAfter, solveCount);
         solveRemarks(solveCount, exactSolves);
-        console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
+        // console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
       }
     ),
     lateRemarks(),
     roundRemarks(),
   ]);
 
-  console.log("Remarks: " + (Date.now() - startTime2) + "ms");
+  console.log("Remarks completed in " + (Date.now() - startTime2) + "ms");
 
   basicRemarks();
 

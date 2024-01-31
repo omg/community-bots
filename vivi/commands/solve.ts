@@ -45,12 +45,8 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   let prompt = interaction.options.get("prompt").value as string;
   let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
 
-  console.log("Solving prompt: " + prompt + " with sorting: " + sorting + " for " + interaction.user.id + " ...")
-
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
-
-    console.log("Solving prompt with regex: " + regex + " ...");
 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;

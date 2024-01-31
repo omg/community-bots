@@ -8,7 +8,7 @@ process.on("message", (data: SolveData) => {
   const { dictionaryString, regexSource } = data;
 
   const promptRegex = new RegExp(regexSource, "i"); // why recreate the regex ..?
-  console.log("Solving prompt with regex: " + promptRegex);
+  console.log("Finding words which match regex: " + promptRegex);
 
   // split the dictionary by newlines
   let words = dictionaryString.split("\n");
@@ -24,8 +24,7 @@ process.on("message", (data: SolveData) => {
   }
 
   const end = Date.now();
-
-  console.log("Took " + (end - start) + "ms to solve prompt.");
+  console.log("Took " + (end - start) + "ms to solve.");
 
   process.send(solutions);
 });
