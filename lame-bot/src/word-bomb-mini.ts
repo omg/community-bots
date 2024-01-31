@@ -110,6 +110,7 @@ async function startRound() {
   if (inProgress) return;
   inProgress = true;
 
+  prompt = null;
   remarks = [];
 
   solves = [];
@@ -661,6 +662,9 @@ lameBotClient.on("messageCreate", (message) => {
 
   // stop if the game is not in progress
   if (!inProgress) return;
+
+  // stop if there's no prompt
+  if (!prompt) return;
 
   // ignore messages not in the default game channel
   if (message.channel.id !== wordBombMiniChannel.id) return;
