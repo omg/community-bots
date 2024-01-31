@@ -672,7 +672,7 @@ lameBotClient.on("messageCreate", (message) => {
   if (message.content.includes("\n")) return;
 
   // check if the guess is a solve and if it contains the prompt
-  let guess = cleanWord(message.content);
+  let guess = cleanWord(message.content).toUpperCase();
   if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
     let repeatablePrompt = getPromptRepeatableText(prompt);
     if (
