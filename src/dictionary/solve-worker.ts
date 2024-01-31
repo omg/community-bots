@@ -7,7 +7,7 @@ process.on("message", (data: SolveData) => {
   const start = Date.now();
   const { dictionaryString, regexSource } = data;
 
-  const promptRegex = new RegExp(regexSource); // why recreate the regex ..?
+  const promptRegex = new RegExp(regexSource, "i"); // why recreate the regex ..?
   console.log("Solving prompt with regex: " + promptRegex);
 
   // split the dictionary by newlines

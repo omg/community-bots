@@ -25,7 +25,7 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = cleanWord(interaction.options.get("prompt").value as string);
+  let prompt = interaction.options.get("prompt").value as string;
   
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);

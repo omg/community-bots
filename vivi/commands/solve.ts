@@ -2,7 +2,7 @@ import { AttachmentBuilder, CommandInteraction, SlashCommandBuilder } from 'disc
 import { getInteractionContent, replyToInteraction } from '../../src/command-handler';
 import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
-import { solvePromptWithTimeout, standardizeWord } from '../../src/dictionary/dictionary';
+import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 import { convertTextToHighlights, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
@@ -42,7 +42,7 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = standardizeWord(interaction.options.get("prompt").value as string);
+  let prompt = interaction.options.get("prompt").value as string;
   let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
 
   console.log("Solving prompt: " + prompt + " with sorting: " + sorting + " for " + interaction.user.id + " ...")
@@ -62,7 +62,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     if (sorting !== "None" && solveCount > 0) {
       solutions.sort(SortingFunctions[sorting]);
 
-      // let fHeader = solveCount === 1 ? "1 solution" : `${formatNumber(solveCount)} solutions` + ` for \`${prompt}\` ` + `sorted by ${sorting_formatted}!`;
       let fileData = Buffer.from(solutions.join("\n"), "utf-8");
       let attachment = new AttachmentBuilder(fileData, { name: `vivi-result.txt` });
 

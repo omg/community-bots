@@ -23,7 +23,7 @@ try {
  */
 export function is1Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related1String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related1String);
 }
 
 /**
@@ -31,7 +31,7 @@ export function is1Related(word: string): boolean {
  */
 export function is100Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related100String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related100String);
 }
 
 /**
@@ -39,7 +39,7 @@ export function is100Related(word: string): boolean {
  */
 export function is1000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related1000String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related1000String);
 }
 
 /**
@@ -47,7 +47,7 @@ export function is1000Related(word: string): boolean {
  */
 export function is10000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related10000String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related10000String);
 }
 
 /**
@@ -55,26 +55,26 @@ export function is10000Related(word: string): boolean {
  */
 export function isDoomRelated(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(relatedDoomString);
+  return new RegExp("^" + cleanInput + "$", "mi").test(relatedDoomString);
 }
 
 // is standardize the best name for this?
 /**
  * Standardizes a word by performing the following operations:
- * 1. Converts the word to uppercase.
- * 2. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
- * 3. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
- * 4. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
- * 5. Trims any leading or trailing whitespace from the word.
+ * 1. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
+ * 2. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
+ * 3. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
+ * 4. Trims any leading or trailing whitespace from the word.
  * 
  * **NOTE:** Trimming might ruin some searches.
+ * This function will also not convert the word to uppercase. Make sure you implement case insensitivity.
  *
  * @param word The word to be standardized
  * @returns The standardized string
  */
 export function standardizeWord(word: string): string {
   return word
-    .toUpperCase()
+    // .toUpperCase()
     .replace(/[‘’]/g, "'")
     .replace(/\-/g, "-")
     .replace(/…/g, "...")
@@ -98,7 +98,7 @@ export function PromptException(message: string) {
  */
 export function isWord(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(dictionaryString);
+  return new RegExp("^" + cleanInput + "$", "mi").test(dictionaryString);
 }
 
 /**
@@ -203,7 +203,7 @@ export async function generatePrompt() {
     let prompt = new RegExp(
       escapeRegExp(
         promptWord.slice(promptSubStart, promptSubStart + promptLength)
-      ).replace(/`/g, ".")
+      ).replace(/`/g, "."), "i"
     );
     console.log(prompt);
 

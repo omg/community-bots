@@ -94,8 +94,8 @@ const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
  * 
  * @example
  * ```typescript
- * getPromptRegexFromPromptSearch("AB") // new RegExp("AB")
- * getPromptRegexFromPromptSearch("/A.B$/") // new RegExp("A.B$")
+ * getPromptRegexFromPromptSearch("AB") // new RegExp("AB", "i")
+ * getPromptRegexFromPromptSearch("/A.B$/") // new RegExp("A.B$", "i")
  * ```
  */
 export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
@@ -135,7 +135,7 @@ export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
     }
 
     // this changes all question marks and periods to actual regexp wildcards and escapes all other special characters
-    return new RegExp(escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, "."));
+    return new RegExp(escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, "."), "i");
   }
 }
 
@@ -159,7 +159,7 @@ export function escapeRegExp(string: string): string {
  */
 export function validateRegex(regex: string): RegExp {
   try {
-    let r = new RegExp(regex);
+    let r = new RegExp(regex, "i");
     r = renameRegexGroups(r);
     return r;
   } catch {
@@ -406,11 +406,11 @@ const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
  * 
  * @example
  * ```typescript
- * getPromptRegexDisplayText(new RegExp("[A-Z]{3}")); // returns "`/[A-Z]{3}/`"
- * getPromptRegexDisplayText(new RegExp("AB")); // returns AB in white emoji letters
+ * getPromptRegexDisplayText(new RegExp("[A-Z]{3}", "i")); // returns "`/[A-Z]{3}/`"
+ * getPromptRegexDisplayText(new RegExp("AB", "i")); // returns AB in white emoji letters
  * 
- * getPromptRegexDisplayText(new RegExp("[A-Z]{3}"), false); // returns "/[A-Z]{3}/"
- * getPromptRegexDisplayText(new RegExp("AB"), false); // returns "AB"
+ * getPromptRegexDisplayText(new RegExp("[A-Z]{3}", "i"), false); // returns "/[A-Z]{3}/"
+ * getPromptRegexDisplayText(new RegExp("AB", "i"), false); // returns "AB"
  * ```
  */
 export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true): string {
@@ -437,8 +437,8 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
  * 
  * @example
  * ```typescript
- * getPromptRepeatableText(new RegExp("AB")); // "AB"
- * getPromptRepeatableText(/(.*)(\1)/); // undefined
+ * getPromptRepeatableText(new RegExp("AB", "i")); // "AB"
+ * getPromptRepeatableText(new RegExp("(.*)(\1)", "i")); // undefined
  * ```
  */
 export function getPromptRepeatableText(regex: RegExp): string | undefined {
