@@ -1,9 +1,9 @@
-import { replyToInteraction, getInteractionContent } from '../../src/command-handler';
-import { getSolveLetters } from '../../src/emoji-renderer';
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
-import { formatNumber, shuffle, SortingFunctions } from '../../src/utils';
+import { AttachmentBuilder, CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { getInteractionContent, replyToInteraction } from '../../src/command-handler';
+import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
-import { cleanWord, getPromptRegexFromPromptSearch, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { convertTextToHighlights, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -42,12 +42,10 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = cleanWord(interaction.options.get("prompt").value as string);
-  // @ts-ignore
-  let sorting: string = interaction.options.get("sorting")?.value ?? "None";
+  let prompt = interaction.options.get("prompt").value as string;
+  let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
 
   try {
-    // cleanWord is called twice here on prompt
     let regex = getPromptRegexFromPromptSearch(prompt);
 
     let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
@@ -60,7 +58,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
     if (sorting !== "None" && solveCount > 0) {
       solutions.sort(SortingFunctions[sorting]);
 
-      // let fHeader = solveCount === 1 ? "1 solution" : `${formatNumber(solveCount)} solutions` + ` for \`${prompt}\` ` + `sorted by ${sorting_formatted}!`;
       let fileData = Buffer.from(solutions.join("\n"), "utf-8");
       let attachment = new AttachmentBuilder(fileData, { name: `vivi-result.txt` });
 
@@ -81,8 +78,8 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
 
       for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
-        
-        let solutionString = '\n• ' + getSolveLetters(solution, regex);
+
+        let solutionString = '\n• ' + convertTextToHighlights(solution, regex);
         if (solutionsLength + solutionString.length > 1910) break;
         solutionStrings.push(solutionString);
         solutionsLength += solutionString.length;
