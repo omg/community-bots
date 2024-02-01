@@ -1,5 +1,5 @@
 import { PromptException, standardizeWord } from "./dictionary/dictionary";
-import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
+import { getPresentEmojis, getHighlightedEmojis, getWildcardEmojis } from "./emoji-renderer";
 
 /*
   Parts of the regex
@@ -321,13 +321,15 @@ export function setHighlightGroups(regex: RegExp): RegExp {
   return new RegExp(regexString, regex.flags);
 }
 
+type LetterType = "present" | "highlighted" | "wildcard"
+
 /**
  * A type to represent letters in a string, and if they should be highlighted or not
  */
 type Letters = {
   text: string,
   // TODO: Add more to this when adding colors
-  highlighted: "GOLD" | "WHITE"
+  letterType: LetterType
 }
 
 /**
@@ -339,7 +341,7 @@ type Letters = {
  */
 export function getHighlightedLetters(solution: string, regex: RegExp): Letters[] {
   let match = regex.exec(solution);
-  if (!match) return [{ text: solution, highlighted: "WHITE" }];
+  if (!match) return [{ text: solution, letterType: "present" }];
 
   let nonHighlightGroups = Object.keys(match.groups || {}).filter((x) => x.startsWith(HIGHLIGHT_GROUP));
 
@@ -349,7 +351,7 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
 
   // if the match starts 3 letters in, we know the first 3 letters are included in the match
   if (match.index > 0) {
-    cutString.push({ text: solution.slice(0, match.index), highlighted: "WHITE" });
+    cutString.push({ text: solution.slice(0, match.index), letterType: "present" });
     lastReplacedIndex = match.index;
   }
 
@@ -357,22 +359,22 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
     // we know this string is highlighted because its been matched, but isnt part of the group
     // (its the text between the match.index/lastReplacedIndex and the start of the nonHighlightGroup)
     let ourString = solution.slice(lastReplacedIndex, solution.indexOf(match.groups[group], lastReplacedIndex));
-    cutString.push({ text: ourString, highlighted: "GOLD" });
+    cutString.push({ text: ourString, letterType: "highlighted" });
 
     // we know this string isnt highlighted because its the exact match of the nonHighlightGroup
     // !! ⚠️ !!
     // this is where we decide what color the wildcard letters should be, change this to whatever the emoji set you want is
-    cutString.push({ text: match.groups[group], highlighted: "WHITE" })
+    cutString.push({ text: match.groups[group], letterType: "wildcard" })
 
     lastReplacedIndex += ourString.length + match.groups[group].length;
   }
   // if the .* doesnt end at the end of the string, and theres another character to match (/x.*e/) for explosive
   // we have to add that to the cutString as highlighted
   if (lastReplacedIndex < match[0].length + match.index) {
-    cutString.push({ text: solution.slice(lastReplacedIndex, match[0].length + match.index), highlighted: "GOLD" });
+    cutString.push({ text: solution.slice(lastReplacedIndex, match[0].length + match.index), letterType: "highlighted" });
     lastReplacedIndex = match[0].length + match.index;
   }
-  cutString.push({ text: solution.slice(lastReplacedIndex), highlighted: "WHITE" });
+  cutString.push({ text: solution.slice(lastReplacedIndex), letterType: "present" });
 
   // TODO: fix this
   // theres a small issue if the .* is at the start or end it will push a empty string to those spots, and i cba to fix it rn
@@ -389,15 +391,18 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
 export function convertLettersToEmojiLetters(letters: Letters[]): string {
   let emojiString = "";
   for (let text of letters) {
-    if (text.highlighted === "GOLD") {
-      emojiString += getPromptLetters(text.text);
-      continue;
-    } else if (text.highlighted === "WHITE") {
-      emojiString += getNormalLetters(text.text);
-      continue;
-    } 
-    
-    emojiString += getNormalLetters(text.text);
+    switch (text.letterType) {
+      case "highlighted":
+        emojiString += getHighlightedEmojis(text.text);
+        break;
+      case "present":
+        emojiString += getPresentEmojis(text.text);
+        break;
+      case "wildcard":
+      default:
+        emojiString += getWildcardEmojis(text.text);
+        break;
+    }
   }
 
   return emojiString;
@@ -412,7 +417,7 @@ export function convertLettersToEmojiLetters(letters: Letters[]): string {
 export function convertLettersToText(letters: Letters[]): string {
   let textString = "";
   for (let text of letters) {
-    textString += text.highlighted ? `**${text.text}**` : text.text;
+    textString += text.letterType ? `**${text.text}**` : text.text;
   }
 
   return textString;
@@ -468,7 +473,7 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
   // check if the regex string has only displayable charaacters.
   // this is not a perfect check, but it should totally be good enough for our purposes
   if (!invalidPromptDisplayRegex.test(displayString)) {
-    return fancy ? getNormalLetters(displayString) : regexString;
+    return fancy ? getPresentEmojis(displayString) : regexString;
   }
 
   return fancy ? "`/" + regexString + "/`" : "/" + regexString + "/";
