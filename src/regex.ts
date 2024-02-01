@@ -295,24 +295,27 @@ export function setHighlightGroups(regex: RegExp): RegExp {
   let lastIndex = 0;
   let gIndex = 0;
 
-  // find all .* in the regex, and replace them with (?<NOHIGHLIGHT_>.*)
-  // unless they have a group around them, in which case we ignore them, because the user wanted them highlighted for whatever reason, technically
-  let text = regexString.indexOf(".*");
-  // i Autofilled this with chatgpt and modified it a bit so i hope it works without any issues :D
-  while (text !== -1) {
-    // check if there is a group around the .*, > is for named groups :D
-    let groupAround = (regexString[text - 1] === "(" || regexString[text - 1] === ">") && regexString[text + 2] === ")";
-    // if there is no group around the .*, then replace it with (?<NOHIGHLIGHT_>.*)
-    if (!groupAround) {
-      let groupText = `(?<${HIGHLIGHT_GROUP}${gIndex}>.*)`;
-      gIndex++;
-      regexString = regexString.slice(0, text) + groupText + regexString.slice(text + 2);
-      lastIndex = text + groupText.length;
-    }
-    lastIndex = text + 2;
+  let firstIndex = regexString.indexOf(".");
+  
+  while (firstIndex !== -1) {
+    // this returns the INDEX of the last character, we have to +1 to get the length of the quantifier
+    let wildcardEnd = findQuantifiersEnd(regexString.slice(firstIndex + 1)) + 1;
 
-    // find the next .*
-    text = regexString.indexOf(".*", lastIndex);
+    // if this isnt true then the wildcard is in a group with multiple other characters
+    // and will NOT be highlighted,
+    // that might cause small issues with what the user expects to be highlighted but its probably fine?
+    // the user can fix that by grouping the wildcard explicitly if they want it to be highlighted
+    let groupedWildcard = (regexString[firstIndex - 1] === "(" || regexString[firstIndex - 1] === ">") && regexString[firstIndex + wildcardEnd] === ")"; 
+    if (!groupedWildcard) {
+      let groupText = `(?<${HIGHLIGHT_GROUP}${gIndex}>${regexString.slice(firstIndex, firstIndex + wildcardEnd)})`;
+      console.log("groupText: ", groupText);
+      gIndex++;
+      regexString = regexString.slice(0, firstIndex) + groupText + regexString.slice(firstIndex + wildcardEnd);
+      lastIndex = firstIndex + groupText.length;
+    }
+    lastIndex = firstIndex + wildcardEnd;
+
+    firstIndex = regexString.indexOf(".", lastIndex);
   }
 
   return new RegExp(regexString, regex.flags);
