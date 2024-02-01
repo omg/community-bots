@@ -1,8 +1,9 @@
 // const blueLettersMap = require("./emojiMaps/blue-letters.js");
-import goldLettersMap from "../assets/emoji-maps/goldLetters";
+import defaultHighlightedLettersMap from "../assets/emoji-maps/defaultHighlightedLetters";
 import remarkEmojiMap from "../assets/emoji-maps/remarkEmojis";
 import streakNumbersMap from "../assets/emoji-maps/streakNumbers";
-import whiteLettersMap from "../assets/emoji-maps/whiteLetters";
+import defaultPresentLettersMap from "../assets/emoji-maps/defaultPresentLetters";
+import defaultWildcardLettersMap from "../assets/emoji-maps/defaultWildcardLetters";
 
 type EmojiMap = { [key: string]: string | string[] };
 
@@ -68,16 +69,6 @@ export function getRemarkEmoji(emoji: string): string {
 }
 
 /**
- * Returns the "prompt letters" of a given prompt string.
- * This calls replaceTextWithLetterMap with the goldLettersMap.
- *
- * @param prompt The prompt string for which to get the letters
- */
-export function getPromptLetters(prompt: string): string {
-  return replaceTextWithLetterMap(prompt, goldLettersMap);
-}
-
-/**
  * Returns the "streak numbers" of a given number.
  * This calls replaceTextWithLetterMap with the streakNumbersMap.
  *
@@ -88,11 +79,31 @@ export function getStreakNumbers(number: number): string {
 }
 
 /**
- * Returns the "normal letters" of a given string.
+ * Returns the "highlighted letters" of a given string.
+ * This calls replaceTextWithLetterMap with the goldLettersMap.
+ *
+ * @param string The prompt string for which to get the letters
+ */
+export function getHighlightedEmojis(string: string): string {
+  return replaceTextWithLetterMap(string, defaultHighlightedLettersMap);
+}
+
+/**
+ * Returns the "present letters" of a given string.
  * This calls replaceTextWithLetterMap with the whiteLettersMap.
  *
  * @param string The string to be converted into normal letters
  */
-export function getNormalLetters(string: string): string {
-  return replaceTextWithLetterMap(string, whiteLettersMap);
+export function getPresentEmojis(string: string): string {
+  return replaceTextWithLetterMap(string, defaultPresentLettersMap);
+}
+
+/**
+ * Returns the "wildcard letters" of a given string.
+ * This calls replaceTextWithLetterMap with the wildcardLettersMap.
+ *
+ * @param string The string to be converted into wildcard letters
+ */
+export function getWildcardEmojis(string: string): string {
+  return replaceTextWithLetterMap(string, defaultWildcardLettersMap);
 }

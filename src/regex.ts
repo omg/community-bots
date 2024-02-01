@@ -1,5 +1,5 @@
 import { PromptException, standardizeWord } from "./dictionary/dictionary";
-import { getNormalLetters, getPromptLetters } from "./emoji-renderer";
+import { getPresentEmojis, getHighlightedEmojis, getWildcardEmojis } from "./emoji-renderer";
 
 /*
   Parts of the regex
@@ -248,6 +248,37 @@ export function renameRegexGroups(regex: RegExp): RegExp {
   return new RegExp(regexString, regex.flags);
 }
 
+
+/**
+ * Helper function to find the end of a quantifier in a regex
+ * 
+ * @param s String to search in
+ * @returns The index of the last character of the quantifier
+ */
+function findQuantifiersEnd(s: string): number {
+  let idx: number = 0;
+
+  while (idx <= s.length) {
+    if (
+      s[idx] === "+" ||
+      s[idx] === "*" ||
+      s[idx] === "?" 
+    ) {
+      idx++;
+    } else if (s[idx] === "{") {
+      // we dont want to highlight {3} or {3,}, etc so skip to the end of the quantifier
+      // this is bad in theory but we know this regex is valid
+      // so we dont have to worry about any stupid edgecases, this should Always work
+      idx = s.indexOf("}", idx);
+      // we want the character After }
+      idx++;
+    } else {
+      // we found the end of the quantifier
+      return idx;
+    }
+  }
+}
+
 /**
  * Small const to rename groups that shouldnt be highlighted for bots response later
  */
@@ -264,35 +295,41 @@ export function setHighlightGroups(regex: RegExp): RegExp {
   let lastIndex = 0;
   let gIndex = 0;
 
-  // find all .* in the regex, and replace them with (?<NOHIGHLIGHT_>.*)
-  // unless they have a group around them, in which case we ignore them, because the user wanted them highlighted for whatever reason, technically
-  let text = regexString.indexOf(".*");
-  // i Autofilled this with chatgpt and modified it a bit so i hope it works without any issues :D
-  while (text !== -1) {
-    // check if there is a group around the .*, > is for named groups :D
-    let groupAround = (regexString[text - 1] === "(" || regexString[text - 1] === ">") && regexString[text + 2] === ")";
-    // if there is no group around the .*, then replace it with (?<NOHIGHLIGHT_>.*)
-    if (!groupAround) {
-      let groupText = `(?<${HIGHLIGHT_GROUP}${gIndex}>.*)`;
-      gIndex++;
-      regexString = regexString.slice(0, text) + groupText + regexString.slice(text + 2);
-      lastIndex = text + groupText.length;
-    }
-    lastIndex = text + 2;
+  let firstIndex = regexString.indexOf(".");
+  
+  while (firstIndex !== -1) {
+    // this returns the INDEX of the last character, we have to +1 to get the length of the quantifier
+    let wildcardEnd = findQuantifiersEnd(regexString.slice(firstIndex + 1)) + 1;
 
-    // find the next .*
-    text = regexString.indexOf(".*", lastIndex);
+    // if this isnt true then the wildcard is in a group with multiple other characters
+    // and will NOT be highlighted,
+    // that might cause small issues with what the user expects to be highlighted but its probably fine?
+    // the user can fix that by grouping the wildcard explicitly if they want it to be highlighted
+    let groupedWildcard = (regexString[firstIndex - 1] === "(" || regexString[firstIndex - 1] === ">") && regexString[firstIndex + wildcardEnd] === ")"; 
+    if (!groupedWildcard) {
+      let groupText = `(?<${HIGHLIGHT_GROUP}${gIndex}>${regexString.slice(firstIndex, firstIndex + wildcardEnd)})`;
+      console.log("groupText: ", groupText);
+      gIndex++;
+      regexString = regexString.slice(0, firstIndex) + groupText + regexString.slice(firstIndex + wildcardEnd);
+      lastIndex = firstIndex + groupText.length;
+    }
+    lastIndex = firstIndex + wildcardEnd;
+
+    firstIndex = regexString.indexOf(".", lastIndex);
   }
 
   return new RegExp(regexString, regex.flags);
 }
+
+type LetterType = "present" | "highlighted" | "wildcard"
 
 /**
  * A type to represent letters in a string, and if they should be highlighted or not
  */
 type Letters = {
   text: string,
-  highlighted: boolean
+  // TODO: Add more to this when adding colors
+  letterType: LetterType
 }
 
 /**
@@ -304,7 +341,7 @@ type Letters = {
  */
 export function getHighlightedLetters(solution: string, regex: RegExp): Letters[] {
   let match = regex.exec(solution);
-  if (!match) return [{ text: solution, highlighted: false }];
+  if (!match) return [{ text: solution, letterType: "present" }];
 
   let nonHighlightGroups = Object.keys(match.groups || {}).filter((x) => x.startsWith(HIGHLIGHT_GROUP));
 
@@ -314,7 +351,7 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
 
   // if the match starts 3 letters in, we know the first 3 letters are included in the match
   if (match.index > 0) {
-    cutString.push({ text: solution.slice(0, match.index), highlighted: false });
+    cutString.push({ text: solution.slice(0, match.index), letterType: "present" });
     lastReplacedIndex = match.index;
   }
 
@@ -322,20 +359,22 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
     // we know this string is highlighted because its been matched, but isnt part of the group
     // (its the text between the match.index/lastReplacedIndex and the start of the nonHighlightGroup)
     let ourString = solution.slice(lastReplacedIndex, solution.indexOf(match.groups[group], lastReplacedIndex));
-    cutString.push({ text: ourString, highlighted: true });
+    cutString.push({ text: ourString, letterType: "highlighted" });
 
     // we know this string isnt highlighted because its the exact match of the nonHighlightGroup
-    cutString.push({ text: match.groups[group], highlighted: false })
+    // !! ⚠️ !!
+    // this is where we decide what color the wildcard letters should be, change this to whatever the emoji set you want is
+    cutString.push({ text: match.groups[group], letterType: "wildcard" })
 
     lastReplacedIndex += ourString.length + match.groups[group].length;
   }
   // if the .* doesnt end at the end of the string, and theres another character to match (/x.*e/) for explosive
   // we have to add that to the cutString as highlighted
   if (lastReplacedIndex < match[0].length + match.index) {
-    cutString.push({ text: solution.slice(lastReplacedIndex, match[0].length + match.index), highlighted: true });
+    cutString.push({ text: solution.slice(lastReplacedIndex, match[0].length + match.index), letterType: "highlighted" });
     lastReplacedIndex = match[0].length + match.index;
   }
-  cutString.push({ text: solution.slice(lastReplacedIndex), highlighted: false });
+  cutString.push({ text: solution.slice(lastReplacedIndex), letterType: "present" });
 
   // TODO: fix this
   // theres a small issue if the .* is at the start or end it will push a empty string to those spots, and i cba to fix it rn
@@ -352,7 +391,18 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
 export function convertLettersToEmojiLetters(letters: Letters[]): string {
   let emojiString = "";
   for (let text of letters) {
-    emojiString += text.highlighted ? getPromptLetters(text.text) : getNormalLetters(text.text);
+    switch (text.letterType) {
+      case "highlighted":
+        emojiString += getHighlightedEmojis(text.text);
+        break;
+      case "present":
+        emojiString += getPresentEmojis(text.text);
+        break;
+      case "wildcard":
+      default:
+        emojiString += getWildcardEmojis(text.text);
+        break;
+    }
   }
 
   return emojiString;
@@ -367,7 +417,7 @@ export function convertLettersToEmojiLetters(letters: Letters[]): string {
 export function convertLettersToText(letters: Letters[]): string {
   let textString = "";
   for (let text of letters) {
-    textString += text.highlighted ? `**${text.text}**` : text.text;
+    textString += text.letterType ? `**${text.text}**` : text.text;
   }
 
   return textString;
@@ -423,7 +473,7 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
   // check if the regex string has only displayable charaacters.
   // this is not a perfect check, but it should totally be good enough for our purposes
   if (!invalidPromptDisplayRegex.test(displayString)) {
-    return fancy ? getNormalLetters(displayString) : regexString;
+    return fancy ? getPresentEmojis(displayString) : regexString;
   }
 
   return fancy ? "`/" + regexString + "/`" : "/" + regexString + "/";
