@@ -248,6 +248,37 @@ export function renameRegexGroups(regex: RegExp): RegExp {
   return new RegExp(regexString, regex.flags);
 }
 
+
+/**
+ * Helper function to find the end of a quantifier in a regex
+ * 
+ * @param s String to search in
+ * @returns The index of the last character of the quantifier
+ */
+function findQuantifiersEnd(s: string): number {
+  let idx: number = 0;
+
+  while (idx <= s.length) {
+    if (
+      s[idx] === "+" ||
+      s[idx] === "*" ||
+      s[idx] === "?" 
+    ) {
+      idx++;
+    } else if (s[idx] === "{") {
+      // we dont want to highlight {3} or {3,}, etc so skip to the end of the quantifier
+      // this is bad in theory but we know this regex is valid
+      // so we dont have to worry about any stupid edgecases, this should Always work
+      idx = s.indexOf("}", idx);
+      // we want the character After }
+      idx++;
+    } else {
+      // we found the end of the quantifier
+      return idx;
+    }
+  }
+}
+
 /**
  * Small const to rename groups that shouldnt be highlighted for bots response later
  */
