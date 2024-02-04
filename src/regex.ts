@@ -340,6 +340,9 @@ type Letters = {
  * @returns A Letters array with the letters marked for highlighting
  */
 export function getHighlightedLetters(solution: string, regex: RegExp): Letters[] {
+  // THANKS JAVASCRIPT I LOVE WHEN THE MOST USEFUL FEATRUE ISNT DOCUMENTED ANYWHERE
+  // :D :D:D:D:D:D:D:D:D:D:D:D:D:D:D:D:D:D:D
+  regex = new RegExp(regex.source, regex.flags + "d");
   let match = regex.exec(solution);
   if (!match) return [{ text: solution, letterType: "present" }];
 
@@ -349,18 +352,26 @@ export function getHighlightedLetters(solution: string, regex: RegExp): Letters[
   let lastMatchedIndex = match[0].length;
   let cutString: Letters[] = [];
 
-  // if the match starts 3 letters in, we know the first 3 letters are included in the match
+  // if the match starts 3 letters in, we know the first 3 letters arent included in the match
   if (match.index > 0) {
     cutString.push({ text: solution.slice(0, match.index), letterType: "present" });
     lastReplacedIndex = match.index;
   }
 
   for (let group of nonHighlightGroups) {
+    // indices: [
+    //   [ 0, 5 ],
+    //   [ 3, 4 ],
+    //   groups: [Object: null prototype] { NOHIGHLIGHT0: [ 3, 4 ] }
+    // ]
+    // @ts-ignore
+    let wildcardStart = match.indices.groups[group][0];
+    
     // we know this string is highlighted because its been matched, but isnt part of the group
     // (its the text between the match.index/lastReplacedIndex and the start of the nonHighlightGroup)
-    let ourString = solution.slice(lastReplacedIndex, solution.indexOf(match.groups[group], lastReplacedIndex));
+    let ourString = solution.slice(lastReplacedIndex, wildcardStart);
     cutString.push({ text: ourString, letterType: "highlighted" });
-
+    
     // we know this string isnt highlighted because its the exact match of the nonHighlightGroup
     // !! ⚠️ !!
     // this is where we decide what color the wildcard letters should be, change this to whatever the emoji set you want is
