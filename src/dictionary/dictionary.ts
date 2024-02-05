@@ -2,6 +2,7 @@ import { fork } from "child_process";
 import fs from "node:fs";
 import path from "path";
 import appRoot from "app-root-path";
+import { escapeRegExp } from "../regex";
 
 // TODO: pull dictionaries from Vivi API
 try {
@@ -22,7 +23,7 @@ try {
  */
 export function is1Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related1String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related1String);
 }
 
 /**
@@ -30,7 +31,7 @@ export function is1Related(word: string): boolean {
  */
 export function is100Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related100String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related100String);
 }
 
 /**
@@ -38,7 +39,7 @@ export function is100Related(word: string): boolean {
  */
 export function is1000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related1000String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related1000String);
 }
 
 /**
@@ -46,7 +47,7 @@ export function is1000Related(word: string): boolean {
  */
 export function is10000Related(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(related10000String);
+  return new RegExp("^" + cleanInput + "$", "mi").test(related10000String);
 }
 
 /**
@@ -54,36 +55,31 @@ export function is10000Related(word: string): boolean {
  */
 export function isDoomRelated(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(relatedDoomString);
+  return new RegExp("^" + cleanInput + "$", "mi").test(relatedDoomString);
 }
 
 // is standardize the best name for this?
 /**
  * Standardizes a word by performing the following operations:
- * 1. Converts the word to uppercase.
- * 2. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
- * 3. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
- * 4. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
- * 5. Trims any leading or trailing whitespace from the word.
+ * 1. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
+ * 2. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
+ * 3. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
+ * 4. Trims any leading or trailing whitespace from the word.
  * 
  * **NOTE:** Trimming might ruin some searches.
+ * This function will also not convert the word to uppercase. Make sure you implement case insensitivity.
  *
  * @param word The word to be standardized
  * @returns The standardized string
  */
 export function standardizeWord(word: string): string {
   return word
-    .toUpperCase()
+    // .toUpperCase()
     .replace(/[‘’]/g, "'")
     .replace(/\-/g, "-")
     .replace(/…/g, "...")
-    .trim(); // TODO: trimming might ruin some searches
+    .trim();
 }
-
-/**
- * A regular expression used to determine if a search is regex or not.
- */
-const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
 
 /**
  * Creates a new PromptException.
@@ -96,117 +92,13 @@ export function PromptException(message: string) {
 }
 
 /**
- * Returns a prompt regex used for searching based on a query.
- * The query may be in a prompt format (AB) or regex format (/AB/).
- * In either format, a capturing group is placed around the query for use in rendering.
- *
- * @param promptQuery A query string to convert to regex
- * @returns A regular expression pattern based on the query. If the query contains a valid regular expression, the function constructs and returns the regex pattern. If the query does not contain a valid regular expression, the function constructs and returns a regex pattern that matches the query as a literal string.
- * 
- * @example
- * ```typescript
- * getPromptRegexFromPromptSearch("AB") // new RegExp("^.*(AB).*$", "m")
- * getPromptRegexFromPromptSearch("/A.B$/") // new RegExp("^.*(A.B)$", "m")
- * ```
- */
-export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
-  let cleanQuery = standardizeWord(promptQuery);
-  let regexResult = regexTest.exec(cleanQuery);
-
-  // TODO find args in the query
-
-  if (regexResult) {
-    // This has regex
-
-    if (/[`\\]/.test(cleanQuery)) {
-      // i think removing the backslash sometime would be useful
-      throw new PromptException("The regex you've entered is invalid.");
-    }
-
-    let regexInput = regexResult[1];
-
-    if (regexInput === "") {
-      // This regex is empty
-      throw new PromptException("The regex you've entered is empty.");
-    }
-
-    if (regexInput.startsWith("^")) {
-      regexInput = "(" + regexInput.slice(1);
-    } else {
-      regexInput = ".*(" + regexInput;
-    }
-    if (regexInput.endsWith("$")) {
-      regexInput = regexInput.slice(0, -1) + ")";
-    } else {
-      regexInput = regexInput + ").*";
-    }
-
-    // check if the regex is valid
-    let regex;
-    try {
-      regex = new RegExp("^" + regexInput + "$", "m");
-    } catch (e) {
-      throw new PromptException("The regex you've entered is invalid.");
-    }
-
-    // let's see what /\r/ returns
-    console.log(regex);
-
-    return regex;
-  } else {
-    // This isn't regex
-
-    if (cleanQuery.includes("`")) {
-      throw new PromptException("The prompt you've entered is invalid.");
-    }
-
-    console.log("NOT REGEX");
-
-    // will this even work? I don't know. I'm not a regex expert. I'm just a guy who wants to make a bot. :(
-    return new RegExp("^.*(" + escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, ".") + ").*$", "m");
-  }
-}
-
-/**
- * Escapes all RegExp special characters.
- *
- * @param string The input string to be escaped.
- */
-export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-}
-
-/**
  * Checks if the given word is in the English dictionary.
  *
  * @param word The word to be checked
  */
 export function isWord(word: string): boolean {
   let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "m").test(dictionaryString);
-}
-
-/**
- * Finds all solutions in the English dictionary to a prompt regular expression with no timeout.
- *
- * @param promptRegex The regular expression pattern to match words to
- */
-export function solvePrompt(promptRegex: RegExp): string[] {
-  // recreate the regex with the global flag
-  if (!promptRegex.flags.includes("g")) {
-    promptRegex = new RegExp(promptRegex.source, promptRegex.flags + "g");
-  }
-
-  console.log("Solving prompt with regex: " + promptRegex);
-
-  let solutions = [];
-
-  let match;
-  while ((match = promptRegex.exec(dictionaryString))) {
-    solutions.push(match[0]);
-  }
-
-  return solutions;
+  return new RegExp("^" + cleanInput + "$", "mi").test(dictionaryString);
 }
 
 /**
@@ -232,7 +124,7 @@ export let solverCache = new Set();
  * @param timeout The timeout in milliseconds
  * @param user The user who is using the solver
  */
-export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<any> {
+export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<string[]> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
@@ -243,7 +135,7 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
       reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
     }, timeout);
 
-    worker.on("message", (solutions) => {
+    worker.on("message", (solutions: string[]) => {
       clearTimeout(timeoutId);
       worker.kill();
       resolve(solutions);
@@ -281,7 +173,7 @@ export function randInt(min: number, max: number): number {
 /**
  * Generates a prompt. It is guaranteed that the prompt will have at least 23 solutions.
  */
-export function generatePrompt() {
+export async function generatePrompt() {
   let promptLength = randInt(3, 5);
   let requiredCharacters = promptLength + 2;
 
@@ -309,17 +201,13 @@ export function generatePrompt() {
 
     // completely unreadable
     let prompt = new RegExp(
-      "^.*(" +
-        escapeRegExp(
-          promptWord.slice(promptSubStart, promptSubStart + promptLength)
-        ).replace(/`/g, ".") +
-        ").*$",
-      "m"
+      escapeRegExp(
+        promptWord.slice(promptSubStart, promptSubStart + promptLength)
+      ).replace(/`/g, "."), "i"
     );
-    console.log(prompt);
 
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
-    let solutions = solvePrompt(prompt);
+    let solutions = await solvePromptWithTimeout(prompt, 999999999, null);
     if (lengthRequired) {
       solutions = solutions.filter((word) => {
         return word.length == promptWord.length;
@@ -338,53 +226,12 @@ export function generatePrompt() {
 }
 
 /**
- * Regular expression used to match any characters that are not uppercase letters, numbers, apostrophes, hyphens, at symbols, or spaces.
- */
-const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
-
-// TODO: i'm going to lose my mind within the next 5 minutes
-/**
- * Finds the repeatable portion of a prompt regular expression. This is used to determine if a player has repeated the prompt in Word Bomb Mini.
- *
- * @param regex The regular expression used to extract the repeatable text
- * @returns The repeatable portion of the regex, or undefined if the regex is not repeatable
- * 
- * @example
- * ```typescript
- * getPromptRepeatableText(new RegExp("^.*(AB).*$")); // "AB"
- * getPromptRepeatableText(/^(.*)(\1)$/); // undefined
- * ```
- */
-export function getPromptRepeatableText(regex: RegExp): string | undefined {
-  // get the string of the regex
-  let regexString = regex.source;
-  // remove the anchors from the start and end of the regex
-  regexString = regexString.slice(1, regexString.length - 1);
-
-  // remove the first opening parenthesis from a string
-  regexString = regexString.replace(/\(/, "");
-  let lastParenthesisIndex = regexString.lastIndexOf(")");
-  // remove the last closing parenthesis from a string
-  regexString = regexString.slice(0, lastParenthesisIndex) + regexString.slice(lastParenthesisIndex + 1);
-
-  let startsWithWildcard = regexString.startsWith(".*");
-  let endsWithWildcard = regexString.endsWith(".*");
-
-  if (startsWithWildcard && endsWithWildcard) {
-    let displayString = regexString.slice(2, regexString.length - 2);
-    if (!invalidPromptDisplayRegex.test(displayString)) {
-      return displayString;
-    }
-  }
-}
-
-/**
  * Gets the amount of words in the dictionary.
  * 
  * @returns Number of words in the dictionary
  */
 export function getWordsInDictionary(): number {
-  return dictionaryString.split("\r\n").length;
+  return dictionaryString.split("\n").length;
 }
 
 /**

@@ -1,9 +1,9 @@
 import { replyToInteraction } from '../../src/command-handler';
-import { getPromptRegexDisplayText } from '../../src/emoji-renderer';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber } from '../../src/utils';
 
-import { cleanWord, solvePromptWithTimeout, getPromptRegexFromPromptSearch } from '../../src/dictionary/dictionary';
+import { cleanWord, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { getPromptRegexDisplayText, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
   .setName('count')
@@ -25,7 +25,7 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let prompt = cleanWord(interaction.options.get("prompt").value);
+  let prompt = interaction.options.get("prompt").value as string;
   
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);

@@ -13,9 +13,8 @@ import {
   setReplyMessage
 } from "../../src/database/db";
 import {
-  cleanWord, escapeRegExp,
+  cleanWord,
   generatePrompt,
-  getPromptRepeatableText,
   is10000Related,
   is1000Related,
   is100Related,
@@ -24,7 +23,8 @@ import {
   isWord,
   solverCache
 } from "../../src/dictionary/dictionary";
-import { getPromptRegexDisplayText, getPromptRegexInlineText, getPromptRegexText, getRemarkEmoji, getSolveLetters, getStreakNumbers } from "../../src/emoji-renderer";
+import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
+import { convertTextToHighlights, escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
 import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
@@ -83,14 +83,7 @@ function isNumberVowelSound(x) {
 
 function getCurrentPromptName() {
   return (
-    getPromptRegexText(prompt) +
-    (lengthRequired ? " - " + promptWord.length : "")
-  );
-}
-
-function getCurrentPromptNameForMessage() {
-  return (
-    getPromptRegexInlineText(prompt) +
+    getPromptRegexDisplayText(prompt, false) +
     (lengthRequired ? " - " + promptWord.length : "")
   );
 }
@@ -117,6 +110,7 @@ async function startRound() {
   if (inProgress) return;
   inProgress = true;
 
+  prompt = null;
   remarks = [];
 
   solves = [];
@@ -124,12 +118,10 @@ async function startRound() {
   startedAt = Date.now();
 
   // make prompt
-  ({ prompt, promptWord, solutions, lengthRequired } = generatePrompt());
+  ({ prompt, promptWord, solutions, lengthRequired } = await generatePrompt());
 
   // send prompt to the channel
-  console.log(wordBombMiniChannel.id);
-  console.log(prompt);
-  console.log(promptWord);
+  console.log(prompt, promptWord, solutions);
 
   await sendMessageAsReply(
     replyMessage,
@@ -167,7 +159,7 @@ async function startRound() {
   }
 
   // start a new round
-  console.log("Starting a new round..");
+  console.log("Starting the round..");
   await startRound();
 })();
 
@@ -253,23 +245,23 @@ async function endRound() {
       lengthRequired ? promptWord.length : null,
       solutions
     );
-    console.log("Part 1 took " + (Date.now() - start) + "ms");
+    // console.log("Part 1 took " + (Date.now() - start) + "ms");
 
     let _a = await promptiversaryRemarks();
-    console.log("Part 2 took " + (Date.now() - start) + "ms");
+    // console.log("Part 2 took " + (Date.now() - start) + "ms");
 
     let _b = await uniqueSolutionRemarks();
-    console.log("Part 3 took " + (Date.now() - start) + "ms");
+    // console.log("Part 3 took " + (Date.now() - start) + "ms");
 
     let solveCount = await getUserSolveCount(winnerUser);
-    console.log("Part 4 took " + (Date.now() - start) + "ms");
+    // console.log("Part 4 took " + (Date.now() - start) + "ms");
 
     let exactSolves = await getUserExactSolves(winnerUser);
-    console.log("Part 5 took " + (Date.now() - start) + "ms");
+    // console.log("Part 5 took " + (Date.now() - start) + "ms");
 
     let rankingAfter;
     if (rankingBefore) rankingAfter = await getUserRanking(winnerUser);
-    console.log("Part 6 took " + (Date.now() - start) + "ms");
+    // console.log("Part 6 took " + (Date.now() - start) + "ms");
 
     // a bit of an odd place to put uniqueSolutionRemarks, but it seems like the most optimal...
     // let promises = [, , , getUserExactSolves(winnerUser)]
@@ -539,7 +531,7 @@ async function endRound() {
           getRemarkEmoji("promptiversary") +
           ` It's your **${formatPlacementWithEnglishWords(
             promptiversary
-          )} promptiversary** with "${getCurrentPromptNameForMessage()}"!`,
+          )} promptiversary** with "${getCurrentPromptName()}"!`,
       });
 
       if (promptiversary === 5) {
@@ -636,14 +628,14 @@ async function endRound() {
       ({ rankingBefore, rankingAfter, solveCount, exactSolves }) => {
         rankRemarks(rankingBefore, rankingAfter, solveCount);
         solveRemarks(solveCount, exactSolves);
-        console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
+        // console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
       }
     ),
     lateRemarks(),
     roundRemarks(),
   ]);
 
-  console.log("Remarks: " + (Date.now() - startTime2) + "ms");
+  console.log("Remarks completed in " + (Date.now() - startTime2) + "ms");
 
   basicRemarks();
 
@@ -655,7 +647,7 @@ async function endRound() {
     )} <@${winnerUser}> solved it! ${getRemarkEmoji("solvedIt")}**\n\n` +
       getRemarkEmoji("roundEnded") +
       " **Round ended!**\n" +
-      getSolveLetters(winnerSolution, prompt) +
+      convertTextToHighlights(winnerSolution, prompt) +
       "\n" +
       getRemarkText()
   );
@@ -671,6 +663,9 @@ lameBotClient.on("messageCreate", (message) => {
   // stop if the game is not in progress
   if (!inProgress) return;
 
+  // stop if there's no prompt
+  if (!prompt) return;
+
   // ignore messages not in the default game channel
   if (message.channel.id !== wordBombMiniChannel.id) return;
 
@@ -681,7 +676,7 @@ lameBotClient.on("messageCreate", (message) => {
   if (message.content.includes("\n")) return;
 
   // check if the guess is a solve and if it contains the prompt
-  let guess = cleanWord(message.content);
+  let guess = cleanWord(message.content).toUpperCase();
   if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
     let repeatablePrompt = getPromptRepeatableText(prompt);
     if (

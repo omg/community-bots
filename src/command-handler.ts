@@ -206,12 +206,9 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     // replace the mention with nothing and trim the message, removing double spaces too
     let text = escapeDiscordMarkdown(message.content.replace("<@" + client.user.id + ">", "").replace(/ +/g, " ").trim());
-    console.log(text);
     
     for (const [, command] of mentionCommands) {
-      console.log(command.NAME_DUMB);
       if (command.matches(text)) {
-        console.log(command.NAME_DUMB);
         if (isCommandLimited(member, command, command.NAME_DUMB, channel)) return;
         if (isOnCooldown(member.id, command.NAME_DUMB)) return;
         if (isOnCooldown(member.id)) return;

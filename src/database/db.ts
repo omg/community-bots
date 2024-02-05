@@ -191,8 +191,6 @@ export async function finishRound(solves, startedAt, prompt, promptWord, promptL
     };
   });
 
-  console.log(operations);
-
   const promises = [
     client.db(dbName).collection("rounds").insertOne(round),
     client.db(dbName).collection("rankings").bulkWrite(operations),
@@ -307,7 +305,6 @@ export async function getCurrentRoundInfo() {
       .countDocuments({ gameID });
   } else {
     let lastTimeWinnerHasntWon = lastRoundWinnerHasntWon[0].completedAt;
-    console.log("Winner has last lost at " + lastTimeWinnerHasntWon);
     streak = await client
       .db(dbName)
       .collection("rounds")
