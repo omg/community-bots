@@ -161,9 +161,15 @@ export let solverCache = new Set();
  * @param promptRegex The regular expression pattern to match words to
  * @param timeout The timeout in milliseconds
  * @param user The user who is using the solver
+ * @param customDictionary A custom dictionary to use for solving the prompt
+ * @param filter A function to filter out words from the solutions
+ * 
+ * @returns A promise that resolves with a set of solutions, or rejects with an error
  */
-export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<string[]> {
+export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string, customDictionary?: Set<string>, filter?: (word: string) => boolean): Promise<string[]> {
   if (user) solverCache.add(user);
+  customDictionary = customDictionary || dictionarySet;
+  filter = filter || (() => true);
 
   return new Promise((resolve, reject) => {
     const worker = fork(path.join(__dirname, "solve-worker"));
@@ -192,7 +198,7 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
       }
     });
 
-    worker.send({ dictionaryString, regexSource: promptRegex.source });
+    worker.send({ customDictionary, regexSource: promptRegex, filter });
   });
 }
 

@@ -1,31 +1,27 @@
-type SolveData = {
-  dictionaryString: string;
-  regexSource: RegExp;
-};
+type ExtendedSolveData = {
+  dictionary: Set<string>;
+  regex: RegExp;
+  filter?: (word: string) => boolean;
+}
 
-process.on("message", (data: SolveData) => {
+process.on("message", (data: ExtendedSolveData) => {
   const start = Date.now();
-  const { dictionaryString, regexSource } = data;
-
-  const promptRegex = new RegExp(regexSource, "i"); // why recreate the regex ..?
-  console.log("Finding words which match regex: " + promptRegex);
-
-  // split the dictionary by newlines
-  let words = dictionaryString.split("\n");
-
+  
+  let { dictionary, regex, filter } = data;
+  
+  console.log("Solving " + regex.source + "...");
+  
   let solutions = [];
-
-  let word;
-  for (let i = 0; i < words.length; i++) {
-    word = words[i];
-    if (promptRegex.test(word)) {
+  dictionary.forEach(word => {
+    if (regex.test(word) && filter(word)) {
       solutions.push(word);
-    }
-  }
+    };
+  });
 
+  
   const end = Date.now();
   console.log("Took " + (end - start) + "ms to solve.");
-
+  
   process.send(solutions);
 });
 
