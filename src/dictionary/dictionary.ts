@@ -6,12 +6,12 @@ import { escapeRegExp } from "../regex";
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync(appRoot.resolve("assets/word-lists/dictionaries/english.txt"), "utf8");
-  var related1String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1-related.txt"), "utf8");
-  var related100String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/100-related.txt"), "utf8");
-  var related1000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8");
-  var related10000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8");
-  var relatedDoomString = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8");
+  var dictionarySet = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/dictionaries/english.txt"), "utf8"));
+  var related1Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1-related.txt"), "utf8"));
+  var related100Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/100-related.txt"), "utf8"));
+  var related1000Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8"));
+  var related10000Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8"));
+  var relatedDoomSet = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8"));
   var frequencyMapString = fs.readFileSync(appRoot.resolve("assets/frequency-maps/prompts-frequency-map.txt"), "utf8");
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
@@ -44,44 +44,55 @@ function parseFrequencyMap(map: string): Map<string, number> {
 
   return fMap;
 }
+
+/**
+ * Helper function to turn dictionary strings into sets.
+ * 
+ * @param dstring Dictionary string
+ */
+function stringIntoSet(dstring: string): Set<string> {
+  return new Set(dstring.toUpperCase().split("\r\n"));
+}
+
+// TODO holy copy-paste batman
 /**
  * Checks if a word is "related to firstness". This checks if the specified word is found in the 'related1String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is1Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(related1String);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return related1Set.has(cleanInput);
 }
 
 /**
  * Checks if a word is related to 100. This checks if the specified word is found in the 'related100String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is100Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(related100String);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return related100Set.has(cleanInput);
 }
 
 /**
  * Checks if a word is related to 1000. This checks if the specified word is found in the 'related1000String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is1000Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(related1000String);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return related1000Set.has(cleanInput);
 }
 
 /**
  * Checks if a word is related to 10000. This checks if the specified word is found in the 'related10000String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is10000Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(related10000String);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return related10000Set.has(cleanInput);
 }
 
 /**
  * Checks if a word is doomy. This checks if the specified word is found in the 'relatedDoomString' variable. The word is cleaned and standardized before performing the check.
  */
 export function isDoomRelated(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(relatedDoomString);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return relatedDoomSet.has(cleanInput);
 }
 
 // is standardize the best name for this?
@@ -100,7 +111,7 @@ export function isDoomRelated(word: string): boolean {
  */
 export function standardizeWord(word: string): string {
   return word
-    // .toUpperCase()
+    .toUpperCase()
     .replace(/[‘’]/g, "'")
     .replace(/\-/g, "-")
     .replace(/…/g, "...")
@@ -123,8 +134,9 @@ export function PromptException(message: string) {
  * @param word The word to be checked
  */
 export function isWord(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word));
-  return new RegExp("^" + cleanInput + "$", "mi").test(dictionaryString);
+  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  return dictionarySet.has(cleanInput);
+  // return new RegExp("^" + cleanInput + "$", "mi").test(dictionaryString);
 }
 
 /**
@@ -243,7 +255,8 @@ export async function generatePrompt(): Promise<GeneratedPrompt> {
  * @returns Number of words in the dictionary
  */
 export function getWordsInDictionary(): number {
-  return dictionaryString.split("\n").length;
+  // Lol
+  return dictionarySet.size;
 }
 
 /**
