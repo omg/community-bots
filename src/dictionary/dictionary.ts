@@ -267,6 +267,10 @@ export function getWordsInDictionary(): number {
   return dictionarySet.size;
 }
 
+export function getDictionary(): Set<string> {
+  return dictionarySet;
+}
+
 /**
  * @deprecated Use {@link standardizeWord} instead.
  */
