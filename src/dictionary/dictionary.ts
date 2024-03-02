@@ -12,7 +12,7 @@ try {
   var related1000Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8"));
   var related10000Set = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8"));
   var relatedDoomSet = stringIntoSet(fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8"));
-  var frequencyMapString = fs.readFileSync(appRoot.resolve("assets/frequency-maps/prompts-frequency-map.txt"), "utf8");
+  var frequencyMapString = fs.readFileSync(appRoot.resolve("assets/word-lists/frequency-maps/prompts-frequency-map.txt"), "utf8");
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
 }
@@ -21,9 +21,14 @@ const frequencyMap = parseFrequencyMap(frequencyMapString);
 
 // filter frequency maps to match the generatePrompts requirements
 frequencyMap.forEach((value, key) => {
+  if (isNaN(value)) {
+    frequencyMap.delete(key);
+    return;
+  }
+
   // are we Dead Set on length required needing the like 40+ solves, or should we just cope and hardlock it to 23 still?
   // TODO: Check the above comment out
-  if ((key.length < 3 || key.length > 5) || (key.includes("-") || key.includes("'")) || key.match(/\./g).length > 2 || value < 23) {
+  if ((key.length < 3 || key.length > 5) || (key.includes("-") || key.includes("'")) || (key.match(/\./g) && key.match(/\./g).length > 2) || value < 23) {
     frequencyMap.delete(key);
   };
 });
