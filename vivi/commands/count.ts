@@ -28,7 +28,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   let prompt = interaction.options.get("prompt").value as string;
   
   try {
-    let regex = getPromptRegexFromPromptSearch(prompt);
+    let regex = getPromptRegexFromPromptSearch(prompt.toUpperCase());
 
     let solutions = await solvePromptWithTimeout(regex, 1300, null);
     let solveCount = solutions.length;
