@@ -318,22 +318,22 @@ export async function getCurrentRoundInfo() {
   return { lastWinner, streak };
 }
 
-export async function getLeaderboardSection(id, startIndex, endIndex) {
-  let leaderboardID = id ?? await getAllTimeLeaderboardID();
+// export async function getLeaderboardSection(id, startIndex: number, endIndex: number) {
+//   let leaderboardID = id ?? await getAllTimeLeaderboardID();
   
-  let limit = endIndex ? endIndex - startIndex : 0;
+//   let limit = endIndex ? endIndex - startIndex : 0;
 
-  let leaderboard = await client
-    .db(dbName)
-    .collection("rankings")
-    .find({ leaderboardID })
-    .sort({ score: -1 })
-    .skip(startIndex)
-    .limit(limit)
-    .toArray();
+//   let leaderboard = await client
+//     .db(dbName)
+//     .collection("rankings")
+//     .find({ leaderboardID })
+//     .sort({ score: -1 })
+//     .skip(startIndex)
+//     .limit(limit)
+//     .toArray();
 
-  return leaderboard;
-}
+//   return leaderboard;
+// }
 
 export async function getLeaderboard(id) {
   let leaderboardID = id ?? await getAllTimeLeaderboardID();
