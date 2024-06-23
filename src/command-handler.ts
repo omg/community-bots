@@ -401,6 +401,10 @@ export async function replyToInteraction(interaction: CommandInteraction, header
  * @param broadcast Whether or not this interaction is being broadcasted.
  */
 export async function editInteractionReply(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+  if (!interaction.replied) {
+    return;
+  }
+
   await interaction.editReply({
     content: getInteractionContent(interaction, header, response, broadcast),
   });

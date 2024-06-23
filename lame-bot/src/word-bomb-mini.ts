@@ -25,7 +25,7 @@ import {
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
 import { convertTextToHighlights, escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
-import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
+import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement, getCleanName } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
 let guild;
@@ -162,18 +162,6 @@ async function startRound() {
   console.log("Starting the round..");
   await startRound();
 })();
-
-function getCleanName(name) {
-  let cleanName = escapeDiscordMarkdown(name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, ""));
-  if (cleanName === "") {
-    if (name.length === 0) {
-      return "Lame Member";
-    } else {
-      return "\\" + name[0];
-    }
-  }
-  return cleanName;
-}
 
 async function getDisplayName(userID) {
   return await guild.members
