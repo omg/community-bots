@@ -80,7 +80,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
         1,
         interaction.user.id
       );
-      return;
     } else {
       let startnum = userIndex - 5;
       if (userIndex + 1 >= leaderboard.length - 10) {
