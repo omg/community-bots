@@ -76,7 +76,7 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
-const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/;
+const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/i;
 
 /**
  * A regular expression used to determine if a search is regex or not.
