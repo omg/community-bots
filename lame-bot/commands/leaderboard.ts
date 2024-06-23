@@ -40,7 +40,11 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
   let message = `### ${getRemarkEmoji("bomb")}  All-Time Score`;
   let names = await Promise.all(
     page.map(async (page) => {
-      return await getDisplayName(page.user);
+      if (cmdUserID === page.user) {
+        return `<@${cmdUserID}>`;
+      } else {
+        return await getDisplayName(page.user);
+      }
     })
   );
 
