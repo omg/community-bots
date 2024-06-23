@@ -54,9 +54,9 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
     }
 
     if (placement <= 10) {
-      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} points**`;
+      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
     } else {
-      message += `\n${placement}. ${name} • **${formatNumber(user.score)} points**`;
+      message += `\n${placement}. ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
     }
   }
 
