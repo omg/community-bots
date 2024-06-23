@@ -1,13 +1,9 @@
-import {
-  CommandInteraction,
-  Guild,
-  GuildMember,
-  SlashCommandBuilder,
-} from "discord.js";
-import { getLeaderboard, getLeaderboardSection } from "../../src/database/db";
-import { getCleanName, formatNumber } from "../../src/utils";
-import { getGuild } from "../src/client";
+import { CommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
 import leaderboardEmojis from "../../assets/emoji-maps/leaderboardEmojis";
+import { getDefaultGameGuild, getLeaderboard } from "../../src/database/db";
+import { formatNumber, getCleanName } from "../../src/utils";
+import { getGuild } from "../src/client";
+import { getRemarkEmoji } from "../../src/emoji-renderer";
 
 export const data = new SlashCommandBuilder()
   .setName("leaderboard")
@@ -26,21 +22,11 @@ export const data = new SlashCommandBuilder()
       .setRequired(false)
   );
 
-// TODO: Figure out the cooldown stuff... overscores can do that!
 export const cooldown = 5 * 1000;
-// export const limits = [];
-
-// export const type = [];
-
-// should probably only be used in bot channels, in which case u can just always broadcast it
-export const broadcastable = false;
-
-// Omg discord server :D
-// const GUILDID = "476593983485902850";
-const GUILDID = "733744302756200501";
+export const broadcastable = true;
 
 async function getDisplayName(userID: string) {
-  return (await await getGuild(GUILDID)).members
+  return await (await getDefaultGameGuild()).members
     .fetch(userID)
     .then((member: GuildMember) => {
       return getCleanName(member.displayName ?? member.user.displayName);
@@ -50,42 +36,34 @@ async function getDisplayName(userID: string) {
     });
 }
 
-async function buildLeaderboardMessage(lbpage, startnum, cmdUserid) {
-  let message = "### <:d:708743544877088808> All-Time Score";
+async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID: string) {
+  let message = `### ${getRemarkEmoji("bomb")}  All-Time Score`;
   let names = await Promise.all(
-    lbpage.map(async (page) => {
+    page.map(async (page) => {
       return await getDisplayName(page.user);
     })
   );
 
-  for (let i = 0; i < lbpage.length; i++) {
-    let user = lbpage[i];
+  for (let i = 0; i < page.length; i++) {
+    let user = page[i];
     let name = names[i];
-    let placement = startnum + i;
-    // Lol
+    let placement = startNum + i;
 
-    if (cmdUserid === user.user) {
-      name = `<@${cmdUserid}>`;
+    if (cmdUserID === user.user) {
+      name = `<@${cmdUserID}>`;
     }
 
     if (placement <= 10) {
-      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(
-        user.score
-      )} points**`;
+      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} points**`;
     } else {
-      message += `\n${placement}. ${name} • **${formatNumber(
-        user.score
-      )} points**`;
+      message += `\n${placement}. ${name} • **${formatNumber(user.score)} points**`;
     }
   }
 
   return message;
 }
 
-export async function execute(
-  interaction: CommandInteraction,
-  preferBroadcast: boolean
-) {
+export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let page = interaction.options.get("page");
   let message;
   let leaderboard = await getLeaderboard(null);
@@ -124,7 +102,7 @@ export async function execute(
   } else {
     let pagenum: number = page.value as number;
     let totalNumOfPages = Math.ceil(leaderboard.length / 10);
-    let startnum;
+    let startnum: number;
 
     if (pagenum >= totalNumOfPages) {
       let itemsOnLastPage = leaderboard.length % 10;
@@ -147,6 +125,6 @@ export async function execute(
 
   await interaction.reply({
     content: message,
-    ephemeral: true,
+    ephemeral: !preferBroadcast
   });
 }
