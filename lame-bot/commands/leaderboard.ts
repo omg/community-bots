@@ -26,7 +26,7 @@ export const cooldown = 5 * 1000;
 export const broadcastable = true;
 
 async function getDisplayName(userID: string) {
-  return await (await getDefaultGameGuild()).members
+  return (await getGuild(await getDefaultGameGuild())).members
     .fetch(userID)
     .then((member: GuildMember) => {
       return getCleanName(member.displayName ?? member.user.displayName);
