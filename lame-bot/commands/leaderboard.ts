@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
       .setName("page")
       // no page should be treated as the users page but whats a good way to convey that?
       .setDescription(
-        "The page of the leaderboard to view (default is Your Page)"
+        "The page of the leaderboard to view (defaults to your page)"
       )
       // leaderboard is ever changing so we cant know a exact value
       // should default to last page if index is out of bounds
@@ -40,7 +40,11 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
   let message = `### ${getRemarkEmoji("bomb")}  All-Time Score`;
   let names = await Promise.all(
     page.map(async (page) => {
-      return await getDisplayName(page.user);
+      if (cmdUserID === page.user) {
+        return `<@${cmdUserID}>`;
+      } else {
+        return await getDisplayName(page.user);
+      }
     })
   );
 
@@ -49,11 +53,7 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
     let name = names[i];
     let placement = startNum + i;
 
-    if (cmdUserID === user.user) {
-      name = `<@${cmdUserID}>`;
-    }
-
-    if (placement <= 10) {
+    if (startNum == 1 && placement <= 10) {
       message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
     } else {
       message += `\n${placement}. ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
@@ -80,7 +80,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
         1,
         interaction.user.id
       );
-      return;
     } else {
       let startnum = userIndex - 5;
       if (userIndex + 1 >= leaderboard.length - 10) {
