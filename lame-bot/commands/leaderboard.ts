@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
       .setName("page")
       // no page should be treated as the users page but whats a good way to convey that?
       .setDescription(
-        "The page of the leaderboard to view (default is Your Page)"
+        "The page of the leaderboard to view (defaults to your page)"
       )
       // leaderboard is ever changing so we cant know a exact value
       // should default to last page if index is out of bounds
