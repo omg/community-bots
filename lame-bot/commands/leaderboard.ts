@@ -26,7 +26,7 @@ export const cooldown = 5 * 1000;
 export const broadcastable = true;
 
 async function getDisplayName(userID: string) {
-  return await (await getDefaultGameGuild()).members
+  return (await getGuild(await getDefaultGameGuild())).members
     .fetch(userID)
     .then((member: GuildMember) => {
       return getCleanName(member.displayName ?? member.user.displayName);
@@ -54,9 +54,9 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
     }
 
     if (placement <= 10) {
-      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} points**`;
+      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
     } else {
-      message += `\n${placement}. ${name} • **${formatNumber(user.score)} points**`;
+      message += `\n${placement}. ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
     }
   }
 

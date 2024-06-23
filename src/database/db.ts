@@ -218,7 +218,7 @@ export async function getDefaultGameChannel() {
 }
 
 let defaultGameGuild;
-export async function getDefaultGameGuild() {
+export async function getDefaultGameGuild(): Promise<string> {
   if (defaultGameGuild) return defaultGameGuild;
   defaultGameGuild = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
