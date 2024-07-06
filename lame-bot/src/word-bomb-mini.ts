@@ -10,7 +10,7 @@ import {
   getUserRanking,
   getUserSolveCount,
   getUserSolveCountForPrompt,
-  setReplyMessage,
+  setReplyMessage
 } from "../../src/database/db";
 import {
   cleanWord,
@@ -21,11 +21,11 @@ import {
   is1Related,
   isDoomRelated,
   isWord,
-  solverCache,
+  solverCache
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
 import { convertTextToHighlights, escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
-import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement } from "../../src/utils";
+import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement, getCleanName } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
 let guild;
@@ -63,7 +63,7 @@ const REMARK = {
   // round remarks
   solveStreak: 18,
   usedSolver: 17,
-  promptOrigin: 16,
+  promptOrigin: 16
 };
 
 let remarks;
@@ -163,18 +163,6 @@ async function startRound() {
   await startRound();
 })();
 
-function getCleanName(name) {
-  let cleanName = escapeDiscordMarkdown(name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, ""));
-  if (cleanName === "") {
-    if (name.length === 0) {
-      return "Lame Member";
-    } else {
-      return "\\" + name[0];
-    }
-  }
-  return cleanName;
-}
-
 async function getDisplayName(userID) {
   return await guild.members
     .fetch(userID)
@@ -243,7 +231,7 @@ async function endRound() {
       prompt,
       promptWord,
       lengthRequired ? promptWord.length : null,
-      solutions,
+      solutions
     );
     // console.log("Part 1 took " + (Date.now() - start) + "ms");
 
@@ -284,7 +272,7 @@ async function endRound() {
     let solverNames = await Promise.all(
       solves.map(async (solve) => {
         return await getDisplayName(solve.user);
-      }),
+      })
     );
     const getName = (user) =>
       solverNames[solves.findIndex((s) => s.user === user)];
@@ -302,7 +290,7 @@ async function endRound() {
       if (playersWhoUsedWord.length > 1) {
         // jinx!
         lateSolversWhoHaveNotJinxed = lateSolversWhoHaveNotJinxed.filter(
-          (s) => !playersWhoUsedWord.includes(s.user),
+          (s) => !playersWhoUsedWord.includes(s.user)
         );
         jinxList.push(playersWhoUsedWord);
       }
@@ -327,7 +315,7 @@ async function endRound() {
     }
 
     let lateNames = lateSolversWhoHaveNotJinxed.map((solve) =>
-      getName(solve.user),
+      getName(solve.user)
     );
     if (lateNames.length > 0) {
       addRemark({
@@ -335,7 +323,7 @@ async function endRound() {
         remark: `**${createEnglishList(lateNames)}** ${engLen(
           lateNames,
           "was",
-          "were",
+          "were"
         )} too late..`,
       });
     }
@@ -383,7 +371,7 @@ async function endRound() {
       solveRemark =
         getRemarkEmoji("solve10000") +
         ` This is your **${formatNumber(
-          solveNumber,
+          solveNumber
         )}th solve**!!! Unbelievable!`;
       if (solveNumber === 10000 && is10000Related(winnerSolution)) {
         solveRemark +=
@@ -451,7 +439,7 @@ async function endRound() {
         remark:
           getRemarkEmoji("exactSolve") +
           ` **Lucky!** That's your **${formatPlacementWithEnglishWords(
-            exactSolves,
+            exactSolves
           )}** exact solve!`,
       });
     }
@@ -478,11 +466,11 @@ async function endRound() {
         remark:
           getRemarkEmoji("rankingMovement") +
           ` You went up **${formatNumber(
-            rankingBefore - rankingAfter,
+            rankingBefore - rankingAfter
           )}** ${engNum(
             rankingBefore - rankingAfter,
             "place",
-            "places",
+            "places"
           )}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`,
       });
     }
@@ -498,9 +486,7 @@ async function endRound() {
       uniqueSolutions++;
       addRemark({
         index: REMARK.uniqueSolve,
-        remark:
-          getRemarkEmoji("uniqueSolve") +
-          " That's the **first time** this solve has ever been used!",
+        remark: getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"
       });
     }
 
@@ -518,7 +504,7 @@ async function endRound() {
     let promptiversary = await getUserSolveCountForPrompt(
       winnerUser,
       prompt,
-      lengthRequired ? promptWord.length : null,
+      lengthRequired ? promptWord.length : null
     );
 
     if (
@@ -532,7 +518,7 @@ async function endRound() {
         remark:
           getRemarkEmoji("promptiversary") +
           ` It's your **${formatPlacementWithEnglishWords(
-            promptiversary,
+            promptiversary
           )} promptiversary** with "${getCurrentPromptName()}"!`,
       });
 
@@ -541,7 +527,7 @@ async function endRound() {
         let firstSolutionToPrompt = await getFirstSolutionToPrompt(
           winnerUser,
           prompt,
-          lengthRequired ? promptWord.length : null,
+          lengthRequired ? promptWord.length : null
         );
 
         if (firstSolutionToPrompt === winnerSolution) {
@@ -582,7 +568,7 @@ async function endRound() {
           remark: `**${getRemarkEmoji(solveStreakEmoji)} You're on ${
             isNumberVowelSound(streak) ? "an" : "a"
           } ${getStreakNumbers(streak)} solve streak! ${getRemarkEmoji(
-            solveStreakEmoji,
+            solveStreakEmoji
           )}**`,
         });
       }
@@ -631,7 +617,7 @@ async function endRound() {
         rankRemarks(rankingBefore, rankingAfter, solveCount);
         solveRemarks(solveCount, exactSolves);
         // console.log("Part 7 took " + (Date.now() - startTime2) + "ms");
-      },
+      }
     ),
     lateRemarks(),
     roundRemarks(),
@@ -645,13 +631,13 @@ async function endRound() {
   await sendMessage(
     wordBombMiniChannel,
     `**${getRemarkEmoji(
-      "solvedIt",
+      "solvedIt"
     )} <@${winnerUser}> solved it! ${getRemarkEmoji("solvedIt")}**\n\n` +
       getRemarkEmoji("roundEnded") +
       " **Round ended!**\n" +
       convertTextToHighlights(winnerSolution, prompt) +
       "\n" +
-      getRemarkText(),
+      getRemarkText()
   );
 
   setTimeout(startRound, 8000);
@@ -706,7 +692,7 @@ lameBotClient.on("messageCreate", (message) => {
               "** characters!\nYours was **" +
               guess.length +
               "**, go higher " +
-              getRemarkEmoji("higher"),
+              getRemarkEmoji("higher")
           )
           .catch((error) => {
             console.log(error);
@@ -723,7 +709,7 @@ lameBotClient.on("messageCreate", (message) => {
               "** characters!\nYours was **" +
               guess.length +
               "**, go lower " +
-              getRemarkEmoji("lower"),
+              getRemarkEmoji("lower")
           )
           .catch((error) => {
             console.log(error);

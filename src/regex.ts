@@ -76,7 +76,7 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
-const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/;
+const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/i;
 
 /**
  * A regular expression used to determine if a search is regex or not.
@@ -451,7 +451,7 @@ export function convertTextToHighlights(text: string, regex: RegExp, highlight: 
 /**
  * Regular expression used to check if the prompt display contains any invalid characters. Only uppercase letters, numbers, apostrophes, hyphens, at symbols, and spaces are considered valid.
  */
-const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/;
+const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/i;
 
 /**
  * This function will take a regex as input and return either a prompt-like display string or a regex encapsulated in backticks.
