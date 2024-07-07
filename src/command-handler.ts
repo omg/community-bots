@@ -383,6 +383,10 @@ export function getInteractionContent(interaction: CommandInteraction, header: s
  * @param broadcast Whether or not this interaction is being broadcasted.
  */
 export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean, options?: Partial<InteractionReplyOptions>) {
+  if (interaction.replied) {
+    return;
+  }
+  
   await interaction.reply({
     content: getInteractionContent(interaction, header, response, broadcast),
     ephemeral: !broadcast,
