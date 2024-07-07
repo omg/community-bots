@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder()
           .setRequired(false)));
 
 export const cooldown = 2 * 1000;
-export const broadcastable = true;
+export const broadcastable = false;
 
 export async function execute(interaction: ChatInputCommandInteraction, preferBroadcast: boolean) {
   const subcommand = interaction.options.getSubcommand();
