@@ -1,5 +1,5 @@
 import { REST } from "@discordjs/rest";
-import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, Message, Routes } from "discord.js";
+import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, InteractionReplyOptions, Message, MessageMentionOptions, Routes } from "discord.js";
 import fs from "node:fs";
 import { escapeDiscordMarkdown } from "./utils";
 
@@ -382,10 +382,15 @@ export function getInteractionContent(interaction: CommandInteraction, header: s
  * @param response The response text.
  * @param broadcast Whether or not this interaction is being broadcasted.
  */
-export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean, options?: Partial<InteractionReplyOptions>) {
+  if (interaction.replied) {
+    return;
+  }
+  
   await interaction.reply({
     content: getInteractionContent(interaction, header, response, broadcast),
     ephemeral: !broadcast,
+    ...options
   });
 }
 

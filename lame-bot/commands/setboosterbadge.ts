@@ -45,12 +45,12 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
   if (interaction.guild.premiumTier < 2) {
     // this is mainly to prevent people from using this while the server doesnt have
     // the correct boost level and casuing a ton of errors
-    replyToInteraction(interaction, "Error", "\nYou can't use booster roles yet, the server must be at least level 2!", false);
+    await replyToInteraction(interaction, "Error", "\nYou can't use booster roles yet, the server must be at least level 2!", false);
     return;
   }
 
   if (!isBooster(userRoles)) {
-    replyToInteraction(interaction, "Error", "\nYou must be a booster to use this command.", false);
+    await replyToInteraction(interaction, "Error", "\nYou must be a booster to use this command.", false);
     return;
   }
 
@@ -63,7 +63,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
     case "image/webp":
       break;
     default:
-      replyToInteraction(interaction, "Error", "\nPlease use a valid image type.", false);
+      await replyToInteraction(interaction, "Error", "\nPlease use a valid image type.", false);
       return;
   }
 
@@ -102,7 +102,7 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
       setBoosterRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       console.error(e);
-      replyToInteraction(interaction, "Error", `\nFailed to create your role!\nTry again later.`, false);
+      await replyToInteraction(interaction, "Error", `\nFailed to create your role!\nTry again later.`, false);
       return;
     }
   }
@@ -112,10 +112,10 @@ export async function execute(interaction: CommandInteraction, _preferBroadcast:
       await assignRole(interaction.user.id, userBoosterRole.id);
     } catch (e) {
       console.error(e);
-      replyToInteraction(interaction, "Error", `\nFailed to add you to the role!\nTry again later.`, false);
+      await replyToInteraction(interaction, "Error", `\nFailed to add you to the role!\nTry again later.`, false);
       return;
     }
   }
 
-  replyToInteraction(interaction, "Booster Badge", "\nSuccessfully set your booster badge!", false);
+  await replyToInteraction(interaction, "Booster Badge", "\nSuccessfully set your booster badge!", false);
 }
