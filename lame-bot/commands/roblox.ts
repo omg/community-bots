@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction, preferBr
   } else if (subcommand === "profile") {
     const userID = interaction.options.getUser("user")?.id ?? interaction.user.id;
     try {
-      const result = await fetch("https://api.blox.link/v4/public/guilds/789699000047370261/discord-to-roblox/" + userID, { headers: { "Authorization": process.env.BLOXLINK_KEY } });
+      const result = await fetch(`https://api.blox.link/v4/public/guilds/476593983485902850/discord-to-roblox/${userID}`, { headers: { "Authorization": process.env.BLOXLINK_KEY } });
       const data = await result.json();
       if (data.error) {
         const errorMessage = data.error.endsWith(".") ? data.error : data.error + ".";
@@ -35,23 +35,33 @@ export async function execute(interaction: ChatInputCommandInteraction, preferBr
       }
 
       const robloxInformation = data.resolved.roblox;
-      console.log(robloxInformation);
 
-      const robloxName = robloxInformation.display_name ?? robloxInformation.username;
-      const robloxID = robloxInformation.id;
+      const robloxName = robloxInformation.displayName ?? robloxInformation.name;
+      const robloxUsername = robloxInformation.name;
+      const robloxLink = robloxInformation.profileLink;
       const robloxDescription = robloxInformation.description;
-      const robloxImage = robloxInformation.avatar_url;
+      
+      // oh my goodness
+      let robloxImage = null;
+      if (robloxInformation.avatar) {
+        if (robloxInformation.avatar.fullBody) {
+          const imageData = await (await fetch(robloxInformation.avatar.fullBody)).json();
+          if (imageData.data && imageData.data[0] && imageData.data[0].imageUrl) {
+            robloxImage = imageData.data[0].imageUrl;
+          }
+        }
+      }
 
       const text = `<@${userID}> is **${robloxName}** on Roblox.`;
       const embed = new EmbedBuilder()
-        .setAuthor({ name: "Roblox" })
+        .setAuthor({ name: "@" + robloxUsername })
         .setTitle(robloxName)
-        .setURL(`https://www.roblox.com/users/${robloxID}/profile`)
+        .setURL(robloxLink)
         .setDescription(robloxDescription)
         .setThumbnail(robloxImage)
         .setColor("#00b0f4");
       
-      await replyToInteraction(interaction, "Profile", "\n• " + text, preferBroadcast, {
+      await replyToInteraction(interaction, "Profile", "\n" + text + "\n** **", preferBroadcast, {
         allowedMentions: { parse: [] },
         embeds: [embed]
       });
