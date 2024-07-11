@@ -83,7 +83,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
       await userBoosterRole.setName(newName);
     } catch (e) {
       console.error(e);
-      await replyToInteraction(interaction, "Error", `\nFailed to name your role!\nTry again later.`, false);
+      await replyToInteraction(interaction, "Error", `\nFailed to name your role!`, false);
       return;
     }
 
