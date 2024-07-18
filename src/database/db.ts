@@ -1,4 +1,5 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
+import { SaveState } from "../games/wbmgame";
 
 // Connection URL
 const url = process.env.MONGO_URL;
@@ -335,7 +336,43 @@ export async function getCurrentRoundInfo() {
 //   return leaderboard;
 // }
 
-export async function getLeaderboard(id) {
+// leaderboards should end up looking like this:
+export interface LeaderboardDocument {
+  _id: ObjectId;
+  name: string;
+  active: boolean;
+}
+
+// Yes you can overload this instead, but overloading for a single parameter looks so ugly and seems dumb for this
+export async function getLeaderboard(id: string | ObjectId | string[] | ObjectId[]): Promise<LeaderboardDocument[]> {
+  // searching _id with $in only works if its an array of objectids, so strings need to be converted
+  // strings in this function are also just a convenience, we probably never use them
+  let leaderboardID: ObjectId[];
+  if (typeof id === "string") {
+    leaderboardID = [new ObjectId(id)];
+  } else if (Array.isArray(id)) {
+    leaderboardID = id.map(id => new ObjectId(id));
+  } else {
+    // its not a string or a array so its a objectid already
+    leaderboardID = [id];
+  }
+  
+  let leaderboard = await client
+    .db(dbName)
+    .collection<LeaderboardDocument>("leaderboards")
+    .find({ _id: {"$in": leaderboardID } })
+    .toArray()
+  
+  return leaderboard.map(leaderboard => {
+    return {
+      _id: leaderboard._id,
+      name: leaderboard.name,
+      active: leaderboard.active
+    }
+  });
+}
+
+export async function getRankingLeaderboard(id: string | ObjectId) {
   let leaderboardID = id ?? await getAllTimeLeaderboardID();
   
   let leaderboard = await client
@@ -345,4 +382,96 @@ export async function getLeaderboard(id) {
     .sort({ score: -1 })
     .toArray();
   return leaderboard;
+}
+
+// export async function getLeaderboard(id: string | ObjectId) {
+//   let leaderboardID = id ?? await getAllTimeLeaderboardID();
+  
+//   let leaderboard = await client
+//     .db(dbName)
+//     .collection("rankings")
+//     .find({ leaderboardID })
+//     .sort({ score: -1 })
+//     .toArray();
+//   return leaderboard;
+// }
+
+// this might be worth typing with a real type instead but i think its fine since its so small
+export async function getActiveLeaderboards(): Promise<{ id: ObjectId, name: string }[]> {
+  let leaderboards = await client
+    .db(dbName)
+    .collection<LeaderboardDocument>("leaderboards")
+    .find({ active: true })
+    .toArray();
+  
+  return leaderboards.map(leaderboard => {
+    return {
+      id: leaderboard._id,
+      name: leaderboard.name
+    }
+  });
+}
+
+// export interface RankingDocument {
+//   _id: ObjectId;
+//   user: string;
+//   leaderboardID: ObjectId;
+//   exactSolves: number;
+//   jinxes: number;
+//   lateSolves: number;
+//   score: number;
+//   solves: number;
+//   viviUses: number;
+//   wins: number;
+// }
+
+
+// previous i was thinking of adding a "data" field to the ranking document
+// and just shoving everything else in there but i think extending the interface
+// is a better idea because it gives type hinting/inference whatever its called
+// i liked data better since you never need to specify which document you want
+// you just get given all the data and you choose which fields you want but
+// i can see how it might be annoying to work with when theres no types
+export interface RankingDocument {
+  _id: ObjectId;
+  leaderboardID: ObjectId;
+  user: string;
+}
+
+// Check this out when im back on this: https://discord.com/channels/916735613808545872/1061085161317466184/1260762051484188682
+// TODO: There needs to be a good way of getting only active leaderboard ranking documents, its a bit of a mess either way
+// either we filter the results via whichever leaderboards the game wants or we give everything and the game filters it
+export async function getUserRankingInfo<T extends RankingDocument>(user_id: string): Promise<T[]> {
+  // for some reason putting the generic on collection (.collection<T>()) gives us a `WithId<T>` type
+  // no clue what the reason is but it seems we would need to extend RankingDocument with WithId to make it work together
+  // but applying the generic to find<T> gives us the outcome we want
+
+  return await client
+    .db(dbName)
+    .collection("rankings")
+    .find<T>({ user: user_id })
+    .toArray();
+}
+
+// TODO: Change these to use generics for savestate
+export async function getSaveState(channel: string): Promise<SaveState | null> {
+  let saveState = await client
+    .db(dbName)
+    .collection("saves")
+    .find<SaveState>({ channel })
+    .limit(1)
+    .toArray();
+  console.log(saveState);
+  return saveState.length === 1 ? saveState[0] : null;
+}
+
+export async function storeSaveState(channel: string, state: SaveState) {
+  await client
+    .db(dbName)
+    .collection("saves")
+    .updateOne(
+      { channel },
+      { $set: state },
+      { upsert: true },
+    );
 }
