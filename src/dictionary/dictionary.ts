@@ -21,7 +21,7 @@ const frequencyMap = parseFrequencyMap(frequencyMapString);
 
 /**
  * Helper function to parse a frequency map string into a Map object.
- * 
+ *
  * @param map Frequency map string
  * @returns Frequency map as a Map object
  */
@@ -37,13 +37,20 @@ function parseFrequencyMap(map: string): Map<string, number> {
     if (isNaN(value)) {
       fMap.delete(key);
       return;
-    };
+    }
 
     // are we Dead Set on length required needing the like 40+ solves, or should we just cope and hardlock it to 23 still?
     // TODO: Check the above comment out
-    if ((key.length < 3 || key.length > 5) || (key.includes("-") || key.includes("'")) || (key.match(/\./g) && key.match(/\./g).length > 2) || value < 23) {
+    if (
+      key.length < 3 ||
+      key.length > 5 ||
+      key.includes("-") ||
+      key.includes("'") ||
+      (key.match(/\./g) && key.match(/\./g).length > 2) ||
+      value < 23
+    ) {
       fMap.delete(key);
-    };
+    }
   });
 
   return fMap;
@@ -51,7 +58,7 @@ function parseFrequencyMap(map: string): Map<string, number> {
 
 /**
  * Helper function to turn dictionary strings into sets.
- * 
+ *
  * @param dstring Dictionary string
  */
 function stringIntoSet(dstring: string): Set<string> {
@@ -106,7 +113,7 @@ export function isDoomRelated(word: string): boolean {
  * 2. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
  * 3. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
  * 4. Trims any leading or trailing whitespace from the word.
- * 
+ *
  * **NOTE:** Trimming might ruin some searches.
  * This function will also not convert the word to uppercase. Make sure you implement case insensitivity.
  *
@@ -165,10 +172,14 @@ export let solverCache = new Set();
  * @param promptRegex The regular expression pattern to match words to
  * @param timeout The timeout in milliseconds
  * @param user The user who is using the solver
- * 
+ *
  * @returns A promise that resolves with a set of solutions, or rejects with an error
  */
-export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<string[]> {
+export function solvePromptWithTimeout(
+  promptRegex: RegExp,
+  timeout: number,
+  user: string
+): Promise<string[]> {
   if (user) solverCache.add(user);
   let dictionary = Array.from(dictionarySet);
 
@@ -177,7 +188,11 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
 
     let timeoutId = setTimeout(() => {
       worker.kill();
-      reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
+      reject(
+        new SolveWorkerException(
+          "Your regex took too long to compute and timed out."
+        )
+      );
     }, timeout);
 
     worker.on("message", (solutions: string[]) => {
@@ -199,7 +214,9 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
       }
     });
 
-    worker.send({ dictionary, regex: promptRegex.source }, (e) => { console.log(e); });
+    worker.send({ dictionary, regex: promptRegex.source }, (e) => {
+      console.log(e);
+    });
   });
 }
 
@@ -216,11 +233,11 @@ export function randInt(min: number, max: number): number {
 
 // Naming this Prompt feels almost misleading, so this works for now
 type GeneratedPrompt = {
-  promptWord: string,
-  solutions: Set<string>,
-  lengthRequired: boolean,
-  prompt: RegExp,
-}
+  promptWord: string;
+  solutions: Set<string>;
+  lengthRequired: boolean;
+  prompt: RegExp;
+};
 
 // i Feel like doing this is bad, but i need it to be a array for the random selection
 // so why not just have it permanently as a array instead of remaking it every time
@@ -235,30 +252,37 @@ export async function generatePrompt(): Promise<GeneratedPrompt> {
 
   let randPromptIndex = Math.floor(Math.random() * preMadePromptList.length);
   let prompt = preMadePromptList[randPromptIndex];
-  
-  let solutions = await solvePromptWithTimeout(new RegExp(prompt, "i"), 999999999, null);
-  
+
+  let solutions = await solvePromptWithTimeout(
+    new RegExp(prompt, "i"),
+    999999999,
+    null
+  );
+
   let randWordIndex = Math.floor(Math.random() * solutions.length);
   let promptWord = solutions[randWordIndex];
   // we can be sure the prompt has more than 23 solutions because of the frequency map filtering
-  let lengthRequired = promptWord.length < 17 && frequencyMap.get(prompt) > 45 && randInt(1, 7) == 1;
+  let lengthRequired =
+    promptWord.length < 17 &&
+    frequencyMap.get(prompt) > 45 &&
+    randInt(1, 7) == 1;
   if (lengthRequired) {
     solutions = solutions.filter((word) => {
       return word.length == promptWord.length;
     });
-  };
+  }
 
   return {
     promptWord: promptWord,
     solutions: new Set(solutions),
     lengthRequired: lengthRequired,
-    prompt: new RegExp(prompt, "i")
-  }
-};
+    prompt: new RegExp(prompt, "i"),
+  };
+}
 
 /**
  * Gets the amount of words in the dictionary.
- * 
+ *
  * @returns Number of words in the dictionary
  */
 export function getWordsInDictionary(): number {

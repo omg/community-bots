@@ -5,8 +5,8 @@ import { WBMRemarkData } from "../games/wbmgame";
 /**
  * This function is called to get the remark, it should return a string
  * all relevant data needed is passed in as the data object
- * 
- * @param data 
+ *
+ * @param data
  */
 export function execute(data: WBMRemarkData): string {
   if (data.currRound.winner?.solution == "plonk") {
@@ -17,7 +17,7 @@ export function execute(data: WBMRemarkData): string {
   // return "";
 }
 
-// higher means it will appear first in the list of indexes 
+// higher means it will appear first in the list of indexes
 // (related remarks should have a similar index to each other to keep them together)
 // if not defined the index will be treated as -1, and placed at the end of the remarks in the order they were added
 // which is probably the same order as the file structure

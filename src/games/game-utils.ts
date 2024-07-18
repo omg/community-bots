@@ -2,17 +2,17 @@ import { escapeDiscordMarkdown, formatPlacement } from "../utils";
 
 /**
  * Returns true of false if the prompt was repeated in the guess
- * 
+ *
  * @param prompt The prompt string
  * @param guess The guess string
- * 
+ *
  * @returns True or false based on if the prompt was repeated in the guess
  */
 export function isRepeatedPrompt(prompt: string, guess: string): boolean {
   prompt = prompt.toLowerCase();
   guess = guess.toLowerCase();
 
-  return (prompt === guess || prompt + "s" === guess)
+  return prompt === guess || prompt + "s" === guess;
 }
 
 export function getCleanName(name) {
@@ -48,13 +48,17 @@ export function formatPlacementWithEnglishWords(x) {
 // replacement for engNum/engLen
 /**
  * Helper function for Determining if a given amount is of singular or plural form
- * 
+ *
  * @param amount A number or an array of items
  * @param singular The singular form of the word
  * @param plural The plural form of the word
  * @returns The parameter singular or plural
  */
-export function isPlural(amount: number | any[], singular: string, plural: string): string {
+export function isPlural(
+  amount: number | any[],
+  singular: string,
+  plural: string
+): string {
   if (amount instanceof Array) {
     return amount.length === 1 ? singular : plural;
   }

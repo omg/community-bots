@@ -6,7 +6,10 @@ export async function execute(data: WBMRemarkData): Promise<string> {
   let useCount = await getSolutionCount(data.currRound.winner.solution);
 
   if (useCount === 1) {
-    return getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"; 
+    return (
+      getRemarkEmoji("uniqueSolve") +
+      " That's the **first time** this solve has ever been used!"
+    );
   }
 }
 
