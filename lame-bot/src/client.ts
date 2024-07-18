@@ -170,13 +170,3 @@ registerClientAsCommandHandler(
 );
 
 //
-
-(async () => {
-  // // wait for stuff to load i guess
-  // setTimeout(async () => {
-  //   const wbm = new WordBombMini("1208308948634050610", "1208309887801757737");
-  //   await wbm.startGame();
-  // }, 1000);
-  const wbm = new WordBombMini("1208308948634050610", "1208309887801757737");
-  await wbm.startGame();
-})();
