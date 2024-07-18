@@ -461,7 +461,6 @@ export async function getSaveState(channel: string): Promise<SaveState | null> {
     .find<SaveState>({ channel })
     .limit(1)
     .toArray();
-  console.log(saveState);
   return saveState.length === 1 ? saveState[0] : null;
 }
 

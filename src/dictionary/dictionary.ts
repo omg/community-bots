@@ -55,9 +55,7 @@ function parseFrequencyMap(map: string): Map<string, number> {
  * @param dstring Dictionary string
  */
 function stringIntoSet(dstring: string): Set<string> {
-  let s = new Set(dstring.toUpperCase().split("\r\n"))
-  console.log("loaded", s.size, "words");
-  return s;
+  return new Set(dstring.toUpperCase().split("\r\n"));
 }
 
 // TODO holy copy-paste batman

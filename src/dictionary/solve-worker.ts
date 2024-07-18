@@ -1,10 +1,3 @@
-// type ExtendedSolveData = {
-//   dictionary: Set<string>;
-//   regex: RegExp;
-//   filter: (word: string) => boolean;
-// }
-
-
 process.on("message", (data: { dictionary: string[], regex: string }) => {
   const start = Date.now();
 

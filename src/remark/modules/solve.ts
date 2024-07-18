@@ -99,7 +99,6 @@ function createSolveRemark(
 }
 
 export function execute(data: WBMRemarkData): string {
-  console.log(data.postRoundWinnerData.rankingDocuments);
   let remark = createSolveRemark(data, data.postRoundWinnerData.rankingDocuments["All-Time"].solves);
 
   return remark;

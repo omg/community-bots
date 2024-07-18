@@ -80,18 +80,13 @@ class GameManager {
         this.games.set(name, game);
 
 
+        // TODO: this is probably not the right way to do this /shrug
         (async function startup() {
-            // @ts-ignore
+            // @ts-ignore        
+            // this is a protected function so we technically shouldnt be able to call it
+            // but we are the game manager so we should be able to do whatever we want
             await game.__setup();
         })();
-
-        // @ts-ignore
-        // Promise(async () => { await game.__setup(); }).then(
-        //     () => {},
-        //     (r) => {
-        //         console.error(`Failed to register ${name} because of ${r}`)
-        //     }
-        // );
     }
 
     dropGame(name: string) {
@@ -100,10 +95,11 @@ class GameManager {
         }
 
         let game = this.games.get(name);
-        // @ts-ignore
-        // this is a protected function so we technically shouldnt be able to call it
-        // but we are the game manager so we should be able to do whatever we want
-        game.__destroy();
+
+        (async function teardown() {
+            // @ts-ignore
+            game.__destroy();
+        })();
     }
 }
 

@@ -39,7 +39,6 @@ export async function getRemarks(data: WBMRemarkData): Promise<string> {
     return await remark.execute(data);
   }));
   let r = promiseResults.filter((s) => s !== "" && s).join("\n");
-  console.log(promiseResults.filter((s) => s !== "" && s), r);
   return r;
 }
 
