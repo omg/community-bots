@@ -144,6 +144,22 @@ export async function sendMessageAsReply(replyMessage: Message, message: string)
   }
 }
 
+export async function sendMessageWithReplyID(channel: TextChannel, message: string, replyMessage: string): Promise<Message> {
+  await waitForReady();
+
+  let retryDelay = 500;
+  while (true) {
+    try {
+      return await channel.send({ content: message, reply: { messageReference: replyMessage } });
+    } catch (error) {
+      console.error(error);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+      retryDelay = Math.min(retryDelay + 500, 5000);
+    }
+  }
+}
+
 //
 
 registerClientAsCommandHandler(
