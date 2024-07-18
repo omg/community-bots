@@ -19,20 +19,6 @@ try {
 
 const frequencyMap = parseFrequencyMap(frequencyMapString);
 
-// filter frequency maps to match the generatePrompts requirements
-frequencyMap.forEach((value, key) => {
-  if (isNaN(value)) {
-    frequencyMap.delete(key);
-    return;
-  }
-
-  // are we Dead Set on length required needing the like 40+ solves, or should we just cope and hardlock it to 23 still?
-  // TODO: Check the above comment out
-  if ((key.length < 3 || key.length > 5) || (key.includes("-") || key.includes("'")) || (key.match(/\./g) && key.match(/\./g).length > 2) || value < 23) {
-    frequencyMap.delete(key);
-  };
-});
-
 /**
  * Helper function to parse a frequency map string into a Map object.
  * 
@@ -41,11 +27,24 @@ frequencyMap.forEach((value, key) => {
  */
 function parseFrequencyMap(map: string): Map<string, number> {
   let fMap = new Map<string, number>();
-  let lines = map.split("\n");
+  let lines = map.split("\r\n");
   for (let line of lines) {
     let [numSolutions, prompt] = line.split("\t");
     fMap.set(prompt, parseInt(numSolutions));
   }
+
+  fMap.forEach((value, key) => {
+    if (isNaN(value)) {
+      fMap.delete(key);
+      return;
+    };
+
+    // are we Dead Set on length required needing the like 40+ solves, or should we just cope and hardlock it to 23 still?
+    // TODO: Check the above comment out
+    if ((key.length < 3 || key.length > 5) || (key.includes("-") || key.includes("'")) || (key.match(/\./g) && key.match(/\./g).length > 2) || value < 23) {
+      fMap.delete(key);
+    };
+  });
 
   return fMap;
 }
@@ -56,7 +55,9 @@ function parseFrequencyMap(map: string): Map<string, number> {
  * @param dstring Dictionary string
  */
 function stringIntoSet(dstring: string): Set<string> {
-  return new Set(dstring.toUpperCase().split("\r\n"));
+  let s = new Set(dstring.toUpperCase().split("\r\n"))
+  console.log("loaded", s.size, "words");
+  return s;
 }
 
 // TODO holy copy-paste batman
@@ -174,7 +175,7 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
   let dictionary = Array.from(dictionarySet);
 
   return new Promise((resolve, reject) => {
-    const worker = fork(path.join(__dirname, "solve-worker"));
+    const worker = fork(path.join(__dirname, "solve-worker.ts"));
 
     let timeoutId = setTimeout(() => {
       worker.kill();
@@ -238,7 +239,7 @@ export async function generatePrompt(): Promise<GeneratedPrompt> {
   let prompt = preMadePromptList[randPromptIndex];
   
   let solutions = await solvePromptWithTimeout(new RegExp(prompt, "i"), 999999999, null);
-
+  
   let randWordIndex = Math.floor(Math.random() * solutions.length);
   let promptWord = solutions[randWordIndex];
   // we can be sure the prompt has more than 23 solutions because of the frequency map filtering

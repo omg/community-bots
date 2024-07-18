@@ -3,8 +3,6 @@
 //   regex: RegExp;
 //   filter: (word: string) => boolean;
 // }
-import { getDictionary } from "./dictionary";
-let dictionary = getDictionary();
 
 
 process.on("message", (data: { dictionary: string[], regex: string }) => {
@@ -12,10 +10,9 @@ process.on("message", (data: { dictionary: string[], regex: string }) => {
 
   let { regex } = data;
   let newRegex = new RegExp(regex, "i");
-  
   let solutions = [];
   console.time("Solving");
-  for (let word of dictionary) {
+  for (let word of data.dictionary) {
     if (newRegex.test(word)) {
       solutions.push(word);
     }
