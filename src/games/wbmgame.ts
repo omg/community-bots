@@ -51,7 +51,7 @@ export type SaveState = {
 type PostRoundUserData = {
     rankingBefore: number,
     rankingAfter: number,
-    // rankingDocument: WBMRankingDocument,
+
     rankingDocuments: { [key: string]: WBMRankingDocument },
 }
 
@@ -61,7 +61,6 @@ export type WBMRemarkData = {
 
     streak: StreakInfo,
 
-    // weird name but i think it makes sense?
     postRoundWinnerData: PostRoundUserData,
 }
 
@@ -147,8 +146,6 @@ export class WordBombMini extends TextChannelBasedGame {
     // and these dont need to be typed because TextChannelBasedGame has the type and sets it as this.settings
     constructor(settings, client) {
         super(settings, client);
-
-        console.log("wbm constructed");
     }
 
     async loadLeaderboards() {
@@ -203,10 +200,10 @@ export class WordBombMini extends TextChannelBasedGame {
         let rankingDocument = await getUserRankingInfo<WBMRankingDocument>(winner.user);
 
         let documents: { [key: string]: WBMRankingDocument } = {};
-        let a_lb = this.active_leaderboards;
+
         // this isnt the fastest way of doing this but it the lists should be so small that it wont matter
         rankingDocument.forEach(doc => {
-            let lb_name = a_lb.get(doc.leaderboardID.toHexString());
+            let lb_name = this.active_leaderboards.get(doc.leaderboardID.toHexString());
             documents[lb_name] = doc;
         });
 
@@ -344,8 +341,6 @@ export class WordBombMini extends TextChannelBasedGame {
             !this.currentRound ||
             message.channel.id !== this.settings.channel.id ||
             this.currentRound.solvers.some(s => s.user === message.author.id)
-            // remnant of old regex system?
-            // || message.content.includes("\n")
         ) return;
 
         let guess = standardizeWord(message.content).toUpperCase();
@@ -355,13 +350,23 @@ export class WordBombMini extends TextChannelBasedGame {
             if (isRepeatedPrompt(round.prompt.source, guess)) {
                 if (round.solvers.length > 0) return;
 
-                // TODO: send a response saying they cant repeat the prompt
+                message.reply("<@" + message.author.id + ">, you cannot repeat the prompt!")
+                .catch((error) => {
+                    console.log(error);
+                });
+                return;
             }
 
             if (round.lengthRequired && guess.length !== round.promptWordLength) {
                 if (round.solvers.length > 0) return;
 
-                // TODO: send a response saying the word isnt the right length
+                message.reply(
+                    "<@" + message.author.id + ">, your word must be " + 
+                    round.promptWordLength + 
+                    "** characters!\nYours was **" + 
+                    guess.length + 
+                    (guess.length < round.promptWordLength ? ("**, go higher " + getRemarkEmoji("higher")) : "** go lower " + getRemarkEmoji("lower"))
+                );
             }
 
             round.solvers.push({
