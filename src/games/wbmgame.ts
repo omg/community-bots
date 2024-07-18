@@ -1,12 +1,11 @@
 import { generatePrompt, solvePromptWithTimeout, solverCache, standardizeWord } from "../dictionary/dictionary";
 import { isRepeatedPrompt } from "./game-utils";
 import { formatNumber, getCleanName } from "../utils";
-import { sendMessage, sendMessageWithReplyID, waitForReady } from "../../lame-bot/src/client";
+import { sendMessage, sendMessageWithReplyID } from "../../lame-bot/src/client";
 import { getRemarkEmoji } from "../emoji-renderer";
 import { convertTextToHighlights, getPromptRegexDisplayText } from "../regex";
 import { finishRound, getActiveLeaderboards, getSaveState, getUserExactSolves, getUserRanking, getUserRankingInfo, getUserSolveCount, LeaderboardDocument, RankingDocument, storeSaveState } from "../database/db";
 import { getRemarks } from "../remark/remarks";
-import { ObjectId } from "mongodb";
 import { TextChannelBasedGame } from "./manager";
 
 type Solver = {
