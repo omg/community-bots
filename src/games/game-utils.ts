@@ -45,12 +45,21 @@ export function formatPlacementWithEnglishWords(x) {
   return NUMBER_WORDS[x] || formatPlacement(x);
 }
 
-// TODO: terrible names?
-export function engNum(x, singular, plural) {
-  return x === 1 ? singular : plural;
-}
-export function engLen(x, singular, plural) {
-  return engNum(x.length, singular, plural);
+// replacement for engNum/engLen
+/**
+ * Helper function for Determining if a given amount is of singular or plural form
+ * 
+ * @param amount A number or an array of items
+ * @param singular The singular form of the word
+ * @param plural The plural form of the word
+ * @returns The parameter singular or plural
+ */
+export function isPlural(amount: number | any[], singular: string, plural: string): string {
+  if (amount instanceof Array) {
+    return amount.length === 1 ? singular : plural;
+  }
+
+  return amount === 1 ? singular : plural;
 }
 
 export function isNumberVowelSound(x) {
