@@ -1,16 +1,16 @@
 import { is10000Related, is1000Related, is100Related, is1Related, isDoomRelated } from "../../dictionary/dictionary";
 import { getRemarkEmoji } from "../../emoji-renderer";
 import { formatPlacementWithEnglishWords } from "../../games/game-utils";
-import { RemarkRelatedData } from "../../games/wbm";
+import { WBMRemarkData } from "../../games/wbmgame";
 import { formatNumber } from "../../utils";
 
 function createSolveRemark(
-  data: RemarkRelatedData, 
+  data: WBMRemarkData, 
   solveNumber: number, 
   ): string {
     let remark = "";
-    let winnerSolution = data.round.winner.solution;
-    let isExactSolve = data.round.winner.solution === data.round.promptWord;
+    let winnerSolution = data.currRound.winner.solution;
+    let isExactSolve = data.currRound.winner.solution === data.currRound.promptWord;
 
     let solveNumberOnlyHas6 = solveNumber
     .toString()
@@ -91,16 +91,16 @@ function createSolveRemark(
     }
 
     if (isExactSolve && !hasRemarkedExactness) {
-      remark += "\n" +
-        getRemarkEmoji("solveExact") +
-        ` **Lucky!** That's your **${formatPlacementWithEnglishWords(data.postRoundWinnerData.exactSolves)} exact solve**!`;
+      remark += getRemarkEmoji("solveExact") +
+        ` **Lucky!** That's your **${formatPlacementWithEnglishWords(data.postRoundWinnerData.rankingDocuments["All-Time"].exactSolves)} exact solve**!`;
     }
 
     return remark;
 }
 
-export function execute(data: RemarkRelatedData): string {
-  let remark = createSolveRemark(data, data.postRoundWinnerData.solveCount);
+export function execute(data: WBMRemarkData): string {
+  console.log(data.postRoundWinnerData.rankingDocuments);
+  let remark = createSolveRemark(data, data.postRoundWinnerData.rankingDocuments["All-Time"].solves);
 
   return remark;
 }

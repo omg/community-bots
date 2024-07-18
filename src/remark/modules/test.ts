@@ -1,7 +1,7 @@
-import { RemarkRelatedData } from "../../games/wbm";
+import { WBMRemarkData } from "../../games/wbmgame";
 
-export function execute(data: RemarkRelatedData): string {
-  if (data.round.winner?.solution == "plank") {
+export function execute(data: WBMRemarkData): string {
+  if (data.currRound.winner?.solution == "plank") {
     return "Holy Moly Plonk";
   }
 }

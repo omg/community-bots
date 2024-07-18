@@ -1,4 +1,4 @@
-import { RemarkRelatedData } from "../games/wbm";
+import { WBMRemarkData } from "../games/wbmgame";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -11,7 +11,7 @@ walkRemarkDir();
 type Remark = {
   index?: number;
 
-  execute: (data: RemarkRelatedData) => string;
+  execute: (data: WBMRemarkData) => string;
 }
 
 function walkRemarkDir() {
@@ -28,18 +28,19 @@ function walkRemarkDir() {
     };
   });
 
-  ALLREMARKS.sort((a, b) => a.index - b.index);
+  ALLREMARKS.sort((a, b) => b.index - a.index);
 }
 
-export async function getRemarks(data: RemarkRelatedData): Promise<string> {
-  const promiseResults = await Promise.all(ALLREMARKS.map(async (remark) => {
+export async function getRemarks(data: WBMRemarkData): Promise<string> {
+  let promiseResults = await Promise.all(ALLREMARKS.map(async (remark) => {
     // remarks should be executed in the same order they are added (sorted by index)
-    // so we shouldnt have to worry about ordering them later ?
-    // will there be issues with remarks having the same index ? hope not...
-    return { result: await remark.execute(data) };
-  }))
-  
-  return promiseResults.map((result) => result.result).join("\n");
+    // so we shouldnt have to worry about ordering them later
+    // will there be issues with remarks having the same index..? hope not...
+    return await remark.execute(data);
+  }));
+  let r = promiseResults.filter((s) => s !== "" && s).join("\n");
+  console.log(promiseResults.filter((s) => s !== "" && s), r);
+  return r;
 }
 
 

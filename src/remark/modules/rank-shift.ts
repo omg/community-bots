@@ -1,12 +1,12 @@
 import { getRemarkEmoji } from "../../emoji-renderer";
-import { engNum } from "../../games/game-utils";
-import { RemarkRelatedData } from "../../games/wbm";
+import { isPlural } from "../../games/game-utils";
+import { WBMRemarkData } from "../../games/wbmgame";
 import { formatNumber } from "../../utils";
 
-export function execute(data: RemarkRelatedData): string {
+export function execute(data: WBMRemarkData): string {
   let rankingBefore = data.postRoundWinnerData.rankingBefore;
   let rankingAfter = data.postRoundWinnerData.rankingAfter;
-  let solveNumber = data.postRoundWinnerData.solveCount;
+  let solveNumber = data.postRoundWinnerData.rankingDocuments["All-Time"].solves;
 
   if (!rankingBefore || solveNumber <= 1 || rankingAfter >= rankingBefore) return ""; 
 
@@ -17,7 +17,7 @@ export function execute(data: RemarkRelatedData): string {
   return getRemarkEmoji("rankingMovement") +
     ` You went up **${formatNumber(
       rankingBefore - rankingAfter
-    )}** ${engNum(
+    )}** ${isPlural(
       rankingBefore - rankingAfter, "place", "places"
     )}, you're now **${formatNumber(rankingAfter)}**! (All-Time)`;
 }

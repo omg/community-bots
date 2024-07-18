@@ -1,4 +1,4 @@
-import { RemarkRelatedData } from "../games/wbm";
+import { WBMRemarkData } from "../games/wbmgame";
 
 // i wish there was a way to display the full type, with all of its properties and subtypes
 // but i cant find a way to do that, and its not worth doing manually since shit will change at some point
@@ -8,8 +8,8 @@ import { RemarkRelatedData } from "../games/wbm";
  * 
  * @param data 
  */
-export function execute(data: RemarkRelatedData): string {
-  if (data.round.winner?.solution == "plonk") {
+export function execute(data: WBMRemarkData): string {
+  if (data.currRound.winner?.solution == "plonk") {
     return "Holy Moly Plonk";
   }
 
@@ -24,5 +24,5 @@ export function execute(data: RemarkRelatedData): string {
 export const index = 999;
 
 // if true the remark will not be used
-// if undefined the remark will be used
+// if undefined or false the remark will be used
 export const disabled = true;

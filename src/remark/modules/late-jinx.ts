@@ -1,6 +1,6 @@
 import { getRemarkEmoji } from "../../emoji-renderer";
-import { engLen } from "../../games/game-utils";
-import { RemarkRelatedData } from "../../games/wbm"; 
+import { isPlural } from "../../games/game-utils";
+import { WBMRemarkData } from "../../games/wbmgame";
 import { createEnglishList } from "../../utils";
 
 const JINX_APPENDS = [
@@ -15,19 +15,19 @@ function mergeRemarks(s: string[]): string {
   return s.join("\n");
 }
 
-export function execute(data: RemarkRelatedData): string {
-  if (data.round.solvers.length === 1) return;
+export function execute(data: WBMRemarkData): string {
+  if (data.currRound.solvers.length === 1) return;
 
   let jinxRemarks = [];
   let lateRemarks = [];
   let jinxList = [];
 
-  let lateSolvers = data.round.solvers.slice(1);
+  let lateSolvers = data.currRound.solvers.slice(1);
   let wordsUsed = [...new Set(lateSolvers.map((solver) => solver.solution))];
   let lateSolversWhoHaveNotJinxed = [...lateSolvers];
 
   for (let word of wordsUsed) {
-    let playersWhoUsedWord = data.round.solvers
+    let playersWhoUsedWord = data.currRound.solvers
       .filter((solver) => solver.solution === word)
       .map((solver) => solver.user);
     
@@ -43,7 +43,7 @@ export function execute(data: RemarkRelatedData): string {
   // add jinx remarks
   for (let i = 0; i < jinxList.length; i++) {
     let jinxers = jinxList[i];
-    let names = jinxers.map((id) => data.round.solvers.find((solver) => solver.user === id).userDisplayName);
+    let names = jinxers.map((id) => data.currRound.solvers.find((solver) => solver.user === id).userDisplayName);
     let jinxText = JINX_APPENDS[i] || JINX_APPENDS[JINX_APPENDS.length - 1];
 
     jinxRemarks.push(
@@ -61,7 +61,7 @@ export function execute(data: RemarkRelatedData): string {
   let lateNames = lateSolversWhoHaveNotJinxed.map((solver) => solver.userDisplayName);
   if (lateNames.length > 0) {
     lateRemarks.push(
-      `**${createEnglishList(lateNames)}** ${engLen(
+      `**${createEnglishList(lateNames)}** ${isPlural(
         lateNames,
         "was",
         "were"
