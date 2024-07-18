@@ -1,8 +1,9 @@
-import { ActivityType, Channel, Client, GatewayIntentBits, Guild, GuildTextBasedChannel, Message, Partials } from "discord.js";
+import { ActivityType, Channel, Client, GatewayIntentBits, Guild, GuildTextBasedChannel, Message, Partials, TextChannel } from "discord.js";
 
 import path from "node:path";
 import { registerClientAsCommandHandler } from "../../src/command-handler";
-import { WordBombMini } from "../../src/games/wbm";
+import { GAME_MANAGER } from "../../src/games/manager";
+import { WordBombMini } from "../../src/games/wbmgame";
 
 export const lameBotClient: Client = new Client({
   intents: [
@@ -32,6 +33,16 @@ function updatePresence() {
 lameBotClient.on("ready", () => {
   console.log(`Logged in as ${lameBotClient.user?.tag}!`);
   updatePresence();
+
+  GAME_MANAGER.registerGame(WordBombMini, "wbm", lameBotClient, 
+    {  
+      guild: "733744302756200501",
+      channel: "964690917808291920",
+      replyMessage: "1263268949332594848",
+
+      event: "messageCreate"
+    }
+  )
 });
 
 /**
