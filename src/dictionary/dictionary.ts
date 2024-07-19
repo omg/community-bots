@@ -26,19 +26,14 @@ const frequencyMap = parseFrequencyMap(frequencyMapString);
  * @returns Frequency map as a Map object
  */
 function parseFrequencyMap(map: string): Map<string, number> {
-  let fMap = new Map<string, number>();
-  let lines = map.split("\r\n");
+  let frequencyMap = new Map<string, number>();
+  let lines = splitLines(map);
   for (let line of lines) {
     let [numSolutions, prompt] = line.split("\t");
-    fMap.set(prompt, parseInt(numSolutions));
+    if (prompt) frequencyMap.set(prompt, parseInt(numSolutions));
   }
 
-  fMap.forEach((value, key) => {
-    if (isNaN(value)) {
-      fMap.delete(key);
-      return;
-    }
-
+  frequencyMap.forEach((value, key) => {
     // are we Dead Set on length required needing the like 40+ solves, or should we just cope and hardlock it to 23 still?
     // TODO: Check the above comment out
     if (
@@ -49,11 +44,15 @@ function parseFrequencyMap(map: string): Map<string, number> {
       (key.match(/\./g) && key.match(/\./g).length > 2) ||
       value < 23
     ) {
-      fMap.delete(key);
+      frequencyMap.delete(key);
     }
   });
 
-  return fMap;
+  return frequencyMap;
+}
+
+export function splitLines(string: string) {
+  return string.replace(/\r\n/g,'\n').split('\n');
 }
 
 /**
@@ -62,7 +61,7 @@ function parseFrequencyMap(map: string): Map<string, number> {
  * @param dstring Dictionary string
  */
 function stringIntoSet(dstring: string): Set<string> {
-  return new Set(dstring.toUpperCase().split("\r\n"));
+  return new Set(splitLines(dstring.toUpperCase()));
 }
 
 // TODO holy copy-paste batman
