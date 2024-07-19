@@ -1,4 +1,4 @@
-import { generatePrompt, solvePromptWithTimeout, solverCache, standardizeWord } from "../dictionary/dictionary";
+import { generatePrompt, solvePromptWithTimeout, solverCache, normalizeUserInput } from "../dictionary/dictionary";
 import { isRepeatedPrompt } from "./game-utils";
 import { formatNumber, getCleanName } from "../utils";
 import { sendMessage, sendMessageWithReplyID } from "../../lame-bot/src/client";
@@ -372,7 +372,7 @@ export class WordBombMini extends TextChannelBasedGame {
     )
       return;
 
-    let guess = standardizeWord(message.content).toUpperCase();
+    let guess = normalizeUserInput(message.content);
     let round = this.currentRound;
 
     if (round.prompt.test(guess) && round.solutions.has(guess)) {

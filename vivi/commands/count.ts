@@ -2,7 +2,7 @@ import { replyToInteraction } from '../../src/command-handler';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber } from '../../src/utils';
 
-import { cleanWord, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 import { getPromptRegexDisplayText, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()

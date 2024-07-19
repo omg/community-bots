@@ -2,7 +2,7 @@ import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getRemarkEmoji } from '../../src/emoji-renderer';
 import { replyToInteraction } from '../../src/command-handler';
 
-import { cleanWord, isWord } from '../../src/dictionary/dictionary';
+import { isWord, normalizeUserInput } from '../../src/dictionary/dictionary';
 
 export const data = new SlashCommandBuilder()
   .setName('check')
@@ -27,7 +27,7 @@ const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
 
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let word = cleanWord(interaction.options.get("word").value as string).toUpperCase();
+  let word = normalizeUserInput(interaction.options.get("word").value as string);
   
   // check if the word only has valid characters
   if (invalidWordRegex.test(word)) {

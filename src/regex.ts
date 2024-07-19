@@ -99,7 +99,7 @@ const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
  * ```
  */
 export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
-  let cleanQuery = standardizeWord(promptQuery);
+  let cleanQuery = normalizeUserInput(promptQuery, { convertToUppercase: false });
   let regexResult = regexTest.exec(cleanQuery);
 
   // TODO find args in the query

@@ -1,8 +1,7 @@
+import appRoot from "app-root-path";
 import { fork } from "child_process";
 import fs from "node:fs";
 import path from "path";
-import appRoot from "app-root-path";
-import { escapeRegExp } from "../regex";
 
 // TODO: pull dictionaries from Vivi API
 try {
@@ -69,7 +68,7 @@ function stringIntoSet(dstring: string): Set<string> {
  * Checks if a word is "related to firstness". This checks if the specified word is found in the 'related1String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is1Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word);
   return related1Set.has(cleanInput);
 }
 
@@ -77,7 +76,7 @@ export function is1Related(word: string): boolean {
  * Checks if a word is related to 100. This checks if the specified word is found in the 'related100String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is100Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word);
   return related100Set.has(cleanInput);
 }
 
@@ -85,7 +84,7 @@ export function is100Related(word: string): boolean {
  * Checks if a word is related to 1000. This checks if the specified word is found in the 'related1000String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is1000Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word);
   return related1000Set.has(cleanInput);
 }
 
@@ -93,7 +92,7 @@ export function is1000Related(word: string): boolean {
  * Checks if a word is related to 10000. This checks if the specified word is found in the 'related10000String' variable. The word is cleaned and standardized before performing the check.
  */
 export function is10000Related(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word);
   return related10000Set.has(cleanInput);
 }
 
@@ -101,31 +100,50 @@ export function is10000Related(word: string): boolean {
  * Checks if a word is doomy. This checks if the specified word is found in the 'relatedDoomString' variable. The word is cleaned and standardized before performing the check.
  */
 export function isDoomRelated(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word);
   return relatedDoomSet.has(cleanInput);
 }
 
-// is standardize the best name for this?
+interface NormalizationOptions {
+  convertToUppercase: boolean;
+  trim: boolean;
+}
+
+const DEFAULT_NORMALIZATION_OPTIONS: NormalizationOptions = {
+  convertToUppercase: true,
+  trim: true
+};
+
 /**
- * Standardizes a word by performing the following operations:
+ * Normalizes user input.
+ * This is because some platforms, such as iOS and macOS, may use different characters for quotes, hyphens, and ellipsis.
+ * 
+ * The default options will:
+ * 1. Convert the word to uppercase.
+ * 2. Trim any leading or trailing whitespace from the input.
+ * 
+ * Then, this function will perform the following operations:
  * 1. Replaces any occurrences of curly single quotes ‘’ with straight single quotes ' (iOS and macOS may use curly quotes by default)
- * 2. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
- * 3. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
- * 4. Trims any leading or trailing whitespace from the word.
+ * 2. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
  *
- * **NOTE:** Trimming might ruin some searches.
- * This function will also not convert the word to uppercase. Make sure you implement case insensitivity.
- *
- * @param word The word to be standardized
- * @returns The standardized string
+ * @param input The input to be normalized
+ * @returns The normalized string
  */
-export function standardizeWord(word: string): string {
-  return word
-    .toUpperCase()
+export function normalizeUserInput(input: string, options?: Partial<NormalizationOptions>): string {
+  const opts: NormalizationOptions = {
+    ...DEFAULT_NORMALIZATION_OPTIONS,
+    ...options
+  }
+
+  input = input
     .replace(/[‘’]/g, "'")
-    .replace(/\-/g, "-")
-    .replace(/…/g, "...")
-    .trim();
+    // .replace(/\-/g, "-") // Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
+    .replace(/…/g, "...");
+
+  if (opts.convertToUppercase) input = input.toUpperCase();
+  if (opts.trim) input = input.trim();
+
+  return input;
 }
 
 /**
@@ -144,7 +162,7 @@ export function PromptException(message: string) {
  * @param word The word to be checked
  */
 export function isWord(word: string): boolean {
-  let cleanInput = standardizeWord(escapeRegExp(word)).toUpperCase();
+  let cleanInput = normalizeUserInput(word); // escapeRegExp(word)
   return dictionarySet.has(cleanInput);
   // return new RegExp("^" + cleanInput + "$", "mi").test(dictionaryString);
 }
@@ -292,8 +310,3 @@ export function getWordsInDictionary(): number {
 export function getDictionary(): Set<string> {
   return dictionarySet;
 }
-
-/**
- * @deprecated Use {@link standardizeWord} instead.
- */
-export const cleanWord = standardizeWord;

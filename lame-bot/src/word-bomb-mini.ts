@@ -13,7 +13,6 @@ import {
   setReplyMessage
 } from "../../src/database/db";
 import {
-  cleanWord,
   generatePrompt,
   is10000Related,
   is1000Related,
@@ -21,6 +20,7 @@ import {
   is1Related,
   isDoomRelated,
   isWord,
+  normalizeUserInput,
   solverCache
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
@@ -664,7 +664,7 @@ lameBotClient.on("messageCreate", (message) => {
   if (message.content.includes("\n")) return;
 
   // check if the guess is a solve and if it contains the prompt
-  let guess = cleanWord(message.content).toUpperCase();
+  let guess = normalizeUserInput(message.content);
   if (prompt.test(escapeRegExp(guess)) && isWord(guess)) {
     let repeatablePrompt = getPromptRepeatableText(prompt);
     if (
