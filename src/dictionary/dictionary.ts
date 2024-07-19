@@ -184,7 +184,7 @@ export function solvePromptWithTimeout(
   let dictionary = Array.from(dictionarySet);
 
   return new Promise((resolve, reject) => {
-    const worker = fork(path.join(__dirname, "solve-worker.ts"));
+    const worker = fork(path.join(__dirname, "solve-worker"));
 
     let timeoutId = setTimeout(() => {
       worker.kill();
@@ -215,7 +215,7 @@ export function solvePromptWithTimeout(
     });
 
     worker.send({ dictionary, regex: promptRegex.source }, (e) => {
-      console.log(e);
+      if (e) console.log(e);
     });
   });
 }
