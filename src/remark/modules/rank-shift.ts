@@ -1,5 +1,5 @@
 import { getRemarkEmoji } from "../../emoji-renderer";
-import { isPlural } from "../../games/game-utils";
+import { usePlural } from "../../games/game-utils";
 import { WBMRemarkData } from "../../games/wbmgame";
 import { formatNumber } from "../../utils";
 
@@ -21,7 +21,7 @@ export function execute(data: WBMRemarkData): string {
 
   return (
     getRemarkEmoji("rankingMovement") +
-    ` You went up **${formatNumber(rankingBefore - rankingAfter)}** ${isPlural(
+    ` You went up **${formatNumber(rankingBefore - rankingAfter)}** ${usePlural(
       rankingBefore - rankingAfter,
       "place",
       "places"

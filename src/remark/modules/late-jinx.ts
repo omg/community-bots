@@ -1,5 +1,5 @@
 import { getRemarkEmoji } from "../../emoji-renderer";
-import { isPlural } from "../../games/game-utils";
+import { usePlural } from "../../games/game-utils";
 import { WBMRemarkData } from "../../games/wbmgame";
 import { createEnglishList } from "../../utils";
 
@@ -61,7 +61,7 @@ export function execute(data: WBMRemarkData): string {
   let lateNames = lateSolversWhoHaveNotJinxed.map((solver) => solver.userDisplayName);
   if (lateNames.length > 0) {
     lateRemarks.push(
-      `**${createEnglishList(lateNames)}** ${isPlural(
+      `**${createEnglishList(lateNames)}** ${usePlural(
         lateNames,
         "was",
         "were"

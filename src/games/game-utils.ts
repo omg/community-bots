@@ -41,24 +41,27 @@ const NUMBER_WORDS = {
 };
 
 // TODO: terrible name
-export function formatPlacementWithEnglishWords(x) {
+export function formatPlacementWithEnglishWords(x: number): string {
   return NUMBER_WORDS[x] || formatPlacement(x);
 }
 
-// replacement for engNum/engLen
 /**
- * Helper function for Determining if a given amount is of singular or plural form
+ * Uses the singular or plural string based on the provided amount or items in an array.
  *
- * @param amount A number or an array of items
+ * @param amount The amount to determine the plurality of
  * @param singular The singular form of the word
  * @param plural The plural form of the word
- * @returns The parameter singular or plural
+ * @returns The singular, if the amount is 1, otherwise the plural
  */
-export function isPlural(
-  amount: number | any[],
+export function usePlural(
+  amount: number | any[] | Set<any>,
   singular: string,
   plural: string
 ): string {
+  if (amount instanceof Set) {
+    return amount.size === 1 ? singular : plural;
+  }
+
   if (amount instanceof Array) {
     return amount.length === 1 ? singular : plural;
   }
@@ -66,6 +69,14 @@ export function isPlural(
   return amount === 1 ? singular : plural;
 }
 
-export function isNumberVowelSound(x) {
+/**
+ * Determines if a number starts with a vowel sound.
+ * 
+ * This is useful when determining if "a" or "an" should be used before a number.
+ * 
+ * @param x The number to check
+ * @returns true if the number starts with a vowel sound
+ */
+export function isNumberVowelSound(x: number): boolean {
   return x == 11 || x == 18 || x.toString().startsWith("8");
 }

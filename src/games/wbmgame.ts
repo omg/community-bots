@@ -1,11 +1,11 @@
-import { generatePrompt, solvePromptWithTimeout, solverCache, normalizeUserInput } from "../dictionary/dictionary";
-import { isRepeatedPrompt } from "./game-utils";
-import { formatNumber, getCleanName } from "../utils";
 import { sendMessage, sendMessageWithReplyID } from "../../lame-bot/src/client";
+import { finishRound, getActiveLeaderboards, getSaveState, getUserRanking, getUserRankingInfo, RankingDocument, storeSaveState } from "../database/db";
+import { generatePrompt, normalizeUserInput, solvePrompt, solverCache } from "../dictionary/dictionary";
 import { getRemarkEmoji } from "../emoji-renderer";
 import { convertTextToHighlights, getPromptRegexDisplayText } from "../regex";
-import { finishRound, getActiveLeaderboards, getSaveState, getUserExactSolves, getUserRanking, getUserRankingInfo, getUserSolveCount, LeaderboardDocument, RankingDocument, storeSaveState } from "../database/db";
 import { getRemarks } from "../remark/remarks";
+import { formatNumber, getCleanName } from "../utils";
+import { isRepeatedPrompt } from "./game-utils";
 import { TextChannelBasedGame } from "./manager";
 
 type Solver = {
@@ -165,7 +165,7 @@ export class WordBombMini extends TextChannelBasedGame {
 
     let round = createRoundWithSaveState(state);
     round.solutions = new Set(
-      await solvePromptWithTimeout(round.prompt, 5000, null)
+      await solvePrompt(round.prompt)
     );
 
     this.currentRound = round;
@@ -375,7 +375,7 @@ export class WordBombMini extends TextChannelBasedGame {
     let round = this.currentRound;
 
     if (round.prompt.test(guess) && round.solutions.has(guess)) {
-      if (isRepeatedPrompt(round.prompt.source, guess)) {
+      if (isRepeatedPrompt(round.prompt, guess)) {
         if (round.solvers.length > 0) return;
 
         message
