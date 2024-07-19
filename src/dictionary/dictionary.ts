@@ -235,7 +235,7 @@ export function solvePrompt(
     });
 
     worker.send({ dictionary, regex: promptRegex.source }, (e) => {
-      if (e) console.log(e);
+      if (e) throw e;
     });
   });
 }
