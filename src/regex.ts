@@ -76,7 +76,8 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
-const invalidPromptSearchRegex = /[^A-Z0-9'\-@. ]/i;
+// No longer truly useful, after ? is no longer considered a wildcard
+// const invalidPromptSearchRegex = /[^A-Z0-9'\-@. ]/i;
 
 /**
  * A regular expression used to determine if a search is regex or not.
@@ -100,17 +101,19 @@ const regexTest = /(?:^| )\/(.*)\/(?: |$)/;
  */
 export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
   let cleanQuery = normalizeUserInput(promptQuery, { convertToUppercase: false });
+
+  // Check if the user inputted the regex using the /regex/ format
   let regexResult = regexTest.exec(cleanQuery);
 
-  // TODO find args in the query
+  // TODO: Allow the user to add arguments to the query, inline
 
-  // let's just be safe with backticks
+  // Backticks cause an undocumented problem, nobody wrote this down, but I'm assuming it has to do with display. Lol.
   if (cleanQuery.includes("`")) {
     throw new PromptException("The prompt you've entered is invalid.");
   }
 
   if (regexResult) {
-    // This has regex
+    // This was inputted using the /regex/ format
 
     let regexInput = regexResult[1];
 
@@ -124,18 +127,26 @@ export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
   } else {
     // This isn't regex
 
-    // If the query has characters that are invalid for prompt search, we can assume it might be a regex.
-    if (invalidPromptSearchRegex.test(cleanQuery)) {
-      try {
-        return validateRegex(cleanQuery);
-      } catch {
-        // The regex was invalid, return that the prompt was invalid
-        throw new PromptException("The prompt you've entered is invalid.");
-      }
+    // // If the query has characters that are invalid for prompt search, we can assume it might be a regex.
+    // if (invalidPromptSearchRegex.test(cleanQuery)) {
+    //   try {
+    //     return validateRegex(cleanQuery);
+    //   } catch {
+    //     // The regex was invalid, return that the prompt was invalid
+    //     throw new PromptException("The prompt you've entered is invalid.");
+    //   }
+    // }
+
+    try {
+      return validateRegex(cleanQuery);
+    } catch {
+      // The regex was invalid, return that the prompt was invalid
+      throw new PromptException("The prompt you've entered is invalid.");
     }
 
-    // this escapes all other special characters
-    return new RegExp(escapeRegExp(cleanQuery), "i");
+    // This isn't useful because we're now assuming the user always wants to be inputting regex
+    // // this escapes all other special characters, used when the user wants things like "." to be a literal "."
+    // return new RegExp(escapeRegExp(cleanQuery), "i");
   }
 }
 
@@ -449,9 +460,34 @@ export function convertTextToHighlights(text: string, regex: RegExp, highlight: 
 }
 
 /**
+ * A string which contains all characters that are valid to be typed by a user for dictionary input.
+ */
+const userPromptInputCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ'-";
+
+/**
+ * A string which contains all characters that are valid to be shown by prompt emojis.
+ */
+const promptDisplayCharacters = userPromptInputCharacters + "0123456789'-@ ";
+
+/**
+ * Regular expression used to check if the dictionary input contains any invalid characters.
+ */
+const invalidDictionaryInputRegex = new RegExp(`[^${userPromptInputCharacters}]`, "i");
+
+/**
  * Regular expression used to check if the prompt display contains any invalid characters. Only uppercase letters, numbers, apostrophes, hyphens, at symbols, and spaces are considered valid.
  */
-const invalidPromptDisplayRegex = /[^A-Z0-9'\-@ ]/i;
+const invalidPromptDisplayRegex = new RegExp(`[^${promptDisplayCharacters}]`, "i"); // /[^A-Z0-9'\-@ ]/i;
+
+/**
+ * Returns if the input string only contains valid characters for dictionary input.
+ * 
+ * @param input The input string to check
+ * @returns true if the input string only contains valid characters for dictionary input
+ */
+export function isValidDictionaryInput(input: string): boolean {
+  return !invalidDictionaryInputRegex.test(input);
+}
 
 /**
  * This function will take a regex as input and return either a prompt-like display string or a regex encapsulated in backticks.
@@ -503,14 +539,30 @@ export function getPromptRegexDisplayText(regex: RegExp, fancy: boolean = true):
  * ```
  */
 export function getPromptRepeatableText(regex: RegExp): string | undefined {
-  // get the string of the regex
-  let regexString = regex.source;
+  let source = regex.source;
 
-  // check if the regex string has only displayable charaacters.
-  // this is not a perfect check, but it should totally be good enough for our purposes
-  if (!invalidPromptDisplayRegex.test(regexString)) {
-    return regexString;
+  // Remove regex which don't impact the repeatability of the prompt:
+  // Anchors
+  source = source.replace(/(^\^|\$$)/g, "");
+  // Flexible wildcards
+  source = source.replace(/\.(\?|\*|\*\?|\*\+)/g, "");
+
+  // check if the regex string has only inputtable charaacters.
+  if (!invalidDictionaryInputRegex.test(source)) {
+    return source;
   }
 
   return undefined;
+}
+
+/**
+ * Returns true if the prompt is repeatable, false otherwise.
+ * 
+ * This is done by checking if {@link getPromptRepeatableText} returns a string.
+ * 
+ * @param prompt The prompt to check
+ * @returns true if the prompt is repeatable, false otherwise
+ */
+export function isPromptRepeatable(prompt: RegExp): boolean {
+  return getPromptRepeatableText(prompt) !== undefined;
 }

@@ -1,30 +1,24 @@
-import { escapeDiscordMarkdown, formatPlacement } from "../utils";
+import { normalizeUserInput } from "../dictionary/dictionary";
+import { getPromptRepeatableText } from "../regex";
+import { formatPlacement } from "../utils";
 
 /**
- * Returns true of false if the prompt was repeated in the guess
+ * Returns if the prompt was repeated in the guess
  *
  * @param prompt The prompt string
  * @param guess The guess string
  *
- * @returns True or false based on if the prompt was repeated in the guess
+ * @returns true if the prompt was repeated in the guess
  */
-export function isRepeatedPrompt(prompt: string, guess: string): boolean {
-  prompt = prompt.toLowerCase();
-  guess = guess.toLowerCase();
-
-  return prompt === guess || prompt + "s" === guess;
-}
-
-export function getCleanName(name) {
-  let cleanName = escapeDiscordMarkdown(name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, ""));
-  if (cleanName === "") {
-    if (name.length === 0) {
-      return "Lame Member";
-    } else {
-      return "\\" + name[0];
-    }
+export function isRepeatedPrompt(prompt: RegExp, guess: string): boolean {
+  const repeatablePrompt = getPromptRepeatableText(prompt);
+  if (!repeatablePrompt) {
+    return false;
   }
-  return cleanName;
+  
+  guess = normalizeUserInput(guess);
+
+  return repeatablePrompt === guess || repeatablePrompt + "S" === guess;
 }
 
 const NUMBER_WORDS = {
