@@ -1,4 +1,4 @@
-import { PromptException, standardizeWord } from "./dictionary/dictionary";
+import { PromptException, normalizeUserInput } from "./dictionary/dictionary";
 import { getPresentEmojis, getHighlightedEmojis, getWildcardEmojis } from "./emoji-renderer";
 
 /*
@@ -76,7 +76,7 @@ function trimArrows(string: string): string {
   return string.replace(/^<|>$/g, "");
 }
 
-const invalidPromptSearchRegex = /[^A-Z0-9'\-@.? ]/i;
+const invalidPromptSearchRegex = /[^A-Z0-9'\-@. ]/i;
 
 /**
  * A regular expression used to determine if a search is regex or not.
@@ -134,8 +134,8 @@ export function getPromptRegexFromPromptSearch(promptQuery: string): RegExp {
       }
     }
 
-    // this changes all question marks and periods to actual regexp wildcards and escapes all other special characters
-    return new RegExp(escapeRegExp(cleanQuery).replace(/\\\?|\\\./g, "."), "i");
+    // this escapes all other special characters
+    return new RegExp(escapeRegExp(cleanQuery), "i");
   }
 }
 
