@@ -252,7 +252,7 @@ export function randInt(min: number, max: number): number {
 }
 
 // Naming this Prompt feels almost misleading, so this works for now
-type GeneratedPrompt = {
+interface GeneratedPrompt {
   promptWord: string;
   solutions: Set<string>;
   lengthRequired: boolean;
@@ -261,26 +261,27 @@ type GeneratedPrompt = {
 
 // i Feel like doing this is bad, but i need it to be a array for the random selection
 // so why not just have it permanently as a array instead of remaking it every time
-const preMadePromptList = Array.from(frequencyMap.keys());
+const frequencyMapArray = Array.from(frequencyMap.keys());
 
 /**
  * Generates a prompt. It is guaranteed that the prompt will have at least 23 solutions.
  */
 export async function generatePrompt(): Promise<GeneratedPrompt> {
   let promptLength = randInt(3, 5);
-  let requiredCharacters = promptLength + 2;
 
-  let randPromptIndex = Math.floor(Math.random() * preMadePromptList.length);
-  let prompt = preMadePromptList[randPromptIndex];
+  // This was implemented in the previous system to prevent generated prompts from being likely to be
+  // either the word or the word + S, but there doesn't seem to be a feasible way to reimplement that
+  // let requiredCharacters = promptLength + 2;
 
-  let solutions = await solvePromptWithTimeout(
-    new RegExp(prompt, "i"),
-    999999999,
-    null
-  );
+  const randChosenPromptIndex = Math.floor(Math.random() * frequencyMapArray.length);
+  const prompt = frequencyMapArray[randChosenPromptIndex];
+  const promptRegex = new RegExp(prompt, "i");
 
-  let randWordIndex = Math.floor(Math.random() * solutions.length);
-  let promptWord = solutions[randWordIndex];
+  let solutions = await solvePrompt(promptRegex);
+
+  const randChosenWordIndex = Math.floor(Math.random() * solutions.length);
+  const promptWord = solutions[randChosenWordIndex];
+
   // we can be sure the prompt has more than 23 solutions because of the frequency map filtering
   let lengthRequired =
     promptWord.length < 17 &&
@@ -293,10 +294,10 @@ export async function generatePrompt(): Promise<GeneratedPrompt> {
   }
 
   return {
-    promptWord: promptWord,
+    prompt: promptRegex,
+    promptWord,
     solutions: new Set(solutions),
-    lengthRequired: lengthRequired,
-    prompt: new RegExp(prompt, "i"),
+    lengthRequired
   };
 }
 
