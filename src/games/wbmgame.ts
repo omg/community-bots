@@ -119,8 +119,7 @@ function createRoundWithSaveState(state: SaveState): WBMRound {
 }
 
 async function createNewRound(): Promise<WBMRound> {
-  let { prompt, promptWord, solutions, lengthRequired } =
-    await generatePrompt();
+  let { prompt, promptWord, solutions, lengthRequired } = await generatePrompt();
 
   let round = createDefaultRound();
 
