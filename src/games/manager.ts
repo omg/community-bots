@@ -61,10 +61,9 @@ class GameManager {
 
     // TODO: this is probably not the right way to do this /shrug
     (async function startup() {
-      // @ts-ignore
       // this is a protected function so we technically shouldnt be able to call it
       // but we are the game manager so we should be able to do whatever we want
-      await game.__setup();
+      await game._setup();
     })();
   }
 
@@ -76,8 +75,7 @@ class GameManager {
     let game = this.games.get(name);
 
     (async function teardown() {
-      // @ts-ignore
-      game.__destroy();
+      game._destroy();
     })();
   }
 }
@@ -104,8 +102,8 @@ export abstract class TextChannelBasedGame {
   // does it matter if these are protected or not?
   // i just wanted something to show that these shouldnt typically be modified
   // but we still need to call them from the game manager, which we can just ts-ignore to do
-  // but it seems like a hacky way of doing this... maybe the __ is enough?
-  protected async __setup(...args) {
+  // but it seems like a hacky way of doing this... maybe the _ is enough?
+  async _setup(...args) {
     const self = this;
 
     await this.prepare();
@@ -119,7 +117,7 @@ export abstract class TextChannelBasedGame {
 
   // this doesnt really matter much as of now but, if this is ever used
   //  figure out of its a good idea to call this.end() when the game is over
-  protected async __destroy(...args) {
+  async _destroy(...args) {
     const self = this;
 
     this.client.off(this.settings.event, self.update);
