@@ -192,10 +192,10 @@ export let solverCache = new Set();
  *
  * @returns A promise that resolves with a set of solutions, or rejects with an error
  */
-export function solvePromptWithTimeout(
+export function solvePrompt(
   promptRegex: RegExp,
-  timeout: number,
-  user: string
+  timeout?: number,
+  user?: string
 ): Promise<string[]> {
   if (user) solverCache.add(user);
   let dictionary = Array.from(dictionarySet);
@@ -203,14 +203,17 @@ export function solvePromptWithTimeout(
   return new Promise((resolve, reject) => {
     const worker = fork(path.join(__dirname, "solve-worker"));
 
-    let timeoutId = setTimeout(() => {
-      worker.kill();
-      reject(
-        new SolveWorkerException(
-          "Your regex took too long to compute and timed out."
-        )
-      );
-    }, timeout);
+    let timeoutId: NodeJS.Timeout;
+    if (timeout) {
+      timeoutId = setTimeout(() => {
+        worker.kill();
+        reject(
+          new SolveWorkerException(
+            "Your regex took too long to compute and timed out."
+          )
+        );
+      }, timeout);
+    }
 
     worker.on("message", (solutions: string[]) => {
       clearTimeout(timeoutId);
