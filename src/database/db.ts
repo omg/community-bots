@@ -441,7 +441,7 @@ export interface RankingDocument {
 // Check this out when im back on this: https://discord.com/channels/916735613808545872/1061085161317466184/1260762051484188682
 // TODO: There needs to be a good way of getting only active leaderboard ranking documents, its a bit of a mess either way
 // either we filter the results via whichever leaderboards the game wants or we give everything and the game filters it
-export async function getUserRankingInfo<T extends RankingDocument>(user_id: string): Promise<T[]> {
+export async function getUserRankingInfo<T extends RankingDocument = RankingDocument>(user_id: string): Promise<T[]> {
   // for some reason putting the generic on collection (.collection<T>()) gives us a `WithId<T>` type
   // no clue what the reason is but it seems we would need to extend RankingDocument with WithId to make it work together
   // but applying the generic to find<T> gives us the outcome we want
