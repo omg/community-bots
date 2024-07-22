@@ -2,6 +2,13 @@ import { normalizeUserInput } from "../dictionary/dictionary";
 import { getPromptRepeatableText } from "../regex";
 import { formatPlacement } from "../utils";
 
+// does this actually go here? i cant really think of any other place to put it besides games/manager.ts
+// but that doesnt seem right either
+//
+// Also, does it make sense to have this empty and let other types fill it in? because realistically there will be no common data between SaveStates
+// this is just meant to be a generic that can be used for db stuff to keep things typed
+export interface SaveState {}
+
 /**
  * Returns if the prompt was repeated in the guess
  *

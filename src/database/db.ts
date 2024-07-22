@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { SaveState } from "../games/wbmgame";
+import { SaveState } from "../games/game-utils";
 
 // Connection URL
 const url = process.env.MONGO_URL;
@@ -227,6 +227,55 @@ export async function getDefaultGameGuild(): Promise<string> {
   return defaultGameGuild;
 }
 
+interface GameDocument {
+  _id: ObjectId;
+  guild: string;
+  channel: string;
+  replyMessage: string;
+  type: string;
+  state: SaveState;
+}
+
+export async function getDefaultGame(): Promise<GameDocument> {
+  let guild = await getDefaultGameGuild();
+  let channel = await getDefaultGameChannel();
+
+  let config = await client.db(dbName).collection("games").find<GameDocument>({ guild: guild, channel: channel }).limit(1).toArray();
+  return config[0];
+}
+
+export async function getGame(channel: string) {
+  let config = await client.db(dbName).collection("games").find<GameDocument>({ channel: channel }).limit(1).toArray();
+
+  return config[0];
+}
+
+// i dont really like doing this for this SINGLE function, but when this file is reworked later it will probably be around more?
+interface FindGameOptions {
+  guild?: string;
+  channel?: string;
+}
+
+export async function getAllGames({ guild, channel }: FindGameOptions = {}): Promise<GameDocument[]> {
+  // this is so unbelievably ugly but i dont know if we actually can filter it out in a more simple/clean way
+  let query = { ...(guild && { guild: guild }), ...(channel && { channel: channel }) };
+
+  let games = await client.db(dbName).collection("games").find<GameDocument>(query).toArray();
+  
+  return games;
+}
+
+export async function updateGameState<T extends SaveState>(channel: string, state: T): Promise<void> {
+  // TODO: This needs to be addressed before new games are added so we arent overwriting other games data
+  // let type = ???; // this would somehow get the correct type to search for in the database
+
+  await client.db(dbName).collection("games").updateOne({ channel: channel }, { $set: { state: state } });
+}
+
+export async function removeGame(channel: string): Promise<void> {
+  await client.db(dbName).collection("games").deleteOne({ channel: channel });
+}
+
 export async function getReplyMessage() {
   let replyMessage = (
     await client.db(dbName).collection("games").find({}).limit(1).toArray()
@@ -451,26 +500,4 @@ export async function getUserRankingInfo<T extends RankingDocument = RankingDocu
     .collection("rankings")
     .find<T>({ user: user_id })
     .toArray();
-}
-
-// TODO: Change these to use generics for savestate
-export async function getSaveState(channel: string): Promise<SaveState | null> {
-  let saveState = await client
-    .db(dbName)
-    .collection("saves")
-    .find<SaveState>({ channel })
-    .limit(1)
-    .toArray();
-  return saveState.length === 1 ? saveState[0] : null;
-}
-
-export async function storeSaveState(channel: string, state: SaveState) {
-  await client
-    .db(dbName)
-    .collection("saves")
-    .updateOne(
-      { channel },
-      { $set: state },
-      { upsert: true },
-    );
 }

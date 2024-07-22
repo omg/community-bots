@@ -35,7 +35,7 @@ type WBMRound = {
   remarks: string[];
 };
 
-export type SaveState = {
+export type WBMSaveState = SaveState & {
   rawPrompt: string;
   prompt: RegExp;
   promptWord: string;
@@ -103,7 +103,7 @@ function createDefaultRound(): WBMRound {
   };
 }
 
-function createRoundWithSaveState(state: SaveState): WBMRound {
+function createRoundWithSaveState(state: WBMSaveState): WBMRound {
   let round = createDefaultRound();
 
   round.rawPrompt = state.rawPrompt;
@@ -157,7 +157,7 @@ export class WordBombMini extends TextChannelBasedGame {
     });
   }
 
-  async loadSaveState(state: SaveState): Promise<boolean> {
+  async loadSaveState(state: WBMSaveState): Promise<boolean> {
     if (!state) {
       // if theres no state dont load a round and let one be created on start
       return false;
@@ -286,7 +286,7 @@ export class WordBombMini extends TextChannelBasedGame {
     this.previousRound = this.currentRound;
     this.currentRound = await createNewRound();
 
-    await storeSaveState(this.settings.channel.id, {
+    await updateGameState(this.settings.channel.id, {
       rawPrompt: this.currentRound.rawPrompt,
       prompt: this.currentRound.prompt,
       promptWord: this.currentRound.promptWord,
@@ -294,7 +294,7 @@ export class WordBombMini extends TextChannelBasedGame {
       solutionCount: this.currentRound.solutionCount,
       lengthRequired: this.currentRound.lengthRequired,
       streak: this.streak,
-      startedAt: this.currentRound.startedAt,
+      startedAt: this.currentRound.startedAt
     });
 
     await this.sendRoundMessage();
