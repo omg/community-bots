@@ -9,14 +9,9 @@ const CLIENTS: Map<string, Client> = new Map([["lame", lameBotClient]]);
 type GameFactory<T extends TextChannelBasedGame> = new (settings: any, client: any) => T;
 
 type GameOptions = {
-  timeout?: number;
-  shouldRestartOnEnd?: boolean;
-
   guild: string;
   channel: string;
   replyMessage: string;
-
-  event: string;
 };
 
 type GameSettings = Omit<GameOptions, "guild" | "channel"> & {
@@ -27,6 +22,7 @@ type GameSettings = Omit<GameOptions, "guild" | "channel"> & {
 };
 
 class GameManager {
+  // channelid to game instance
   private games: Map<string, TextChannelBasedGame>;
 
   constructor() {
@@ -35,29 +31,28 @@ class GameManager {
 
   registerGame<T extends TextChannelBasedGame>(
     factory: GameFactory<T>,
-    name: string,
     client: Client,
     options: GameOptions
   ) {
     if (!client) {
       // i dont think its a good idea to default every game to a single client so, lets just Error !
       throw new Error("A valid client must be provided to register a game");
-    } else if (!name) {
-      throw new Error("Game must have a name to be registered");
+    } else if (this.games.has(options.channel)) {
+      throw new Error("Game with that name already exists, or a game is already registered to that channel");
     }
 
     // fuckin Hope this works
     if (!client.isReady()) {
       client.once("ready", async () => {
         setTimeout(() => {
-          this.registerGame(factory, name, client, options);
+          this.registerGame(factory, client, options);
         }, 200);
       });
       return;
     }
 
     let game = new factory(options, client);
-    this.games.set(name, game);
+    this.games.set(options.channel, game);
 
     // TODO: this is probably not the right way to do this /shrug
     (async function startup() {
@@ -84,6 +79,7 @@ export abstract class TextChannelBasedGame {
   readonly client: Client;
   readonly settings: GameSettings;
 
+  event: string;
   inProgress: boolean;
 
   constructor(options: GameOptions, client: Client) {
@@ -108,7 +104,7 @@ export abstract class TextChannelBasedGame {
 
     await this.prepare();
 
-    this.client.on(this.settings.event, function (message) {
+    this.client.on(this.event, function (message) {
       self.update(message);
     });
 
@@ -120,7 +116,7 @@ export abstract class TextChannelBasedGame {
   async _destroy(...args) {
     const self = this;
 
-    this.client.off(this.settings.event, self.update);
+    this.client.off(this.event, self.update);
 
     await this.end();
     await this.clean();

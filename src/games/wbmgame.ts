@@ -141,6 +141,7 @@ export class WordBombMini extends TextChannelBasedGame {
   // ObjectId has some fucked comparison stuff, essentially Map<ObjectId, string>.get(ObjectId) will always fail
   // so we have to convert it all into the hexstring first, its so stupid
   active_leaderboards: Map<string, string>;
+  event: string = "messageCreate";
 
   // i think its nicer if we arent exporting the setting types
   // and these dont need to be typed because TextChannelBasedGame has the type and sets it as this.settings
