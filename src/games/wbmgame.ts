@@ -271,11 +271,15 @@ export class WordBombMini extends TextChannelBasedGame {
           "** characters!"
         : "");
 
-    await sendMessageWithReplyID(
-      this.settings.channel,
-      m,
-      this.settings.replyMessage
-    );
+    if (this.settings.replyMessage) {
+      await sendMessageWithReplyID(
+        this.settings.channel,
+        m,
+        this.settings.replyMessage
+      );
+    } else {
+      await sendMessage(this.settings.channel, m);
+    }
   }
 
   async startRound() {
