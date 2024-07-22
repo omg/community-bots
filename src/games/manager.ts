@@ -6,9 +6,9 @@ import { lameBotClient } from "../../lame-bot/src/client";
 // the client to be imported or moved around is a bit better, and it looks cleaner when registering a game
 const CLIENTS: Map<string, Client> = new Map([["lame", lameBotClient]]);
 
-type gameFactory<T> = new (settings: any, client: any) => T;
+type GameFactory<T extends TextChannelBasedGame> = new (settings: any, client: any) => T;
 
-type GameSettings = {
+type GameOptions = {
   timeout?: number;
   shouldRestartOnEnd?: boolean;
 
@@ -19,7 +19,7 @@ type GameSettings = {
   event: string;
 };
 
-type RealSettings = Omit<GameSettings, "guild" | "channel"> & {
+type GameSettings = Omit<GameOptions, "guild" | "channel"> & {
   client: Client;
 
   guild: Guild;
@@ -34,10 +34,10 @@ class GameManager {
   }
 
   registerGame<T extends TextChannelBasedGame>(
-    factory: gameFactory<T>,
+    factory: GameFactory<T>,
     name: string,
     client: Client,
-    settings: GameSettings
+    options: GameOptions
   ) {
     if (!client) {
       // i dont think its a good idea to default every game to a single client so, lets just Error !
@@ -50,13 +50,13 @@ class GameManager {
     if (!client.isReady()) {
       client.once("ready", async () => {
         setTimeout(() => {
-          this.registerGame(factory, name, client, settings);
+          this.registerGame(factory, name, client, options);
         }, 200);
       });
       return;
     }
 
-    let game = new factory(settings, client);
+    let game = new factory(options, client);
     this.games.set(name, game);
 
     // TODO: this is probably not the right way to do this /shrug
@@ -82,18 +82,18 @@ class GameManager {
 
 export abstract class TextChannelBasedGame {
   readonly client: Client;
-  readonly settings: RealSettings;
+  readonly settings: GameSettings;
 
   inProgress: boolean;
 
-  constructor(settings: GameSettings, client: Client) {
+  constructor(options: GameOptions, client: Client) {
     this.client = client;
 
     this.settings = {
-      ...settings,
+      ...options,
       client: client,
-      guild: client.guilds.cache.get(settings.guild),
-      channel: client.channels.cache.get(settings.channel) as TextChannel,
+      guild: client.guilds.cache.get(options.guild),
+      channel: client.channels.cache.get(options.channel) as TextChannel,
     };
 
     this.inProgress = false;
