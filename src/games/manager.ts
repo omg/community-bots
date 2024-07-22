@@ -9,9 +9,6 @@ const CLIENTS: Map<string, Client> = new Map([["lame", lameBotClient]]);
 type gameFactory<T> = new (settings: any, client: any) => T;
 
 type GameSettings = {
-  timeout?: number;
-  shouldRestartOnEnd?: boolean;
-
   guild: string;
   channel: string;
   replyMessage: string;
