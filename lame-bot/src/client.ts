@@ -4,6 +4,7 @@ import path from "node:path";
 import { registerClientAsCommandHandler } from "../../src/command-handler";
 import { GAME_MANAGER } from "../../src/games/manager";
 import { WordBombMini } from "../../src/games/wbmgame";
+import { getAllGames, getDefaultGame, getDefaultGameGuild, getGame } from "../../src/database/db";
 
 export const lameBotClient: Client = new Client({
   intents: [
@@ -33,16 +34,6 @@ function updatePresence() {
 lameBotClient.on("ready", () => {
   console.log(`Logged in as ${lameBotClient.user?.tag}!`);
   updatePresence();
-
-  GAME_MANAGER.registerGame(WordBombMini, "wbm", lameBotClient, 
-    {  
-      guild: "733744302756200501",
-      channel: "964690917808291920",
-      replyMessage: "1263268949332594848",
-
-      event: "messageCreate"
-    }
-  )
 });
 
 /**
@@ -159,6 +150,23 @@ export async function sendMessageWithReplyID(channel: TextChannel, message: stri
     }
   }
 }
+
+lameBotClient.once("ready", async() => {
+  // just a precaution to make sure anything that might also wait for ready is ready
+  setTimeout(() => {}, 2000);
+
+  let game = await getAllGames();
+
+  game.forEach(async (game) => {
+    if (game.type !== "WordBombMini") return;
+
+    GAME_MANAGER.registerGame(WordBombMini, lameBotClient, {
+      guild: game.guild,
+      channel: game.channel,
+      replyMessage: game.replyMessage,
+    });
+  });
+});
 
 //
 

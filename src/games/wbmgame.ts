@@ -1,11 +1,11 @@
 import { sendMessage, sendMessageWithReplyID } from "../../lame-bot/src/client";
-import { finishRound, getActiveLeaderboards, getSaveState, getUserRanking, getUserRankingInfo, RankingDocument, storeSaveState } from "../database/db";
+import { finishRound, getActiveLeaderboards, getUserRanking, getUserRankingInfo, RankingDocument, getGame, updateGameState } from "../database/db";
 import { generatePrompt, normalizeUserInput, solvePrompt, solverCache } from "../dictionary/dictionary";
 import { getRemarkEmoji } from "../emoji-renderer";
 import { convertTextToHighlights, getPromptRegexDisplayText } from "../regex";
 import { getRemarks } from "../remark/remarks";
 import { formatNumber, getCleanName } from "../utils";
-import { isRepeatedPrompt } from "./game-utils";
+import { isRepeatedPrompt, SaveState } from "./game-utils";
 import { TextChannelBasedGame } from "./manager";
 
 type Solver = {
@@ -352,10 +352,11 @@ export class WordBombMini extends TextChannelBasedGame {
   }
 
   async start() {
+    let game = await getGame(this.settings.channel.id);
     let loaded = await this.loadSaveState(
-      await getSaveState(this.settings.channel.id)
+      game.state as WBMSaveState
     );
-    console.log("Loading state", loaded);
+    console.log("Loaded state successfully? ", loaded);
 
     if (!loaded) {
       await this.startRound();
