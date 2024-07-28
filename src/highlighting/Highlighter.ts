@@ -1,15 +1,19 @@
-import { CharacterMap, CharacterTheme } from "../highlighting/CharacterSet";
-import CaffeinatedCharacterTheme from "../highlighting/highlighters/Caffeinated";
-import ComicSansCharacterTheme from "../highlighting/highlighters/ComicSans";
-import DarkCharacterTheme from "../highlighting/highlighters/Dark";
-import DefaultCharacterTheme from "../highlighting/highlighters/Default";
-import GreenCharacterTheme from "../highlighting/highlighters/Green";
-import LifeboatCharacterTheme from "../highlighting/highlighters/Lifeboat";
-import LilacCharacterTheme from "../highlighting/highlighters/Lilac";
-import RoseCharacterTheme from "../highlighting/highlighters/Rose";
-import TextCharacterTheme from "../highlighting/highlighters/Text";
-import ViviCharacterTheme from "../highlighting/highlighters/Vivi";
+import { CharacterMap, CharacterTheme } from "./CharacterSet";
+import CaffeinatedCharacterTheme from "./highlighters/Caffeinated";
+import ComicSansCharacterTheme from "./highlighters/ComicSans";
+import DarkCharacterTheme from "./highlighters/Dark";
+import DefaultCharacterTheme from "./highlighters/Default";
+import GreenCharacterTheme from "./highlighters/Green";
+import LifeboatCharacterTheme from "./highlighters/Lifeboat";
+import LilacCharacterTheme from "./highlighters/Lilac";
+import RoseCharacterTheme from "./highlighters/Rose";
+import TextCharacterTheme from "./highlighters/Text";
+import ViviCharacterTheme from "./highlighters/Vivi";
 import { getHighlightedLetters, setHighlightGroups } from "../regex";
+import { CommandInteraction } from "discord.js";
+import { getHighlighterTheme } from "../database/db";
+
+type HighlightingBots = "vivi" | "unknown";
 
 export class Highlighter {
   private theme: CharacterTheme;
@@ -94,9 +98,32 @@ export class Highlighter {
 
     return emojiString;
   }
+
+  static fromName(name: string): Highlighter | undefined {
+    return Highlighters[name];
+  }
+
+  static async fromServerInteraction(userID: string): Promise<Highlighter> {
+    const highlighterTheme: string = await getHighlighterTheme(userID);
+    return Highlighter.fromName(highlighterTheme) ?? DefaultHighlighter;
+  }
+
+  static async fromCommand(userID: string, guildID: string, fromBot: HighlightingBots): Promise<Highlighter> {
+    if (guildID !== process.env.GUILD_ID) {
+      switch (fromBot) {
+        case "vivi":
+          return Highlighters.Vivi;
+      }
+    }
+    return Highlighter.fromServerInteraction(userID);
+  }
+
+  static async fromCommandInteraction(interaction: CommandInteraction, fromBot: HighlightingBots): Promise<Highlighter> {
+    return Highlighter.fromCommand(interaction.user.id, interaction.guildId, fromBot);
+  }
 }
 
-export const Highlighters = {
+const Highlighters = {
   // Themes for OMG
   Default: new Highlighter(DefaultCharacterTheme),
   Caffeinated: new Highlighter(CaffeinatedCharacterTheme),
@@ -113,3 +140,10 @@ export const Highlighters = {
   // Highlighters for testing
   Text: new Highlighter(TextCharacterTheme)
 }
+
+/**
+ * The default highlighter to use.
+ * 
+ * Change this if you're working locally and your bot doesn't have access to the emojis, when testing, or something else.
+ */
+export const DefaultHighlighter = Highlighters.Default;
