@@ -30,6 +30,7 @@ export const broadcastable = false;
 export const cooldown = 90 * 1000; // Lol there's no way to fix this  LOL! Lol! Made a mistake? 90 SECOND COOLDOWN! LOL!
 
 const boosterPositionRole = "1183517686232268904";
+const boosterEndRole = "1267109693252309134";
 
 const validateUserName = (name: string, _id?: string) => {
   let validated = "";
@@ -66,7 +67,12 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     }
 
     let roles = interaction.guild.roles;
+    let rolePos = roles.cache.get(boosterPositionRole).position;
+    let endRolePos = roles.cache.get(boosterEndRole).position;
     let userBoosterRole = roles.cache.get(profile.boosterRole);
+
+    const higherPosition = Math.max(rolePos, endRolePos);
+    const lowerPosition = Math.min(rolePos, endRolePos);
 
     if (!userBoosterRole) {
       await replyToInteraction(interaction, "Error", "\nYour booster badge seems to be missing, please set it again.", false);
@@ -80,6 +86,14 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     }
 
     try {
+      // check if other roles have this name (not including any booster roles)
+      let existingRole = roles.cache.find((role) => {
+        return role.name.toLowerCase() == newName.toLowerCase() && role.position <= lowerPosition && role.position >= higherPosition;
+      });
+      if (existingRole) {
+        await replyToInteraction(interaction, "Error", `\nA role with the name \`${newName}\` already exists.`, false);
+        return;
+      }
       await userBoosterRole.setName(newName);
     } catch (e) {
       console.error(e);
