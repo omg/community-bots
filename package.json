@@ -24,6 +24,7 @@
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
     "app-root-path": "^3.1.0",
+    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "discord.js": "^14.8.0",
     "dotenv": "^16.0.2",
@@ -33,7 +34,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
-    "cross-env": "^7.0.3",
     "nodemon": "^2.0.20",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.1"
