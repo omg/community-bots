@@ -126,6 +126,12 @@ export function getCleanName(name: string) {
   return cleanName;
 }
 
+// TODO : Docs
+export function getCleanRoleName(name: string) {
+  let cleanName = name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, "");
+  return cleanName;
+}
+
 /**
  * A collection of sorting functions for strings.
  */
