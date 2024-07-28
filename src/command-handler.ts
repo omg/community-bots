@@ -162,7 +162,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     const command = require(`${commandFolder}/${file}`);
     // check if data and execute are defined in command
     if (command.data && command.execute) {
-      const commandJSON = command.data.toJSON();
+      const commandJSON = command.JSON ?? command.data.toJSON();
 
       commands.set(command.data.name, command);
       JSONcommands.push(commandJSON);
