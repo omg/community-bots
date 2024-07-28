@@ -1,6 +1,6 @@
 import { CommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
 import leaderboardEmojis from "../../assets/emoji-maps/leaderboardEmojis";
-import { getDefaultGameGuild, getLeaderboard } from "../../src/database/db";
+import { getDefaultGameGuild, getLeaderboard, getRankingLeaderboard } from "../../src/database/db";
 import { formatNumber, getCleanName } from "../../src/utils";
 import { getGuild } from "../src/client";
 import { getRemarkEmoji } from "../../src/emoji-renderer";
@@ -66,7 +66,7 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let page = interaction.options.get("page");
   let message;
-  let leaderboard = await getLeaderboard(null);
+  let leaderboard = await getRankingLeaderboard(null);
 
   if (!page) {
     let user = interaction.user.id;

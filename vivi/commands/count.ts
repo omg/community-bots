@@ -2,7 +2,7 @@ import { replyToInteraction } from '../../src/command-handler';
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { formatNumber } from '../../src/utils';
 
-import { cleanWord, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { solvePrompt } from '../../src/dictionary/dictionary';
 import { getPromptRegexDisplayText, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
@@ -37,7 +37,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await solvePromptWithTimeout(regex, 1300, null);
+    let solutions = await solvePrompt(regex, 1300, null);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {

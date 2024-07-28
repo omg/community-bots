@@ -1,7 +1,10 @@
-import { ActivityType, Channel, Client, GatewayIntentBits, Guild, GuildTextBasedChannel, Message, Partials } from "discord.js";
+import { ActivityType, Channel, Client, GatewayIntentBits, Guild, GuildTextBasedChannel, Message, Partials, TextChannel } from "discord.js";
 
 import path from "node:path";
 import { registerClientAsCommandHandler } from "../../src/command-handler";
+import { GAME_MANAGER } from "../../src/games/manager";
+import { WordBombMini } from "../../src/games/wbmgame";
+import { getAllGames, getDefaultGame, getDefaultGameGuild, getGame } from "../../src/database/db";
 
 export const lameBotClient: Client = new Client({
   intents: [
@@ -131,6 +134,39 @@ export async function sendMessageAsReply(replyMessage: Message, message: string)
     }
   }
 }
+
+export async function sendMessageWithReplyID(channel: TextChannel, message: string, replyMessage: string): Promise<Message> {
+  await waitForReady();
+
+  let retryDelay = 500;
+  while (true) {
+    try {
+      return await channel.send({ content: message, reply: { messageReference: replyMessage } });
+    } catch (error) {
+      console.error(error);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+      retryDelay = Math.min(retryDelay + 500, 5000);
+    }
+  }
+}
+
+lameBotClient.once("ready", async() => {
+  // just a precaution to make sure anything that might also wait for ready is ready
+  setTimeout(() => {}, 2000);
+
+  let game = await getAllGames();
+
+  game.forEach(async (game) => {
+    if (game.type !== "WordBombMini") return;
+
+    GAME_MANAGER.registerGame(WordBombMini, lameBotClient, {
+      guild: game.guild,
+      channel: game.channel,
+      replyMessage: game.replyMessage,
+    });
+  });
+});
 
 //
 

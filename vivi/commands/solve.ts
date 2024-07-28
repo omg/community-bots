@@ -2,7 +2,7 @@ import { AttachmentBuilder, CommandInteraction, SlashCommandBuilder } from 'disc
 import { getInteractionContent, replyToInteraction } from '../../src/command-handler';
 import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
-import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { solvePrompt } from '../../src/dictionary/dictionary';
 import { convertTextToHighlights, getPromptRegexFromPromptSearch } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
@@ -55,7 +55,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
+    let solutions: string[] = await solvePrompt(regex, 1300, interaction.user.id);
     let solveCount = solutions.length;
 
     let solverString = '\nI found '

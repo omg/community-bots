@@ -2,7 +2,8 @@ import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getRemarkEmoji } from '../../src/emoji-renderer';
 import { replyToInteraction } from '../../src/command-handler';
 
-import { cleanWord, isWord } from '../../src/dictionary/dictionary';
+import { isWord, normalizeUserInput } from '../../src/dictionary/dictionary';
+import { isValidDictionaryInput } from '../../src/regex';
 
 export const data = new SlashCommandBuilder()
   .setName('check')
@@ -29,15 +30,12 @@ Object.keys(extras).forEach(key => JSON[key] = extras[key]);
 
 export const broadcastable = true;
 
-// TODO - this should really be moved
-const invalidWordRegex = /[^A-Z0-9'\-@ ]/;
-
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let word = cleanWord(interaction.options.get("word").value as string).toUpperCase();
+  let word = normalizeUserInput(interaction.options.get("word").value as string);
   
-  // check if the word only has valid characters
-  if (invalidWordRegex.test(word)) {
+  // Check if the word only has valid characters
+  if (!isValidDictionaryInput(word)) {
     await replyToInteraction(interaction, "Word Status", "\n• Sorry, that's not a valid word!", preferBroadcast);
     return;
   }

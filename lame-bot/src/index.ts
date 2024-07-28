@@ -1,2 +1,2 @@
 require("./client");
-require("./word-bomb-mini");
+// require("./word-bomb-mini");
