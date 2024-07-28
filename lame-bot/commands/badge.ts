@@ -88,7 +88,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     try {
       // check if other roles have this name (not including any booster roles)
       let existingRole = roles.cache.find((role) => {
-        return role.name.toLowerCase() == newName.toLowerCase() && role.position <= lowerPosition && role.position >= higherPosition;
+        return role.name.toLowerCase() == newName.toLowerCase() && (role.position <= lowerPosition || role.position >= higherPosition);
       });
       if (existingRole) {
         await replyToInteraction(interaction, "Error", `\nA role with the name \`${newName}\` already exists.`, false);
