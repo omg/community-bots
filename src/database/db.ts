@@ -73,6 +73,11 @@ export async function getCash(user) {
   return profile.cash || 0;
 }
 
+export async function getHighlighterTheme(user) {
+  let profile = await getProfile(user);
+  return profile.highlighterTheme || "Default";
+}
+
 export async function spendCash(user, amount) {
   if (amount < 0) return false;
   let profile = await getProfile(user);
