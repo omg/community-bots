@@ -1,5 +1,5 @@
 import { PromptException, standardizeWord } from "./dictionary/dictionary";
-import { Highlighter } from "./themes/highlighter";
+import { Highlighter } from "./highlighting/Highlighter";
 
 /*
   Parts of the regex
