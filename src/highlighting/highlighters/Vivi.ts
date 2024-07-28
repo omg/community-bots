@@ -136,10 +136,10 @@ export const WildcardCharacters: CharacterMap = {
   "unknown": "<:Hyphen:1267157469818523721>" // TODO
 };
 
-export const DefaultCharacterSet: CharacterTheme = {
+export const ViviCharacterTheme: CharacterTheme = {
   Present: PresentCharacters,
   Highlighted: HighlightedCharacters,
   Wildcard: WildcardCharacters
 };
 
-export default DefaultCharacterSet;
+export default ViviCharacterTheme;
