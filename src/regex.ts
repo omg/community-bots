@@ -1,5 +1,5 @@
 import { PromptException, standardizeWord } from "./dictionary/dictionary";
-import { Highlighter } from "./themes/highlighter";
+import { Highlighter } from "./highlighting/Highlighter";
 
 /*
   Parts of the regex
@@ -430,7 +430,7 @@ export function getPromptRegexDisplayText(regex: RegExp, highlighter?: Highlight
   // check if the regex string has only displayable charaacters.
   // this is not a perfect check, but it should totally be good enough for our purposes
   if (!invalidPromptDisplayRegex.test(displayString)) {
-    return highlighter ? highlighter.getPresent(displayString) : regexString;
+    return highlighter ? highlighter.getPresent(displayString, true) : regexString;
   }
 
   return highlighter ? "`/" + regexString + "/`" : "/" + regexString + "/";

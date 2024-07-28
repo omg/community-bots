@@ -3,8 +3,8 @@ import { getInteractionContent, replyToInteraction } from '../../src/command-han
 import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
 import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
+import { Highlighter } from '../../src/highlighting/Highlighter';
 import { getPromptRegexFromPromptSearch } from '../../src/regex';
-import { Highlighters } from '../../src/themes/highlighter';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -53,13 +53,13 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   let prompt = interaction.options.get("prompt").value as string;
   let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
 
-  const isHomeServer = interaction.guildId === process.env.GUILD_ID;
-  const highlighter = isHomeServer ? Highlighters.Default : Highlighters.Vivi;
-
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions: string[] = await solvePromptWithTimeout(regex, 1300, interaction.user.id);
+    const [highlighter, solutions] = await Promise.all([
+      Highlighter.fromCommandInteraction(interaction, "vivi"),
+      solvePromptWithTimeout(regex, 1300, null)
+    ]);
     let solveCount = solutions.length;
 
     let solverString = '\nI found '

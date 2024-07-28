@@ -4,7 +4,7 @@ import { formatNumber } from '../../src/utils';
 
 import { cleanWord, solvePromptWithTimeout } from '../../src/dictionary/dictionary';
 import { getPromptRegexDisplayText, getPromptRegexFromPromptSearch } from '../../src/regex';
-import { Highlighters } from '../../src/themes/highlighter';
+import { Highlighter } from '../../src/highlighting/Highlighter';
 
 export const data = new SlashCommandBuilder()
   .setName('count')
@@ -34,14 +34,14 @@ export const broadcastable = true;
 // create function to handle the command
 export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
   let prompt = interaction.options.get("prompt").value as string;
-
-  const isHomeServer = interaction.guildId === process.env.GUILD_ID;
-  const highlighter = isHomeServer ? Highlighters.Default : Highlighters.Vivi;
   
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
 
-    let solutions = await solvePromptWithTimeout(regex, 1300, null);
+    const [highlighter, solutions] = await Promise.all([
+      Highlighter.fromCommandInteraction(interaction, "vivi"),
+      solvePromptWithTimeout(regex, 1300, null)
+    ]);
     let solveCount = solutions.length;
 
     if (solveCount === 0) {
