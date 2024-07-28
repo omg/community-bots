@@ -368,6 +368,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 }
 
 function isBroadcastChannel(channel: GuildTextBasedChannel) {
+  if (!channel) return false;
   return channel.name.toLowerCase().includes("bot");
 }
 
