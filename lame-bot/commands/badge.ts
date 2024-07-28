@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, CommandInteraction, GuildMemberRoleManager
 import sharp from 'sharp';
 import { replyToInteraction } from '../../src/command-handler';
 import { getProfile, setBoosterRole } from '../../src/database/db';
-import { assignRole, createBoosterRole, setRoleIcon } from '../../src/sleuth';
+import { assignRole, createBoosterRole, renameRole, setRoleIcon } from '../../src/sleuth';
 import { getCleanRoleName } from '../../src/utils';
 
 export const data = new SlashCommandBuilder()
@@ -82,19 +82,19 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     const newName = getCleanRoleName(name);
     if (!newName) {
       await replyToInteraction(interaction, "Error", "\nPlease provide a valid name for your badge.", false);
-      return
+      return;
     }
 
     try {
       // check if other roles have this name (not including any booster roles)
       let existingRole = roles.cache.find((role) => {
-        return role.name.toLowerCase() == newName.toLowerCase() && role.position <= lowerPosition && role.position >= higherPosition;
+        return role.name.toLowerCase() == newName.toLowerCase() && (role.position <= lowerPosition || role.position >= higherPosition);
       });
       if (existingRole) {
-        await replyToInteraction(interaction, "Error", `\nA role with the name \`${newName}\` already exists.`, false);
+        await replyToInteraction(interaction, "Error", `\nA role with that name already exists.`, false);
         return;
       }
-      await userBoosterRole.setName(newName);
+      await renameRole(userBoosterRole.id, newName);
     } catch (e) {
       console.error(e);
       await replyToInteraction(interaction, "Error", `\nFailed to name your role!`, false);
