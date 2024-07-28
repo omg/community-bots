@@ -51,11 +51,11 @@ export const PresentCharacters: PresentCharacterMap = {
 };
 
 export const HighlightedCharacters: CharacterMap = { ...Characters };
-for (const key in Characters) {
-  Characters[key] = `**${Characters[key]}**`;
-}
+// for (const key in Characters) {
+//   HighlightedCharacters[key] = `**${Characters[key]}**`;
+// }
 
-export const WildcardCharacters: CharacterMap = { ...Characters };
+export const WildcardCharacters: CharacterMap = HighlightedCharacters;
 
 export const TextCharacterTheme: CharacterTheme = {
   Present: PresentCharacters,
