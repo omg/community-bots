@@ -72,6 +72,7 @@ function getCommandLimitsFor(member: GuildMember, command: BaseCommand): Command
 }
 
 function areLimitsIgnored(limit: CommandLimit, channel: GuildTextBasedChannel) {
+  if (channel.guildId !== process.env.GUILD_ID) return true;
   if (limit.includeBotsChannel) return false;
   return channel.name.toLowerCase().includes("roll") || isBroadcastChannel(channel);
 }
@@ -242,30 +243,34 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     const command = commands.get(commandName);
     if (!command) return;
 
-    if (isCommandLimited(member, command, commandName, interaction.channel)) {
-      const finishedTimestamp = Math.ceil((Date.now() + getLimitTime(member, commandName)) / 1000);
-      let limitTime = getLimitTime(member, commandName);
-      let subCommand = interaction.options.getSubcommand(false);
-      let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
+    const followLimits = interaction.guildId === process.env.GUILD_ID;
 
-      replyToInteraction(
-        interaction,
-        "Limit",
-        "\n• You've used this command too much! You can use it again <t:" + finishedTimestamp + ":R>.",
-        false
-      );
-
-      if (limitTime < 20 * 1000) {
-        setTimeout(() => {
-          editInteractionReply(
-            interaction,
-            "Limit",
-            "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
-            false
-          )
-        }, limitTime + Math.random() * 750);
+    if (followLimits) {
+      if (isCommandLimited(member, command, commandName, interaction.channel)) {
+        const finishedTimestamp = Math.ceil((Date.now() + getLimitTime(member, commandName)) / 1000);
+        let limitTime = getLimitTime(member, commandName);
+        let subCommand = interaction.options.getSubcommand(false);
+        let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
+  
+        replyToInteraction(
+          interaction,
+          "Limit",
+          "\n• You've used this command too much! You can use it again <t:" + finishedTimestamp + ":R>.",
+          false
+        );
+  
+        if (limitTime < 20 * 1000) {
+          setTimeout(() => {
+            editInteractionReply(
+              interaction,
+              "Limit",
+              "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
+              false
+            )
+          }, limitTime + Math.random() * 750);
+        }
+        return;
       }
-      return;
     }
 
     if (isOnCooldown(interaction.user.id, commandName)) {
@@ -328,7 +333,9 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     
     setOnCooldown(interaction.user.id, commandName, command.cooldown);
-    addLimits(member, command, commandName, interaction.channel);
+    if (followLimits) {
+      addLimits(member, command, commandName, interaction.channel);
+    }
 
     try {
       await command.execute(interaction, preferBroadcast);
