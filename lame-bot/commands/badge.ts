@@ -82,7 +82,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
     const newName = getCleanRoleName(name);
     if (!newName) {
       await replyToInteraction(interaction, "Error", "\nPlease provide a valid name for your badge.", false);
-      return
+      return;
     }
 
     try {
