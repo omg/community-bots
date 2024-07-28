@@ -29,11 +29,14 @@ export class Highlighter {
    * @param map The map to use when converting the string
    * @returns The mapped string
    */
-  private mapText(string: string, map: CharacterMap) {
+  private mapText(string: string, map: CharacterMap, alternateMap?: { [key: string]: string }) {
     return string
       .toUpperCase()
       .split("")
       .map((letter) => {
+        if (alternateMap && alternateMap[letter]) {
+          return alternateMap[letter];
+        }
         return map[letter] ?? map.unknown;
       })
       .join("");
@@ -43,10 +46,12 @@ export class Highlighter {
    * Applies the present highlight to a string.
    * 
    * @param string The string to get the present highlight for
+   * @param spacesAreAny Whether spaces should be treated as wildcard any characters
    * @returns The string with the present highlight applied
    */
-  getPresent(string: string): string {
-    return this.mapText(string, this.theme.Present);
+  getPresent(string: string, spacesAreAny: boolean = false): string {
+    const alternateMap = spacesAreAny ? { " ": this.theme.Present.any } : undefined;
+    return this.mapText(string, this.theme.Present, alternateMap);
   }
 
   /**
