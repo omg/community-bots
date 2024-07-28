@@ -184,9 +184,16 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   const rest = new REST({ version: "10" }).setToken(token);
   (async () => {
     try {
+      const EMPTY = [];
+      const applicationCommands = process.env.NODE_ENV === "development" ? EMPTY : JSONcommands;
+      const applicationGuildCommands = process.env.NODE_ENV === "development" ? JSONcommands : EMPTY;
       await rest.put(
         Routes.applicationGuildCommands(clientID, process.env.GUILD_ID),
-        { body: JSONcommands }
+        { body: applicationGuildCommands }
+      );
+      await rest.put(
+        Routes.applicationCommands(clientID),
+        { body: applicationCommands }
       );
     } catch (error) {
       console.error(error);
