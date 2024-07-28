@@ -103,7 +103,7 @@ const ViviHighlighter = new EmojiHighlighter({
 
 export const Highlighters = {
   // Themes for OMG
-  Default: DefaultHighlighter,
+  Default: new TextHighlighter(),
 
   // Highlighters for installed applications
   Vivi: ViviHighlighter,
