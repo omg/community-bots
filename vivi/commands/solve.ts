@@ -38,6 +38,13 @@ export const data = new SlashCommandBuilder()
         value: 'lengthThenAlphabetical'
       }));
 
+export const JSON = data.toJSON();
+const extras = {
+  "integration_types": [0, 1],
+  "contexts": [0, 1, 2]
+}
+Object.keys(extras).forEach(key => JSON[key] = extras[key]);
+
 export const broadcastable = true;
 
 // create function to handle the command
