@@ -153,6 +153,8 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   let broadcastCommand = {
     name: "shout",
     description: "Broadcast a command!",
+    "integration_types": [0, 1],
+    "contexts": [0, 1, 2],
     options: [],
   };
 
