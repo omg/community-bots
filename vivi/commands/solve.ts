@@ -3,7 +3,8 @@ import { getInteractionContent, replyToInteraction } from '../../src/command-han
 import { SortingFunctions, formatNumber, shuffle } from '../../src/utils';
 
 import { solvePromptWithTimeout } from '../../src/dictionary/dictionary';
-import { convertTextToHighlights, getPromptRegexFromPromptSearch } from '../../src/regex';
+import { getPromptRegexFromPromptSearch } from '../../src/regex';
+import { Highlighters } from '../../src/themes/highlighter';
 
 export const data = new SlashCommandBuilder()
   .setName('solve')
@@ -52,6 +53,9 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   let prompt = interaction.options.get("prompt").value as string;
   let sorting: string = interaction.options.get("sorting")?.value as string ?? "None";
 
+  const isHomeServer = interaction.guildId === process.env.GUILD_ID;
+  const highlighter = isHomeServer ? Highlighters.Default : Highlighters.Vivi;
+
   try {
     let regex = getPromptRegexFromPromptSearch(prompt);
 
@@ -86,7 +90,7 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
       for (let i = 0; i < Math.min(solutions.length, 4); i++) {
         let solution = solutions[i];
 
-        let solutionString = '\n• ' + convertTextToHighlights(solution, regex);
+        let solutionString = '\n• ' + highlighter.highlight(solution, regex);
         if (solutionsLength + solutionString.length > 1910) break;
         solutionStrings.push(solutionString);
         solutionsLength += solutionString.length;
