@@ -24,8 +24,8 @@ import {
   solverCache
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
+import { DefaultHighlighter, Highlighter } from "../../src/highlighting/Highlighter";
 import { escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
-import { Highlighters } from "../../src/themes/highlighter";
 import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement, getCleanName } from "../../src/utils";
 import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
 
@@ -128,7 +128,7 @@ async function startRound() {
     replyMessage,
     (
       getRemarkEmoji("bomb") + " **Quick!** Type a word containing:" +
-      "\n\n" + getPromptRegexDisplayText(prompt, Highlighters.Default) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") +
+      "\n\n" + getPromptRegexDisplayText(prompt, DefaultHighlighter) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") +
       (lengthRequired ? "\n\n• Must be **" + promptWord.length + "** characters!" : "")
     )
   );
@@ -610,6 +610,11 @@ async function endRound() {
     });
   };
 
+  let highlighter: Highlighter;
+  const retrieveHighlighterTheme = async () => {
+    highlighter = await Highlighter.fromServerInteraction(winnerUser);
+  };
+
   let startTime2 = Date.now();
 
   await Promise.all([
@@ -622,6 +627,7 @@ async function endRound() {
     ),
     lateRemarks(),
     roundRemarks(),
+    retrieveHighlighterTheme()
   ]);
 
   console.log("Remarks completed in " + (Date.now() - startTime2) + "ms");
@@ -636,7 +642,7 @@ async function endRound() {
     )} <@${winnerUser}> solved it! ${getRemarkEmoji("solvedIt")}**\n\n` +
       getRemarkEmoji("roundEnded") +
       " **Round ended!**\n" +
-      Highlighters.Default.highlight(winnerSolution, prompt) +
+      highlighter.highlight(winnerSolution, prompt) +
       "\n" +
       getRemarkText()
   );
