@@ -91,7 +91,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _preferB
         return role.name.toLowerCase() == newName.toLowerCase() && (role.position <= lowerPosition || role.position >= higherPosition);
       });
       if (existingRole) {
-        await replyToInteraction(interaction, "Error", `\nA role with the name \`${newName}\` already exists.`, false);
+        await replyToInteraction(interaction, "Error", `\nA role with that name already exists.`, false);
         return;
       }
       await userBoosterRole.setName(newName);
