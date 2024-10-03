@@ -4,7 +4,9 @@ A collection of bots you can use for a community server.
 
 ## Set up the configuration
 
-Setting up the project is currently a pain in the ass, and it is not recommended that you even try. It is that bad right now.
+Setting up the project is a pain in the ass, and it is not recommended that you even try. There won't be documentation to do this.
+
+The next major version is set to be released in 2025. It will provide developer documentation, easy setup and tooling, and better incorporation of concepts for many of the new features Discord has implemented during this version's development.
 
 ## Run the project for development
 
