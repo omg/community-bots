@@ -647,7 +647,7 @@ async function endRound() {
       getRemarkText()
   );
 
-  setTimeout(startRound, 8000);
+  setTimeout(startRound, 5.75 * 1000);
 }
 
 // listen for messages from discord
