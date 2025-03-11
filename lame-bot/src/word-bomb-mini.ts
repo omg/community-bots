@@ -10,7 +10,7 @@ import {
   getUserRanking,
   getUserSolveCount,
   getUserSolveCountForPrompt,
-  setReplyMessage
+  setReplyMessage,
 } from "../../src/database/db";
 import {
   cleanWord,
@@ -21,13 +21,33 @@ import {
   is1Related,
   isDoomRelated,
   isWord,
-  solverCache
+  solverCache,
 } from "../../src/dictionary/dictionary";
 import { getRemarkEmoji, getStreakNumbers } from "../../src/emoji-renderer";
-import { DefaultHighlighter, Highlighter } from "../../src/highlighting/Highlighter";
-import { escapeRegExp, getPromptRegexDisplayText, getPromptRepeatableText } from "../../src/regex";
-import { createEnglishList, escapeDiscordMarkdown, formatNumber, formatPercentage, formatPlacement, getCleanName } from "../../src/utils";
-import { getChannel, getGuild, lameBotClient, sendMessage, sendMessageAsReply } from "./client";
+import {
+  DefaultHighlighter,
+  Highlighter,
+} from "../../src/highlighting/Highlighter";
+import {
+  escapeRegExp,
+  getPromptRegexDisplayText,
+  getPromptRepeatableText,
+} from "../../src/regex";
+import {
+  createEnglishList,
+  escapeDiscordMarkdown,
+  formatNumber,
+  formatPercentage,
+  formatPlacement,
+  getCleanName,
+} from "../../src/utils";
+import {
+  getChannel,
+  getGuild,
+  lameBotClient,
+  sendMessage,
+  sendMessageAsReply,
+} from "./client";
 
 let guild;
 let wordBombMiniChannel;
@@ -64,7 +84,7 @@ const REMARK = {
   // round remarks
   solveStreak: 18,
   usedSolver: 17,
-  promptOrigin: 16
+  promptOrigin: 16,
 };
 
 let remarks;
@@ -126,11 +146,18 @@ async function startRound() {
 
   await sendMessageAsReply(
     replyMessage,
-    (
-      getRemarkEmoji("bomb") + " **Quick!** Type a word containing:" +
-      "\n\n" + getPromptRegexDisplayText(prompt, DefaultHighlighter) + " ***｡✲ﾟ** (" + formatNumber(solutions) + (solutions === 1 ? " solution)" : " solutions)") +
-      (lengthRequired ? "\n\n• Must be **" + promptWord.length + "** characters!" : "")
-    )
+    getRemarkEmoji("bomb") +
+      " **Quick!** Type a word containing:" +
+      "\n\n" +
+      getPromptRegexDisplayText(prompt, DefaultHighlighter) +
+      " **⋆˚࿔** " +
+      formatNumber(solutions) +
+      (solutions === 1 ? " solution" : " solutions") +
+      (lengthRequired
+        ? `\n\n${getRemarkEmoji("requirement")} Must be **` +
+          promptWord.length +
+          "** characters!"
+        : "")
   );
 
   // lameBotClient.user.setPresence({
@@ -151,7 +178,7 @@ async function startRound() {
     console.log("Setting the reply message - hold on a bit.");
     replyMessage = await sendMessage(
       wordBombMiniChannel,
-      "<:e:775931479124344883> **Heads up!** A new round is starting! ***｡✲ﾟ**"
+      "<:e:775931479124344883> **Heads up!** A new round is starting! **⋆˚࿔**"
     );
     await setReplyMessage(replyMessage);
     await new Promise((resolve) => setTimeout(resolve, 8888));
@@ -487,7 +514,9 @@ async function endRound() {
       uniqueSolutions++;
       addRemark({
         index: REMARK.uniqueSolve,
-        remark: getRemarkEmoji("uniqueSolve") + " That's the **first time** this solve has ever been used!"
+        remark:
+          getRemarkEmoji("uniqueSolve") +
+          " That's the **first time** this solve has ever been used!",
       });
     }
 
@@ -627,7 +656,7 @@ async function endRound() {
     ),
     lateRemarks(),
     roundRemarks(),
-    retrieveHighlighterTheme()
+    retrieveHighlighterTheme(),
   ]);
 
   console.log("Remarks completed in " + (Date.now() - startTime2) + "ms");
