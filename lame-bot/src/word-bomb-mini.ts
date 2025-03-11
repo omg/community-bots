@@ -212,7 +212,7 @@ const NUMBER_WORDS = {
   7: "seventh",
   8: "eighth",
   9: "ninth",
-  10: "tenth",
+  10: "tenth"
 };
 
 const JINX_APPENDS = [
@@ -220,7 +220,7 @@ const JINX_APPENDS = [
   "also jinxed each other!",
   "jinxed each other too!",
   "jinxed each other as well!",
-  "jinxed each other!",
+  "jinxed each other!"
 ];
 
 // TODO: terrible name
@@ -288,7 +288,7 @@ async function endRound() {
       rankingBefore,
       rankingAfter,
       solveCount,
-      exactSolves,
+      exactSolves
     };
   }
 
@@ -338,7 +338,7 @@ async function endRound() {
           " **" +
           createEnglishList(jinxerNames) +
           "** " +
-          jinxText,
+          jinxText
       });
     }
 
@@ -352,7 +352,7 @@ async function endRound() {
           lateNames,
           "was",
           "were"
-        )} too late..`,
+        )} too late..`
       });
     }
   };
@@ -456,7 +456,7 @@ async function endRound() {
     if (solveRemark) {
       addRemark({
         index: REMARK.solveNumber,
-        remark: solveRemark,
+        remark: solveRemark
       });
     }
 
@@ -468,7 +468,7 @@ async function endRound() {
           getRemarkEmoji("exactSolve") +
           ` **Lucky!** That's your **${formatPlacementWithEnglishWords(
             exactSolves
-          )}** exact solve!`,
+          )}** exact solve!`
       });
     }
   };
@@ -486,7 +486,7 @@ async function endRound() {
         index: REMARK.rankShift,
         remark:
           getRemarkEmoji("firstPlace") +
-          " **You have taken first place!** (All-Time)",
+          " **You have taken first place!** (All-Time)"
       });
     } else {
       addRemark({
@@ -499,7 +499,7 @@ async function endRound() {
             rankingBefore - rankingAfter,
             "place",
             "places"
-          )}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`,
+          )}, you're now **${formatPlacement(rankingAfter)}**! (All-Time)`
       });
     }
   };
@@ -549,7 +549,7 @@ async function endRound() {
           getRemarkEmoji("promptiversary") +
           ` It's your **${formatPlacementWithEnglishWords(
             promptiversary
-          )} promptiversary** with "${getCurrentPromptName()}"!`,
+          )} promptiversary** with "${getCurrentPromptName()}"!`
       });
 
       if (promptiversary === 5) {
@@ -566,7 +566,7 @@ async function endRound() {
             index: REMARK.sameSolvePromptiversary,
             remark:
               getRemarkEmoji("promptiversaryStale") +
-              " You solved this prompt with the **same word** as your first time!",
+              " You solved this prompt with the **same word** as your first time!"
           });
         }
       }
@@ -599,7 +599,7 @@ async function endRound() {
             isNumberVowelSound(streak) ? "an" : "a"
           } ${getStreakNumbers(streak)} solve streak! ${getRemarkEmoji(
             solveStreakEmoji
-          )}**`,
+          )}**`
         });
       }
     } else {
@@ -613,7 +613,7 @@ async function endRound() {
             getRemarkEmoji("streakEnded") +
             ` **${
               lastWinnerName + (lastWinnerName.endsWith("s") ? "'" : "'s")
-            }** solve streak of **${streak}** has been ended!`,
+            }** solve streak of **${streak}** has been ended!`
         });
       }
       streak = 1;
@@ -629,13 +629,13 @@ async function endRound() {
         index: REMARK.usedSolver,
         remark:
           getRemarkEmoji("usedVivi") +
-          " This player **used the solver** during this round.",
+          " This player **used the solver** during this round."
       });
     }
 
     addRemark({
       index: REMARK.promptOrigin,
-      remark: `This prompt was created from "${promptWord.toLowerCase()}"`,
+      remark: `This prompt was created from "${promptWord.toLowerCase()}"`
     });
   };
 
@@ -676,7 +676,7 @@ async function endRound() {
       getRemarkText()
   );
 
-  setTimeout(startRound, 8000);
+  setTimeout(startRound, 5.75 * 1000);
 }
 
 // listen for messages from discord
@@ -758,7 +758,7 @@ lameBotClient.on("messageCreate", (message) => {
     solves.push({
       user: message.author.id,
       solution: guess,
-      usedVivi: solverCache.has(message.author.id),
+      usedVivi: solverCache.has(message.author.id)
     });
 
     // if this player is the first to solve, start a timer to end the round after 300 milliseconds
