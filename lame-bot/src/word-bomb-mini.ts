@@ -150,9 +150,10 @@ async function startRound() {
       " **Quick!** Type a word containing:" +
       "\n\n" +
       getPromptRegexDisplayText(prompt, DefaultHighlighter) +
-      " **⋆˚࿔** " +
+      " **•** " +
       formatNumber(solutions) +
       (solutions === 1 ? " solution" : " solutions") +
+      " **⋆˚࿔**" +
       (lengthRequired
         ? `\n\n${getRemarkEmoji("requirement")} Must be **` +
           promptWord.length +
