@@ -150,11 +150,13 @@ async function startRound() {
       " **Quick!** Type a word containing:" +
       "\n\n" +
       getPromptRegexDisplayText(prompt, DefaultHighlighter) +
-      " ***｡✲ﾟ** (" +
+      " **⋆˚࿔** " +
       formatNumber(solutions) +
-      (solutions === 1 ? " solution)" : " solutions)") +
+      (solutions === 1 ? " solution" : " solutions") +
       (lengthRequired
-        ? "\n\n• Must be **" + promptWord.length + "** characters!"
+        ? `\n\n${getRemarkEmoji("requirement")} Must be **` +
+          promptWord.length +
+          "** characters!"
         : "")
   );
 
@@ -176,7 +178,7 @@ async function startRound() {
     console.log("Setting the reply message - hold on a bit.");
     replyMessage = await sendMessage(
       wordBombMiniChannel,
-      "<:e:775931479124344883> **Heads up!** A new round is starting! ***｡✲ﾟ**"
+      "<:e:775931479124344883> **Heads up!** A new round is starting! **⋆˚࿔**"
     );
     await setReplyMessage(replyMessage);
     await new Promise((resolve) => setTimeout(resolve, 8888));
@@ -674,7 +676,7 @@ async function endRound() {
       getRemarkText()
   );
 
-  setTimeout(startRound, 8000);
+  setTimeout(startRound, 5.75 * 1000);
 }
 
 // listen for messages from discord

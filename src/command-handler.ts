@@ -1,5 +1,17 @@
 import { REST } from "@discordjs/rest";
-import { ChannelType, Client, Collection, CommandInteraction, Events, GuildMember, GuildTextBasedChannel, InteractionReplyOptions, Message, MessageMentionOptions, Routes } from "discord.js";
+import {
+  ChannelType,
+  Client,
+  Collection,
+  CommandInteraction,
+  Events,
+  GuildMember,
+  GuildTextBasedChannel,
+  InteractionReplyOptions,
+  Message,
+  MessageMentionOptions,
+  Routes,
+} from "discord.js";
 import fs from "node:fs";
 import { escapeDiscordMarkdown } from "./utils";
 
@@ -13,24 +25,24 @@ type CommandLimit = {
   max: number | false;
   interval: number;
   includeBotsChannel: boolean;
-}
+};
 
 type BaseCommand = {
   cooldown: number;
   limits?: CommandLimit[];
   tags?: string[];
-}
+};
 
 type BotCommand = BaseCommand & {
   data: any;
   execute: (interaction: any, preferBroadcast: boolean) => Promise<void>;
-}
+};
 
 type MentionCommand = BaseCommand & {
   NAME_DUMB: string; // temporarily required
   matches: (text: string) => boolean;
   execute: (message: Message, text: string) => Promise<void>;
-}
+};
 
 function commandToBroadcastOption(command: BotCommand) {
   return { type: 1, ...command };
@@ -59,7 +71,10 @@ function getMemberLevel(member: GuildMember) {
   return 0;
 }
 
-function getCommandLimitsFor(member: GuildMember, command: BaseCommand): CommandLimit {
+function getCommandLimitsFor(
+  member: GuildMember,
+  command: BaseCommand
+): CommandLimit {
   if (!command.limits) return undefined;
   const memberLevel = getMemberLevel(member);
   let limit: CommandLimit;
@@ -74,10 +89,17 @@ function getCommandLimitsFor(member: GuildMember, command: BaseCommand): Command
 function areLimitsIgnored(limit: CommandLimit, channel: GuildTextBasedChannel) {
   if (channel.guildId !== process.env.GUILD_ID) return true;
   if (limit.includeBotsChannel) return false;
-  return channel.name.toLowerCase().includes("roll") || isBroadcastChannel(channel);
+  return (
+    channel.name.toLowerCase().includes("roll") || isBroadcastChannel(channel)
+  );
 }
 
-function isCommandLimited(member: GuildMember, command: BaseCommand, commandName: string, channel: GuildTextBasedChannel) {
+function isCommandLimited(
+  member: GuildMember,
+  command: BaseCommand,
+  commandName: string,
+  channel: GuildTextBasedChannel
+) {
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return false;
 
@@ -99,7 +121,12 @@ function getLimitTime(member: GuildMember, commandName: string) {
   return Math.max(limitEnd - Date.now(), 0);
 }
 
-function addLimits(member: GuildMember, command: BaseCommand, commandName: string, channel: GuildTextBasedChannel) {
+function addLimits(
+  member: GuildMember,
+  command: BaseCommand,
+  commandName: string,
+  channel: GuildTextBasedChannel
+) {
   let limits = getCommandLimitsFor(member, command);
   if (!limits) return;
 
@@ -108,7 +135,10 @@ function addLimits(member: GuildMember, command: BaseCommand, commandName: strin
   let limitEnd = commandLimitEnd.get(member.id + commandName);
   if (limitEnd) {
     if (limitEnd < Date.now()) {
-      commandLimitEnd.set(member.id + commandName, Date.now() + limits.interval);
+      commandLimitEnd.set(
+        member.id + commandName,
+        Date.now() + limits.interval
+      );
       commandUses.set(member.id + commandName, 0);
     }
   } else {
@@ -137,7 +167,12 @@ function secondsToEnglish(seconds: number) {
   return seconds + (seconds === 1 ? " second" : " seconds");
 }
 
-export function registerClientAsCommandHandler(client: Client, commandFolder: string, clientID: string, token: string) {
+export function registerClientAsCommandHandler(
+  client: Client,
+  commandFolder: string,
+  clientID: string,
+  token: string
+) {
   const commands: Collection<string, BotCommand> = new Collection();
   const mentionCommands: Collection<string, MentionCommand> = new Collection();
 
@@ -153,8 +188,8 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   let broadcastCommand = {
     name: "shout",
     description: "Broadcast a command!",
-    "integration_types": [0, 1],
-    "contexts": [0, 1, 2],
+    integration_types: [0, 1],
+    contexts: [0, 1, 2],
     options: [],
   };
 
@@ -187,16 +222,17 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
   (async () => {
     try {
       const EMPTY = [];
-      const applicationCommands = process.env.NODE_ENV === "development" ? EMPTY : JSONcommands;
-      const applicationGuildCommands = process.env.NODE_ENV === "development" ? JSONcommands : EMPTY;
+      const applicationCommands =
+        process.env.NODE_ENV === "development" ? EMPTY : JSONcommands;
+      const applicationGuildCommands =
+        process.env.NODE_ENV === "development" ? JSONcommands : EMPTY;
       await rest.put(
         Routes.applicationGuildCommands(clientID, process.env.GUILD_ID),
         { body: applicationGuildCommands }
       );
-      await rest.put(
-        Routes.applicationCommands(clientID),
-        { body: applicationCommands }
-      );
+      await rest.put(Routes.applicationCommands(clientID), {
+        body: applicationCommands,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -207,7 +243,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     if (message.author.bot) return;
     if (!message.guild) return;
     if (message.channel.type !== ChannelType.GuildText) return;
-    
+
     // check if it mentions the bot
     if (!message.mentions.has(client.user.id)) return;
 
@@ -215,14 +251,20 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
     let channel = message.channel as GuildTextBasedChannel;
 
     // replace the mention with nothing and trim the message, removing double spaces too
-    let text = escapeDiscordMarkdown(message.content.replace("<@" + client.user.id + ">", "").replace(/ +/g, " ").trim());
-    
+    let text = escapeDiscordMarkdown(
+      message.content
+        .replace("<@" + client.user.id + ">", "")
+        .replace(/ +/g, " ")
+        .trim()
+    );
+
     for (const [, command] of mentionCommands) {
       if (command.matches(text)) {
-        if (isCommandLimited(member, command, command.NAME_DUMB, channel)) return;
+        if (isCommandLimited(member, command, command.NAME_DUMB, channel))
+          return;
         if (isOnCooldown(member.id, command.NAME_DUMB)) return;
         if (isOnCooldown(member.id)) return;
-        
+
         setOnCooldown(message.member.id, command.NAME_DUMB, command.cooldown);
         addLimits(message.member, command, command.NAME_DUMB, message.channel);
 
@@ -256,26 +298,35 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     if (followLimits) {
       if (isCommandLimited(member, command, commandName, interaction.channel)) {
-        const finishedTimestamp = Math.ceil((Date.now() + getLimitTime(member, commandName)) / 1000);
+        const finishedTimestamp = Math.ceil(
+          (Date.now() + getLimitTime(member, commandName)) / 1000
+        );
         let limitTime = getLimitTime(member, commandName);
         let subCommand = interaction.options.getSubcommand(false);
-        let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
-  
+        let commandFormat =
+          interaction.commandName + (subCommand ? " " + subCommand : "");
+
         replyToInteraction(
           interaction,
           "Limit",
-          "\n• You've used this command too much! You can use it again <t:" + finishedTimestamp + ":R>.",
+          "\n• You've used this command too much! You can use it again <t:" +
+            finishedTimestamp +
+            ":R>.",
           false
         );
-  
+
         if (limitTime < 20 * 1000) {
           setTimeout(() => {
             editInteractionReply(
               interaction,
               "Limit",
-              "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
+              "\n• You can now use </" +
+                commandFormat +
+                ":" +
+                interaction.commandId +
+                ">.",
               false
-            )
+            );
           }, limitTime + Math.random() * 750);
         }
         return;
@@ -284,15 +335,20 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
 
     if (isOnCooldown(interaction.user.id, commandName)) {
       // TODO Could personalize this message depending on the bot's personality
-      const finishedTimestamp = Math.ceil(commandCooldown.get(interaction.user.id + commandName) / 1000);
+      const finishedTimestamp = Math.ceil(
+        commandCooldown.get(interaction.user.id + commandName) / 1000
+      );
       let cooldownTime = getCooldown(interaction.user.id, commandName);
       let subCommand = interaction.options.getSubcommand(false);
-      let commandFormat = interaction.commandName + (subCommand ? " " + subCommand : "");
+      let commandFormat =
+        interaction.commandName + (subCommand ? " " + subCommand : "");
 
       replyToInteraction(
         interaction,
         "Cooldown",
-        "\n• Hold on! You can use this command again <t:" + finishedTimestamp + ":R>.",
+        "\n• Hold on! You can use this command again <t:" +
+          finishedTimestamp +
+          ":R>.",
         false
       );
 
@@ -301,21 +357,29 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
           editInteractionReply(
             interaction,
             "Cooldown",
-            "\n• You can now use </" + commandFormat + ":" + interaction.commandId + ">.",
+            "\n• You can now use </" +
+              commandFormat +
+              ":" +
+              interaction.commandId +
+              ">.",
             false
-          )
+          );
         }, cooldownTime);
       }
       return;
     } else if (isOnCooldown(interaction.user.id)) {
       if (COOLDOWN_TIME > 2750) {
-        const finishedTimestamp = Math.ceil(commandCooldown.get(interaction.user.id) / 1000);
+        const finishedTimestamp = Math.ceil(
+          commandCooldown.get(interaction.user.id) / 1000
+        );
         let cooldownTime = getCooldown(interaction.user.id);
 
         replyToInteraction(
           interaction,
           "Cooldown",
-          "\n• Hold on! You can use another command <t:" + finishedTimestamp + ":R>.",
+          "\n• Hold on! You can use another command <t:" +
+            finishedTimestamp +
+            ":R>.",
           false
         );
 
@@ -326,7 +390,7 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
               "Cooldown",
               "\n• You can now use commands again.",
               false
-            )
+            );
           }, cooldownTime);
         }
       } else {
@@ -340,7 +404,6 @@ export function registerClientAsCommandHandler(client: Client, commandFolder: st
       return;
     }
 
-    
     setOnCooldown(interaction.user.id, commandName, command.cooldown);
     if (followLimits) {
       addLimits(member, command, commandName, interaction.channel);
@@ -381,48 +444,68 @@ function isBroadcastChannel(channel: GuildTextBasedChannel) {
  * @param broadcast Whether or not this interaction is being broadcasted.
  * @returns The content to be displayed as a response.
  */
-export function getInteractionContent(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
-  return "**" + header + " *｡✲ﾟ ——**" +
-  (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
-  "\n" + response;
+export function getInteractionContent(
+  interaction: CommandInteraction,
+  header: string,
+  response: string,
+  broadcast: boolean
+) {
+  return (
+    "**" +
+    header +
+    " ⋆˚࿔ ——**" +
+    (broadcast ? "\n\n<@" + interaction.user.id + ">" : "") +
+    "\n" +
+    response
+  );
 }
-
 
 /**
  * Replies to an interaction with the given header and response.
  * This function is a shorthand which calls getInteractionContent to get the content string that should be displayed as a response, and replies to the interaction.
- * 
+ *
  * **NOTE:** This function will not work if the interaction was already replied to, if the interaction was deferred (use {@link editInteractionReply} instead), or if the time to reply to the interaction has passed.
- * 
+ *
  * @param interaction The command interaction object.
  * @param header The header text.
  * @param response The response text.
  * @param broadcast Whether or not this interaction is being broadcasted.
  */
-export async function replyToInteraction(interaction: CommandInteraction, header: string, response: string, broadcast: boolean, options?: Partial<InteractionReplyOptions>) {
+export async function replyToInteraction(
+  interaction: CommandInteraction,
+  header: string,
+  response: string,
+  broadcast: boolean,
+  options?: Partial<InteractionReplyOptions>
+) {
   if (interaction.replied) {
     return;
   }
-  
+
   await interaction.reply({
     content: getInteractionContent(interaction, header, response, broadcast),
     ephemeral: !broadcast,
-    ...options
+    ...options,
   });
 }
 
 /**
  * Edits an interaction that was already replied to with the given header and response.
  * This function is a shorthand which calls getInteractionContent to get the content string that should be displayed as a response, and edits the interaction.
- * 
+ *
  * **NOTE:** This function will not work if the interaction was not previously replied to, if the interaction was replied to with an ephemeral message, if the interaction was replied to with a message that wasn't sent by this bot, or if the message was deleted.
- * 
+ *
  * @param interaction The command interaction object.
  * @param header The header text.
  * @param response The response text.
  * @param broadcast Whether or not this interaction is being broadcasted.
  */
-export async function editInteractionReply(interaction: CommandInteraction, header: string, response: string, broadcast: boolean) {
+export async function editInteractionReply(
+  interaction: CommandInteraction,
+  header: string,
+  response: string,
+  broadcast: boolean
+) {
   if (!interaction.replied) {
     return;
   }
