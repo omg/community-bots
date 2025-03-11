@@ -6,12 +6,30 @@ import { escapeRegExp } from "../regex";
 
 // TODO: pull dictionaries from Vivi API
 try {
-  var dictionaryString = fs.readFileSync(appRoot.resolve("assets/word-lists/dictionaries/english.txt"), "utf8");
-  var related1String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1-related.txt"), "utf8");
-  var related100String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/100-related.txt"), "utf8");
-  var related1000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/1000-related.txt"), "utf8");
-  var related10000String = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/10000-related.txt"), "utf8");
-  var relatedDoomString = fs.readFileSync(appRoot.resolve("assets/word-lists/lists/doom-related.txt"), "utf8");
+  var dictionaryString = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/dictionaries/english.txt"),
+    "utf8"
+  );
+  var related1String = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/lists/1-related.txt"),
+    "utf8"
+  );
+  var related100String = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/lists/100-related.txt"),
+    "utf8"
+  );
+  var related1000String = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/lists/1000-related.txt"),
+    "utf8"
+  );
+  var related10000String = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/lists/10000-related.txt"),
+    "utf8"
+  );
+  var relatedDoomString = fs.readFileSync(
+    appRoot.resolve("assets/word-lists/lists/doom-related.txt"),
+    "utf8"
+  );
 } catch (e) {
   throw "Couldn't retrieve word lists from files.";
 }
@@ -65,7 +83,7 @@ export function isDoomRelated(word: string): boolean {
  * 2. Replaces any occurrences of hyphens - with hyphens -. (...what the FUCK?)
  * 3. Replaces any occurrences of ellipsis … with three consecutive dots ... (iOS and macOS - when users are trying to enter regex)
  * 4. Trims any leading or trailing whitespace from the word.
- * 
+ *
  * **NOTE:** Trimming might ruin some searches.
  * This function will also not convert the word to uppercase. Make sure you implement case insensitivity.
  *
@@ -73,12 +91,14 @@ export function isDoomRelated(word: string): boolean {
  * @returns The standardized string
  */
 export function standardizeWord(word: string): string {
-  return word
-    // .toUpperCase()
-    .replace(/[‘’]/g, "'")
-    .replace(/\-/g, "-")
-    .replace(/…/g, "...")
-    .trim();
+  return (
+    word
+      // .toUpperCase()
+      .replace(/[‘’]/g, "'")
+      .replace(/\-/g, "-")
+      .replace(/…/g, "...")
+      .trim()
+  );
 }
 
 /**
@@ -86,9 +106,9 @@ export function standardizeWord(word: string): string {
  *
  * @param message The error message
  */
-export function PromptException(message: string) {
+export function SliceException(message: string) {
   this.message = message;
-  this.name = "PromptException";
+  this.name = "SliceException";
 }
 
 /**
@@ -124,7 +144,11 @@ export let solverCache = new Set();
  * @param timeout The timeout in milliseconds
  * @param user The user who is using the solver
  */
-export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, user: string): Promise<string[]> {
+export function solvePromptWithTimeout(
+  promptRegex: RegExp,
+  timeout: number,
+  user: string
+): Promise<string[]> {
   if (user) solverCache.add(user);
 
   return new Promise((resolve, reject) => {
@@ -132,7 +156,11 @@ export function solvePromptWithTimeout(promptRegex: RegExp, timeout: number, use
 
     let timeoutId = setTimeout(() => {
       worker.kill();
-      reject(new SolveWorkerException("Your regex took too long to compute and timed out."));
+      reject(
+        new SolveWorkerException(
+          "Your regex took too long to compute and timed out."
+        )
+      );
     }, timeout);
 
     worker.on("message", (solutions: string[]) => {
@@ -183,7 +211,7 @@ export async function generatePrompt() {
   let regex = new RegExp("(" + repeatedRegex + "[^\r\n'-]*)$", "gm");
 
   let match: RegExpExecArray;
-  while (match = regex.exec(dictionaryString)) {
+  while ((match = regex.exec(dictionaryString))) {
     solves.push(match[1]);
   }
 
@@ -196,14 +224,18 @@ export async function generatePrompt() {
     let blanks = Math.min(promptLength - 2, 2);
     for (let i = 0; i < blanks; i++) {
       let rand = randInt(promptSubStart, promptSubStart + promptLength - 1);
-      promptWord = promptWord.substring(0, rand) + "`" + promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
+      promptWord =
+        promptWord.substring(0, rand) +
+        "`" +
+        promptWord.substring(rand + 1, promptWord.length); //only thru substart and subend
     }
 
     // completely unreadable
     let prompt = new RegExp(
       escapeRegExp(
         promptWord.slice(promptSubStart, promptSubStart + promptLength)
-      ).replace(/`/g, "."), "i"
+      ).replace(/`/g, "."),
+      "i"
     );
 
     let lengthRequired = promptWord.length < 17 && randInt(1, 7) == 1;
@@ -220,14 +252,14 @@ export async function generatePrompt() {
       promptWord: actualPromptWord,
       solutions: solutions.length,
       lengthRequired: lengthRequired,
-      prompt
+      prompt,
     };
   }
 }
 
 /**
  * Gets the amount of words in the dictionary.
- * 
+ *
  * @returns Number of words in the dictionary
  */
 export function getWordsInDictionary(): number {
