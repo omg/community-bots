@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(false)
   );
 
-export const cooldown = 8 * 1000;
+export const cooldown = 5 * 1000;
 export const type = ["fun", "annoying"];
 
 export const limits = [];
