@@ -35,7 +35,10 @@ type BaseCommand = {
 
 type BotCommand = BaseCommand & {
   data: any;
-  execute: (interaction: any, preferBroadcast: boolean) => Promise<void>;
+  execute: (
+    interaction: any,
+    preferBroadcast: boolean
+  ) => Promise<void | boolean>;
 };
 
 type MentionCommand = BaseCommand & {
@@ -148,6 +151,36 @@ function addLimits(
   commandUses.set(
     member.id + commandName,
     (commandUses.get(member.id + commandName) || 0) + 1
+  );
+}
+
+function removeLimit(
+  member: GuildMember,
+  command: BaseCommand,
+  commandName: string,
+  channel: GuildTextBasedChannel
+) {
+  let limits = getCommandLimitsFor(member, command);
+  if (!limits) return;
+
+  if (areLimitsIgnored(limits, channel)) return false;
+
+  let limitEnd = commandLimitEnd.get(member.id + commandName);
+  if (limitEnd) {
+    if (limitEnd < Date.now()) {
+      commandLimitEnd.set(
+        member.id + commandName,
+        Date.now() + limits.interval
+      );
+      commandUses.set(member.id + commandName, 0);
+    }
+  } else {
+    commandLimitEnd.set(member.id + commandName, Date.now() + limits.interval);
+  }
+
+  commandUses.set(
+    member.id + commandName,
+    Math.max(0, (commandUses.get(member.id + commandName) || 0) - 1)
   );
 }
 
@@ -410,7 +443,14 @@ export function registerClientAsCommandHandler(
     }
 
     try {
-      await command.execute(interaction, preferBroadcast);
+      const doRemoveCooldown = await command.execute(
+        interaction,
+        preferBroadcast
+      );
+      if (doRemoveCooldown) {
+        setOnCooldown(interaction.user.id, commandName, 5 * 1000); // keep it on cooldown for at least 5 more sec.
+        removeLimit(member, command, commandName, interaction.channel);
+      }
     } catch (error) {
       console.error(error);
       try {
