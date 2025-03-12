@@ -114,7 +114,7 @@ export function escapeDiscordMarkdown(string: string): string {
 
 // TODO: write documentation for this
 export function getCleanName(name: string) {
-  let cleanName = escapeDiscordMarkdown(name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, ""));
+  let cleanName = escapeDiscordMarkdown(name.replace(/[﷽𒐫𒈙⸻꧅ဪ௵௸]/g, ""));
   if (cleanName === "") {
     if (name.length === 0) {
       return "Lame Member";
@@ -127,7 +127,7 @@ export function getCleanName(name: string) {
 
 // TODO : Docs
 export function getCleanRoleName(name: string) {
-  let cleanName = name.replace(/﷽𒐫𒈙⸻꧅ဪ௵௸/g, "");
+  let cleanName = name.replace(/[﷽𒐫𒈙⸻꧅ဪ௵௸]/g, "");
   return cleanName;
 }
 
@@ -139,7 +139,7 @@ export const SortingFunctions = {
   lengthAscending: (a: string, b: string) => a.length - b.length,
   alphabetical: (a: string, b: string) => a.localeCompare(b),
   lengthThenAlphabetical: (a: string, b: string) =>
-    b.length - a.length || a.localeCompare(b)
+    b.length - a.length || a.localeCompare(b),
 };
 
 /**
