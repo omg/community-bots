@@ -504,13 +504,15 @@ export async function editInteractionReply(
   interaction: CommandInteraction,
   header: string,
   response: string,
-  broadcast: boolean
+  broadcast: boolean,
+  options?: Partial<InteractionReplyOptions>
 ) {
-  if (!interaction.replied) {
+  if (!interaction.deferred && !interaction.replied) {
     return;
   }
 
   await interaction.editReply({
     content: getInteractionContent(interaction, header, response, broadcast),
+    ...options,
   });
 }
