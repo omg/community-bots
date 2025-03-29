@@ -109,7 +109,7 @@ export function shuffle<T>(array: T[]): T[] {
  * @param string The string to escape
  */
 export function escapeDiscordMarkdown(string: string): string {
-  return string.replace(/`/g, "'").replace(/[\\_~\*\|:#@><-]/g, "\\$&");
+  return string.replace(/`/g, "'").replace(/[\\_~\*\|:#@><+-]/g, "\\$&");
 }
 
 // TODO: write documentation for this
@@ -139,7 +139,7 @@ export const SortingFunctions = {
   lengthAscending: (a: string, b: string) => a.length - b.length,
   alphabetical: (a: string, b: string) => a.localeCompare(b),
   lengthThenAlphabetical: (a: string, b: string) =>
-    b.length - a.length || a.localeCompare(b)
+    b.length - a.length || a.localeCompare(b),
 };
 
 /**
