@@ -109,7 +109,7 @@ export function shuffle<T>(array: T[]): T[] {
  * @param string The string to escape
  */
 export function escapeDiscordMarkdown(string: string): string {
-  return string.replace(/`/g, "'").replace(/[\\_~\*\|:#@><-]/g, "\\$&");
+  return string.replace(/`/g, "'").replace(/[\\_~\*\|:#@><+-]/g, "\\$&");
 }
 
 // TODO: write documentation for this
