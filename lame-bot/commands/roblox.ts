@@ -46,43 +46,56 @@ export async function execute(
 
     const robloxInformation = data.resolved.roblox;
 
-    const robloxName = robloxInformation.displayName ?? robloxInformation.name;
-    const robloxUsername = robloxInformation.name;
-    const robloxLink = robloxInformation.profileLink;
-    const robloxDescription = robloxInformation.description;
+    if (robloxInformation) {
+      const robloxName =
+        robloxInformation.displayName ?? robloxInformation.name;
+      const robloxUsername = robloxInformation.name;
+      const robloxLink = robloxInformation.profileLink;
+      const robloxDescription = robloxInformation.description;
 
-    // oh my goodness
-    let robloxImage = null;
-    if (robloxInformation.avatar) {
-      if (robloxInformation.avatar.fullBody) {
-        const imageData = await (
-          await fetch(robloxInformation.avatar.fullBody)
-        ).json();
-        if (imageData.data && imageData.data[0] && imageData.data[0].imageUrl) {
-          robloxImage = imageData.data[0].imageUrl;
+      // oh my goodness
+      let robloxImage = null;
+      if (robloxInformation.avatar) {
+        if (robloxInformation.avatar.fullBody) {
+          const imageData = await (
+            await fetch(robloxInformation.avatar.fullBody)
+          ).json();
+          if (
+            imageData.data &&
+            imageData.data[0] &&
+            imageData.data[0].imageUrl
+          ) {
+            robloxImage = imageData.data[0].imageUrl;
+          }
         }
       }
-    }
 
-    const text = `<@${userID}> is **${robloxName}** on Roblox.`;
-    const embed = new EmbedBuilder()
-      .setAuthor({ name: "@" + robloxUsername })
-      .setTitle(robloxName)
-      .setURL(robloxLink)
-      .setDescription(robloxDescription)
-      .setThumbnail(robloxImage)
-      .setColor("#00a8ff");
+      const text = `<@${userID}> is **${robloxName}** on Roblox.`;
+      const embed = new EmbedBuilder()
+        .setAuthor({ name: "@" + robloxUsername })
+        .setTitle(robloxName)
+        .setURL(robloxLink)
+        .setDescription(robloxDescription)
+        .setThumbnail(robloxImage)
+        .setColor("#00a8ff");
 
-    await editInteractionReply(
-      interaction,
-      "Profile",
-      "\n" + text + "\n** **",
-      false,
-      {
+      await editInteractionReply(
+        interaction,
+        "Profile",
+        "\n" + text + "\n** **",
+        false,
+        {
+          allowedMentions: { parse: [] },
+          embeds: [embed],
+        }
+      );
+    } else {
+      const text = `<@${userID}> is on Roblox. I'm unable to retrieve the profile, so you'll need to [visit their profile link](https://www.roblox.com/users/${data.robloxID}/profile).`;
+
+      await editInteractionReply(interaction, "Profile", "\n" + text, false, {
         allowedMentions: { parse: [] },
-        embeds: [embed],
-      }
-    );
+      });
+    }
   } catch (error) {
     console.error(error);
     await editInteractionReply(
