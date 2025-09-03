@@ -18,13 +18,13 @@ export async function execute(message: Message, text: string) {
   let max = 100 + 1; // (0 - 100)
 
   let response = await message.reply({
-    content: "https://omg.games/assets/rolling.gif"
+    content: "https://i.imgur.com/QCmWjQR.gif",
   });
 
   setTimeout(async () => {
     // edit the reply with @user rolls X/max
     await response.edit({
-      content: "" + Math.floor(Math.random() * max) + "%"
+      content: "" + Math.floor(Math.random() * max) + "%",
     });
   }, 1200);
 }

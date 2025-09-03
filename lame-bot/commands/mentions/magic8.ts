@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
 import * as magic8 from "../magic8";
 
-export const NAME_DUMB = "magic8"
+export const NAME_DUMB = "magic8";
 
 export const cooldown = magic8.cooldown;
 export const type = magic8.type;
@@ -29,7 +29,7 @@ const questions = [
   /^mig?htn?'?t? /i,
   /^mu?stn?'?t? /i,
   /^sha?ll?n?'?t? /i,
-  /\?$/i
+  /\?$/i,
 ];
 
 export function matches(text: string) {
@@ -41,12 +41,12 @@ export function matches(text: string) {
 
 export async function execute(message: Message, text: string) {
   let response = await message.reply({
-    content: "https://omg.games/assets/rolling.gif"
+    content: "https://i.imgur.com/QCmWjQR.gif",
   });
 
   setTimeout(async () => {
     await response.edit({
-      content: magic8.getResponse()
+      content: magic8.getResponse(),
     });
   }, 1200);
 }
