@@ -1,8 +1,8 @@
+import { SlashCommandBuilder } from "@discordjs/builders";
 import { randomInt } from "crypto";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import { replyToInteraction } from "../../src/command-handler";
 import { escapeDiscordMarkdown, formatNumber } from "../../src/utils";
-import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const data = new SlashCommandBuilder()
   .setName("characters")
@@ -20,14 +20,17 @@ export const data = new SlashCommandBuilder()
 
 export const JSON = data.toJSON();
 const extras = {
-  "integration_types": [0, 1],
-  "contexts": [0, 1, 2]
-}
-Object.keys(extras).forEach(key => JSON[key] = extras[key]);
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+};
+Object.keys(extras).forEach((key) => (JSON[key] = extras[key]));
 
 export const broadcastable = true;
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+  preferBroadcast: boolean
+) {
   let query = interaction.options.get("query").value as string;
 
   let characterCount = query.length;
@@ -42,10 +45,18 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
   await replyToInteraction(
     interaction,
     "Character Count",
-    (
-      "\n> " + (query.length > 300 ? escapeDiscordMarkdown(query.slice(0, 298) + "..") : escapeDiscordMarkdown(query)) +
-      "\n• **" + formatNumber(characterCount) + " characters**" + (whitespaceCount === 0 ? "." : " - " + formatNumber(characterCount - whitespaceCount) + " ignoring whitespace.")
-    ),
+    "\n> " +
+      (query.length > 300
+        ? escapeDiscordMarkdown(query.slice(0, 298) + "..")
+        : escapeDiscordMarkdown(query)) +
+      "\n• **" +
+      formatNumber(characterCount) +
+      " characters**" +
+      (whitespaceCount === 0
+        ? "."
+        : " - " +
+          formatNumber(characterCount - whitespaceCount) +
+          " ignoring whitespace."),
     preferBroadcast
   );
 }

@@ -1,6 +1,6 @@
 import {
   AttachmentBuilder,
-  CommandInteraction,
+  ChatInputCommandInteraction,
   SlashCommandBuilder,
 } from "discord.js";
 import {
@@ -68,7 +68,7 @@ export const broadcastable = true;
 
 // create function to handle the command
 export async function execute(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   preferBroadcast: boolean
 ) {
   let prompt = interaction.options.get("slice").value as string;

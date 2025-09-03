@@ -1,9 +1,13 @@
-import { CommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  GuildMember,
+  SlashCommandBuilder,
+} from "discord.js";
 import leaderboardEmojis from "../../assets/emoji-maps/leaderboardEmojis";
 import { getDefaultGameGuild, getLeaderboard } from "../../src/database/db";
+import { getRemarkEmoji } from "../../src/emoji-renderer";
 import { formatNumber, getCleanName } from "../../src/utils";
 import { getGuild } from "../src/client";
-import { getRemarkEmoji } from "../../src/emoji-renderer";
 
 export const data = new SlashCommandBuilder()
   .setName("leaderboard")
@@ -36,7 +40,11 @@ async function getDisplayName(userID: string) {
     });
 }
 
-async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID: string) {
+async function buildLeaderboardMessage(
+  page: any[],
+  startNum: number,
+  cmdUserID: string
+) {
   let message = `### ${getRemarkEmoji("bomb")}  All-Time Score`;
   let names = await Promise.all(
     page.map(async (page) => {
@@ -54,16 +62,23 @@ async function buildLeaderboardMessage(page: any[], startNum: number, cmdUserID:
     let placement = startNum + i;
 
     if (startNum == 1 && placement <= 10) {
-      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
+      message += `\n${leaderboardEmojis[placement]}  ${name} • **${formatNumber(
+        user.score
+      )} ${user.score == 1 ? "point" : "points"}**`;
     } else {
-      message += `\n${placement}. ${name} • **${formatNumber(user.score)} ${user.score == 1 ? "point" : "points"}**`;
+      message += `\n${placement}. ${name} • **${formatNumber(user.score)} ${
+        user.score == 1 ? "point" : "points"
+      }**`;
     }
   }
 
   return message;
 }
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+  preferBroadcast: boolean
+) {
   let page = interaction.options.get("page");
   let message;
   let leaderboard = await getLeaderboard(null);
@@ -124,6 +139,6 @@ export async function execute(interaction: CommandInteraction, preferBroadcast: 
 
   await interaction.reply({
     content: message,
-    ephemeral: !preferBroadcast
+    ephemeral: !preferBroadcast,
   });
 }

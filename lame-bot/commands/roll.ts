@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { formatNumber } from "../../src/utils";
 
 export const data = new SlashCommandBuilder()
@@ -34,7 +34,7 @@ limits[2] = {
 };
 
 export async function execute(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   preferBroadcast: boolean
 ) {
   let max = (interaction.options.get("max")?.value as number) ?? 10;
