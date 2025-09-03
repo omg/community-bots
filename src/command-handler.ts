@@ -551,8 +551,10 @@ export async function editInteractionReply(
     return;
   }
 
+  const { flags, ...rest } = options;
+
   await interaction.editReply({
     content: getInteractionContent(interaction, header, response, broadcast),
-    ...options,
+    ...rest,
   });
 }

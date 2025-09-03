@@ -1,12 +1,11 @@
 {
-  "name": "lame-bot",
+  "name": "community-bots",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "npm i && cross-env NODE_ENV=development nodemon src/index.ts",
-    "server": "cross-env NODE_ENV=production node dist/src/index.js"
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -24,18 +23,15 @@
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
     "app-root-path": "^3.1.0",
-    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "discord.js": "^14.8.0",
     "dotenv": "^16.0.2",
     "mongodb": "^4.9.1",
     "sharp": "^0.33.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.1.6"
   },
   "devDependencies": {
-    "@types/node": "^20.4.5",
-    "nodemon": "^2.0.20",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.6.1"
+    "@types/node": "^20.4.5"
   }
 }
