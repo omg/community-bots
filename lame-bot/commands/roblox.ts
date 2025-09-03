@@ -25,16 +25,18 @@ export async function execute(
 ) {
   interaction.deferReply({ ephemeral: !preferBroadcast });
   const userID = interaction.options.getUser("user")?.id ?? interaction.user.id;
+
   try {
-    const result = await fetch(
+    const bloxlinkResponse = await fetch(
       `https://api.blox.link/v4/public/guilds/476593983485902850/discord-to-roblox/${userID}`,
       { headers: { Authorization: process.env.BLOXLINK_KEY } }
     );
-    const data = await result.json();
-    if (data.error) {
-      const errorMessage = data.error.endsWith(".")
-        ? data.error
-        : data.error + ".";
+    const bloxlinkData = await bloxlinkResponse.json();
+
+    if (bloxlinkData.error) {
+      const errorMessage = bloxlinkData.error.endsWith(".")
+        ? bloxlinkData.error
+        : bloxlinkData.error + ".";
       await editInteractionReply(
         interaction,
         "Profile",
@@ -44,58 +46,73 @@ export async function execute(
       return;
     }
 
-    const robloxInformation = data.resolved.roblox;
-
-    if (robloxInformation) {
-      const robloxName =
-        robloxInformation.displayName ?? robloxInformation.name;
-      const robloxUsername = robloxInformation.name;
-      const robloxLink = robloxInformation.profileLink;
-      const robloxDescription = robloxInformation.description;
-
-      // oh my goodness
-      let robloxImage = null;
-      if (robloxInformation.avatar) {
-        if (robloxInformation.avatar.fullBody) {
-          const imageData = await (
-            await fetch(robloxInformation.avatar.fullBody)
-          ).json();
-          if (
-            imageData.data &&
-            imageData.data[0] &&
-            imageData.data[0].imageUrl
-          ) {
-            robloxImage = imageData.data[0].imageUrl;
-          }
-        }
-      }
-
-      const text = `<@${userID}> is **${robloxName}** on Roblox.`;
-      const embed = new EmbedBuilder()
-        .setAuthor({ name: "@" + robloxUsername })
-        .setTitle(robloxName)
-        .setURL(robloxLink)
-        .setDescription(robloxDescription)
-        .setThumbnail(robloxImage)
-        .setColor("#00a8ff");
-
+    const robloxID: number | undefined = bloxlinkData.robloxID;
+    if (!robloxID) {
       await editInteractionReply(
         interaction,
         "Profile",
-        "\n" + text + "\n** **",
-        false,
-        {
-          allowedMentions: { parse: [] },
-          embeds: [embed],
-        }
+        "\n• That user does not have a Roblox account connected.",
+        false
       );
-    } else {
-      const text = `<@${userID}> is on Roblox. I'm unable to retrieve the profile, so you'll need to [visit their profile link](https://www.roblox.com/users/${data.robloxID}/profile).`;
-
-      await editInteractionReply(interaction, "Profile", "\n" + text, false, {
-        allowedMentions: { parse: [] },
-      });
+      return;
     }
+
+    const robloxUserFetch = fetch(
+      `https://users.roblox.com/v1/users/${robloxID}`
+    );
+    const robloxThumbnailFetch = fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxID}&format=Png&size=100x100`
+    );
+
+    const [robloxUserResponse, robloxThumbnailResponse] = await Promise.all([
+      robloxUserFetch,
+      robloxThumbnailFetch,
+    ]);
+    const [robloxUserData, robloxThumbnailData] = await Promise.all([
+      robloxUserResponse.json(),
+      robloxThumbnailResponse.json(),
+    ]);
+
+    if (robloxUserData.errors || robloxThumbnailData.errors) {
+      await editInteractionReply(
+        interaction,
+        "Profile",
+        "\n• That user's Roblox account was connected but could not be retrieved.",
+        false
+      );
+      return;
+    }
+
+    const robloxName: string =
+      robloxUserData.displayName ?? robloxUserData.name;
+    const robloxUsername: string = robloxUserData.name;
+    const robloxLink = `https://www.roblox.com/users/${robloxID}/profile`;
+    const robloxDescription: string = escapeDiscordMarkdown(
+      robloxUserData.description ?? ""
+    );
+
+    const robloxImage: string | undefined =
+      robloxThumbnailData?.data?.[0]?.imageUrl;
+
+    const text = `<@${userID}> is **${robloxName}** on Roblox.`;
+    const embed = new EmbedBuilder()
+      .setAuthor({ name: "@" + robloxUsername })
+      .setTitle(robloxName)
+      .setURL(robloxLink)
+      .setDescription(robloxDescription)
+      .setThumbnail(robloxImage)
+      .setColor("#00a8ff");
+
+    await editInteractionReply(
+      interaction,
+      "Profile",
+      "\n" + text + "\n** **",
+      false,
+      {
+        allowedMentions: { parse: [] },
+        embeds: [embed],
+      }
+    );
   } catch (error) {
     console.error(error);
     await editInteractionReply(
