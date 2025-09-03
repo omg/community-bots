@@ -11,17 +11,17 @@ export const limits = [];
 limits[0] = {
   max: 2,
   interval: 10 * 60 * 1000,
-  includeBotsChannel: false
+  includeBotsChannel: false,
 };
 limits[1] = {
   max: 4,
   interval: 5 * 60 * 1000,
-  includeBotsChannel: false
+  includeBotsChannel: false,
 };
 limits[2] = {
   max: 20,
   interval: 20 * 60 * 1000,
-  includeBotsChannel: false
+  includeBotsChannel: false,
 };
 
 const responses = [
@@ -56,27 +56,34 @@ const terribleResponses = [
   "Whatever <@971202946895339550> thinks.",
   "Shut up.",
   "heheheeh >:3 You'll never get the answer i wont tell you :3c >w<.",
-  "<:e:948803642327203860>."
-]
+  "<:e:948803642327203860>.",
+];
 
 export function getResponse() {
   if (Math.random() < 0.0175) {
-    return "_" + terribleResponses[Math.floor(Math.random() * terribleResponses.length)] + ".._";
+    return (
+      "_" +
+      terribleResponses[Math.floor(Math.random() * terribleResponses.length)] +
+      ".._"
+    );
   }
   return "_" + responses[Math.floor(Math.random() * responses.length)] + ".._";
 }
 
-export async function execute(interaction: CommandInteraction, preferBroadcast: boolean) {
-  let max = interaction.options.get("max")?.value as number ?? 10;
+export async function execute(
+  interaction: CommandInteraction,
+  preferBroadcast: boolean
+) {
+  let max = (interaction.options.get("max")?.value as number) ?? 10;
 
   await interaction.reply({
-    content: "https://omg.games/assets/rolling.gif"
+    content: "https://i.imgur.com/QCmWjQR.gif",
   });
 
   setTimeout(async () => {
     // edit the reply with @user rolls X/max
     await interaction.editReply({
-      content: "<@" + interaction.user.id + "> **•** " + getResponse()
+      content: "<@" + interaction.user.id + "> **•** " + getResponse(),
     });
   }, 1200);
 }

@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omg-games/lame-bot.git"
+    "url": "git+https://github.com/omg/community-bots.git"
   },
   "author": "",
   "license": "ISC",
@@ -18,9 +18,9 @@
     "node": "18.x"
   },
   "bugs": {
-    "url": "https://github.com/omg-games/lame-bot/issues"
+    "url": "https://github.com/omg/community-bots/issues"
   },
-  "homepage": "https://github.com/omg-games/lame-bot#readme",
+  "homepage": "https://github.com/omg/community-bots#readme",
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
     "app-root-path": "^3.1.0",
