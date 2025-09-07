@@ -23,7 +23,7 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   preferBroadcast: boolean
 ) {
-  interaction.deferReply({ ephemeral: !preferBroadcast });
+  await interaction.deferReply({ ephemeral: !preferBroadcast });
   const userID = interaction.options.getUser("user")?.id ?? interaction.user.id;
 
   try {
