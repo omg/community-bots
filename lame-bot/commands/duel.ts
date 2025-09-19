@@ -30,18 +30,18 @@ export const data = new SlashCommandBuilder()
 
 export const limits = [];
 limits[0] = {
-  max: 1,
-  interval: 2 * 60 * 1000,
+  max: 4,
+  interval: 5 * 60 * 1000,
   includeBotsChannel: true,
 };
 limits[1] = {
-  max: 2,
-  interval: 4 * 60 * 1000,
+  max: 4,
+  interval: 5 * 60 * 1000,
   includeBotsChannel: true,
 };
 limits[2] = {
-  max: 3,
-  interval: 6 * 60 * 1000,
+  max: 4,
+  interval: 5 * 60 * 1000,
   includeBotsChannel: true,
 };
 
